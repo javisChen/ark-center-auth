@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 引入公用配置 -->
+    <include resource="com/ark/component/logging/ark-logback-base.xml"/>
+
+    <!-- Nacos Config -->
+    <logger name="com.alibaba.cloud.nacos.configdata" level="DEBUG"/>
+
+</configuration>
