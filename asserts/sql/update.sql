@@ -1,3 +1,3 @@
-update iam_api
-set name = concat('/iam', iam_api.name), url = concat('/iam', iam_api.url)
+update auth_api
+set name = concat('/auth', auth_api.name), url = concat('/auth', auth_api.url)
 where 1 = 1;

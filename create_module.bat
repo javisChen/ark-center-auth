@@ -3,8 +3,8 @@
 REM 获取传入的模块名称参数
 set "module=%1"
 
-set "project=ark-center-iam"
-set "package=com\ark\center\iam"
+set "project=ark-center-auth"
+set "package=com\ark\center\auth"
 
 mkdir "%project%-adapter\src\main\java\%package%\adapter\%module%"
 mkdir "%project%-adapter\src\main\java\%package%\adapter\%module%\web"

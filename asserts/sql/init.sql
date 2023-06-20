@@ -1,4 +1,4 @@
-create table if not exists iam.iam_api
+create table if not exists auth.auth_api
 (
     id                bigint unsigned auto_increment,
     application_id    bigint unsigned  default '0'               not null comment '应用id，关联upms_application.id',
@@ -21,15 +21,15 @@ create table if not exists iam.iam_api
     comment 'api表' charset = utf8mb4;
 
 create index fk_upms_api_category_idx
-    on iam.iam_api (category_id);
+    on auth.auth_api (category_id);
 
 create index idx_application_id
-    on iam.iam_api (application_id, is_deleted);
+    on auth.auth_api (application_id, is_deleted);
 
 create index idx_is_deleted
-    on iam.iam_api (is_deleted);
+    on auth.auth_api (is_deleted);
 
-create table if not exists iam.iam_api_category
+create table if not exists auth.auth_api_category
 (
     id             bigint unsigned auto_increment,
     application_id bigint unsigned default '0'               not null comment '应用id，关联upms_application.id',
@@ -46,12 +46,12 @@ create table if not exists iam.iam_api_category
     comment 'Api分类表' charset = utf8mb4;
 
 create index idx_application_id
-    on iam.iam_api_category (application_id, is_deleted);
+    on auth.auth_api_category (application_id, is_deleted);
 
 create index idx_is_deleted
-    on iam.iam_api_category (is_deleted);
+    on auth.auth_api_category (is_deleted);
 
-create table if not exists iam.iam_application
+create table if not exists auth.auth_application
 (
     id           bigint unsigned auto_increment
     primary key,
@@ -72,9 +72,9 @@ create table if not exists iam.iam_application
     comment '应用表' charset = utf8mb4;
 
 create index uk_is_deleted
-    on iam.iam_application (is_deleted);
+    on auth.auth_application (is_deleted);
 
-create table if not exists iam.iam_element
+create table if not exists auth.auth_element
 (
     id           bigint unsigned auto_increment comment 'id'
     primary key,
@@ -90,12 +90,12 @@ create table if not exists iam.iam_element
     comment '页面元素表' charset = utf8mb4;
 
 create index idx_is_deleted
-    on iam.iam_element (is_deleted);
+    on auth.auth_element (is_deleted);
 
 create index idx_route_id
-    on iam.iam_element (route_id);
+    on auth.auth_element (route_id);
 
-create table if not exists iam.iam_permission
+create table if not exists auth.auth_permission
 (
     id           bigint unsigned auto_increment comment 'id'
     primary key,
@@ -116,9 +116,9 @@ create table if not exists iam.iam_permission
     comment '权限表' charset = utf8mb4;
 
 create index idx_is_deleted
-    on iam.iam_permission (is_deleted);
+    on auth.auth_permission (is_deleted);
 
-create table if not exists iam.iam_permission_role_rel
+create table if not exists auth.auth_permission_role_rel
 (
     id            bigint unsigned auto_increment comment 'id'
     primary key,
@@ -133,7 +133,7 @@ create table if not exists iam.iam_permission_role_rel
     )
     comment '角色与权限关联表' charset = utf8mb4;
 
-create table if not exists iam.iam_role
+create table if not exists auth.auth_role
 (
     id           bigint unsigned auto_increment comment 'Id'
     primary key,
@@ -151,9 +151,9 @@ create table if not exists iam.iam_role
     comment '角色表' charset = utf8mb4;
 
 create index idx_is_deleted
-    on iam.iam_role (is_deleted);
+    on auth.auth_role (is_deleted);
 
-create table if not exists iam.iam_route
+create table if not exists auth.auth_route
 (
     id             bigint unsigned auto_increment comment 'id',
     application_id bigint unsigned default '0'               not null comment '应用id，关联upms_application.id',
@@ -183,12 +183,12 @@ create table if not exists iam.iam_route
     comment '路由表' charset = utf8mb4;
 
 create index fk_idx_system_id
-    on iam.iam_route (application_id);
+    on auth.auth_route (application_id);
 
 create index idx_pid
-    on iam.iam_route (pid);
+    on auth.auth_route (pid);
 
-create table if not exists iam.iam_user
+create table if not exists auth.auth_user
 (
     id           bigint unsigned auto_increment
     primary key,
@@ -210,9 +210,9 @@ create table if not exists iam.iam_user
     comment '用户表' charset = utf8mb4;
 
 create index idx_is_deleted
-    on iam.iam_user (is_deleted);
+    on auth.auth_user (is_deleted);
 
-create table if not exists iam.iam_user_group
+create table if not exists auth.auth_user_group
 (
     id           bigint unsigned auto_increment comment 'Id'
     primary key,
@@ -234,12 +234,12 @@ create table if not exists iam.iam_user_group
     comment '用户组表' charset = utf8mb4;
 
 create index idx_is_deleted
-    on iam.iam_user_group (is_deleted);
+    on auth.auth_user_group (is_deleted);
 
 create index idx_pid
-    on iam.iam_user_group (pid);
+    on auth.auth_user_group (pid);
 
-create table if not exists iam.iam_user_group_role_rel
+create table if not exists auth.auth_user_group_role_rel
 (
     id            bigint unsigned auto_increment comment 'Id'
     primary key,
@@ -254,7 +254,7 @@ create table if not exists iam.iam_user_group_role_rel
     )
     comment '用户组与角色关联表' charset = utf8mb4;
 
-create table if not exists iam.iam_user_group_user_rel
+create table if not exists auth.auth_user_group_user_rel
 (
     id            bigint unsigned auto_increment comment 'Id'
     primary key,
@@ -269,7 +269,7 @@ create table if not exists iam.iam_user_group_user_rel
     )
     comment '用户组与用户关联表' charset = utf8mb4;
 
-create table if not exists iam.iam_user_role_rel
+create table if not exists auth.auth_user_role_rel
 (
     id           bigint unsigned auto_increment comment 'Id'
     primary key,

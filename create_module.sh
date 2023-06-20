@@ -3,8 +3,8 @@
 # 获取用户输入的变量
 read -p "请输入模块名称：" module
 
-project="ark-center-iam"
-package="com/ark/center/iam"
+project="ark-center-auth"
+package="com/ark/center/auth"
 
 mkdir -p "${project}-adapter/src/main/java/${package}/adapter/${module}"
 mkdir -p "${project}-adapter/src/main/java/${package}/adapter/${module}/web"

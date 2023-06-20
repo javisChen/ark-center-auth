@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ark.center</groupId>
-    <artifactId>ark-center-iam</artifactId>
+    <artifactId>ark-center-auth</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <modules>
-        <module>ark-center-iam-client</module>
-        <module>ark-center-iam-app</module>
-        <module>ark-center-iam-adapter</module>
-        <module>ark-center-iam-domain</module>
-        <module>ark-center-iam-infra</module>
-        <module>ark-center-iam-start</module>
+        <module>ark-center-auth-client</module>
+        <module>ark-center-auth-app</module>
+        <module>ark-center-auth-adapter</module>
+        <module>ark-center-auth-domain</module>
+        <module>ark-center-auth-infra</module>
+        <module>ark-center-auth-start</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -29,31 +29,31 @@
 
             <dependency>
                 <groupId>com.ark.center</groupId>
-                <artifactId>ark-center-iam-client</artifactId>
+                <artifactId>ark-center-auth-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.ark.center</groupId>
-                <artifactId>ark-center-iam-adapter</artifactId>
+                <artifactId>ark-center-auth-adapter</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.ark.center</groupId>
-                <artifactId>ark-center-iam-app</artifactId>
+                <artifactId>ark-center-auth-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.ark.center</groupId>
-                <artifactId>ark-center-iam-infra</artifactId>
+                <artifactId>ark-center-auth-infra</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.ark.center</groupId>
-                <artifactId>ark-center-iam-domain</artifactId>
+                <artifactId>ark-center-auth-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
