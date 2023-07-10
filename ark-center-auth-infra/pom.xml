@@ -19,11 +19,6 @@
     <dependencies>
 
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-authorization-server</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.ark.center</groupId>
             <artifactId>ark-center-auth-domain</artifactId>
         </dependency>
@@ -33,17 +28,10 @@
             <artifactId>ark-center-auth-client</artifactId>
         </dependency>
 
-        <!-- 商品服务 -->
-<!--        <dependency>-->
-<!--            <groupId>com.ark.center</groupId>-->
-<!--            <artifactId>ark-center-commodity-client</artifactId>-->
-<!--        </dependency>-->
-
-        <!-- 支付服务 -->
-<!--        <dependency>-->
-<!--            <groupId>com.ark.center</groupId>-->
-<!--            <artifactId>ark-center-pay-client</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
+        </dependency>
 
         <!-- 服务基本组件 -->
         <dependency>
