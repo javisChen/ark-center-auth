@@ -13,11 +13,9 @@ public class SecurityConfig {
 //        //省略HttpSecurity的配置
         httpSecurity
                 .anonymous(configurer -> configurer
-                        .key("213")
-                        .disable()
+                        .key("javis")
                 )
-                .formLogin(configurer -> configurer.disable())
-                .
+//                .formLogin(AbstractHttpConfigurer::disable)
         ;
         return httpSecurity.build();
     }
