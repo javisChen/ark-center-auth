@@ -8,7 +8,10 @@ import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointR
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,18 +31,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationConfiguration authenticationConfiguration) throws Exception {
         LoginAuthenticationFilter loginAuthenticationFilter = new LoginAuthenticationFilter();
         LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
+        loginAuthenticationFilter.setAuthenticationSuccessHandler(authenticationHandler);
         loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
-        loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
+        loginAuthenticationFilter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
         httpSecurity.addFilterBefore(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-//        httpSecurity.formLogin(withDefaults());
-//        httpSecurity.httpBasic(withDefaults());
+        httpSecurity.formLogin(Customizer.withDefaults());
+
         // 资源权限控制
         httpSecurity.authorizeHttpRequests(requests -> requests
                 .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
+                    .permitAll()
+                .requestMatchers("/login/account")
                     .permitAll()
                 .requestMatchers("/admin/test")
                     .hasRole("ADMIN")
@@ -51,6 +57,9 @@ public class SecurityConfig {
                 .accessDeniedHandler((request, response, accessDeniedException) -> response.getWriter().write("access denied"))
                 .authenticationEntryPoint(new DefaultAuthenticationEntryPoint())
         );
+
+        // 禁用csrf
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
     }
 

@@ -22,12 +22,7 @@ public class LoginAuthenticationHandler implements AuthenticationSuccessHandler,
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
         ServerResponse serverResponse = SingleResponse.error("auth", "400", exception.getMessage());
-        String body = JSON.toJSONString(serverResponse);
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
-        response.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-        response.setContentLength(body.length());
-        JSON.writeTo(response.getOutputStream(), body);
+        doWrite(JSON.toJSONBytes(serverResponse), response, HttpServletResponse.SC_BAD_REQUEST);
     }
 
     @Override
@@ -42,11 +37,14 @@ public class LoginAuthenticationHandler implements AuthenticationSuccessHandler,
 
     private void writeSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         SingleResponse<AuthLoginDTO> serverResponse = SingleResponse.ok(new AuthLoginDTO(""));
-        String body = JSON.toJSONString(serverResponse);
-        response.setStatus(HttpServletResponse.SC_OK);
+        doWrite(JSON.toJSONBytes(serverResponse), response, HttpServletResponse.SC_OK);
+    }
+
+    private void doWrite(byte[] body, HttpServletResponse response, int status) throws IOException {
+        response.setStatus(status);
         response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
         response.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-        response.setContentLength(body.length());
-        JSON.writeTo(response.getOutputStream(), body);
+        response.setContentLength(body.length);
+        response.getOutputStream().write(body);
     }
 }
