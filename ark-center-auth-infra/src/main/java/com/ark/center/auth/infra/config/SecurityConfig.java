@@ -8,17 +8,12 @@ import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointR
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
@@ -34,25 +29,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authenticationProvider(new AuthenticationProvider() {
-            @Override
-            public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-                return null;
-            }
-
-            @Override
-            public boolean supports(Class<?> authentication) {
-                return false;
-            }
-        });
         LoginAuthenticationFilter loginAuthenticationFilter = new LoginAuthenticationFilter();
         LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
         loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
         loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
         httpSecurity.addFilterBefore(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        httpSecurity.formLogin(withDefaults());
-        httpSecurity.httpBasic(withDefaults());
+//        httpSecurity.formLogin(withDefaults());
+//        httpSecurity.httpBasic(withDefaults());
         // 资源权限控制
         httpSecurity.authorizeHttpRequests(requests -> requests
                 .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
