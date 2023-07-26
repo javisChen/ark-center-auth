@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication;
+package com.ark.center.auth.infra.authentication.login;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;

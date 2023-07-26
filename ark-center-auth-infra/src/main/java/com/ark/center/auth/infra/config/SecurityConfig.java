@@ -2,7 +2,8 @@ package com.ark.center.auth.infra.config;
 
 import com.ark.center.auth.infra.DefaultAuthenticationEntryPoint;
 import com.ark.center.auth.infra.authentication.DefaultUserDetailsService;
-import com.ark.center.auth.infra.authentication.LoginAuthenticationFilter;
+import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
+import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +45,11 @@ public class SecurityConfig {
                 return false;
             }
         });
-        httpSecurity.addFilterBefore(new LoginAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        LoginAuthenticationFilter loginAuthenticationFilter = new LoginAuthenticationFilter();
+        LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
+        loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
+        loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
+        httpSecurity.addFilterBefore(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         httpSecurity.formLogin(withDefaults());
         httpSecurity.httpBasic(withDefaults());
@@ -57,12 +62,10 @@ public class SecurityConfig {
                 .anyRequest()
                     .authenticated());
 
-
         // 权限不足时的处理
         httpSecurity.exceptionHandling(configurer -> configurer
                 .accessDeniedHandler((request, response, accessDeniedException) -> response.getWriter().write("access denied"))
                 .authenticationEntryPoint(new DefaultAuthenticationEntryPoint())
-
         );
         return httpSecurity.build();
     }
