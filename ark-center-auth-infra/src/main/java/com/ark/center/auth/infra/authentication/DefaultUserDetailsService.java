@@ -16,7 +16,7 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
 
     private Map<String, UserDetails> userDetailsMap;
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         userDetailsMap = new HashMap<>();
         userDetailsMap.put("jc", new User("jc", "$2a$10$r3l66yYouxHT7l2TUR.7CO48i6rVXaZ489fDGGe88DK8EkbfxQiyS", List.of(new SimpleGrantedAuthority("DEV"))));
         userDetailsMap.put("jc123", new User("jc", "$2a$10$r3l66yYouxHT7l2TUR.7CO48i6rVXaZ489fDGGe88DK8EkbfxQiyS", List.of(new SimpleGrantedAuthority("ADMIN"))));
