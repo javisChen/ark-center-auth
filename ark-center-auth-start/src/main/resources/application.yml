@@ -45,7 +45,9 @@ spring:
       - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
 mybatis-plus:
   mapper-locations: classpath:com/ark/center/auth/infra/*/gateway/db/xml/*.xml
-
+logging:
+  level:
+    com.ark.center.auth.infra.user.facade: debug
 ---
 # 本地开发环境，默认关闭服务注册以及关闭读取远程配置
 spring:

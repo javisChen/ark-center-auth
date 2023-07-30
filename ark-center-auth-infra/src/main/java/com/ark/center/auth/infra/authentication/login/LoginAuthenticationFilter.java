@@ -1,9 +1,11 @@
 package com.ark.center.auth.infra.authentication.login;
 
+import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -15,6 +17,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 
 public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    private static final String SALT = "6r4ogrp7th9rbyob";
 
     public static final String SPRING_SECURITY_FORM_USERNAME_KEY = "userName";
 
@@ -37,7 +41,7 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        if (this.postOnly && !request.getMethod().equals("POST")
+        if (this.postOnly && !request.getMethod().equals(HttpMethod.POST.name())
                 && request.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
@@ -54,7 +58,8 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
         username = (username != null) ? username.trim() : "";
         String password =  loginParams.getString(passwordParameter);
         password = (password != null) ? password : "";
-        UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken.unauthenticated(username,
+        password = DigestUtil.md5Hex(password) + SALT;
+        UsernamePasswordAuthenticationToken authRequest = LoginAuthenticationToken.unauthenticated(username,
                 password);
         setDetails(request, authRequest);
         return this.getAuthenticationManager().authenticate(authRequest);
@@ -90,55 +95,18 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
         return request.getParameter(this.usernameParameter);
     }
 
-    /**
-     * Provided so that subclasses may configure what is put into the authentication
-     * request's details property.
-     * @param request that an authentication request is being created for
-     * @param authRequest the authentication request object that should have its details
-     * set
-     */
     protected void setDetails(HttpServletRequest request, UsernamePasswordAuthenticationToken authRequest) {
         authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
     }
 
-    /**
-     * Sets the parameter name which will be used to obtain the username from the login
-     * request.
-     * @param usernameParameter the parameter name. Defaults to "username".
-     */
     public void setUsernameParameter(String usernameParameter) {
         Assert.hasText(usernameParameter, "Username parameter must not be empty or null");
         this.usernameParameter = usernameParameter;
     }
 
-    /**
-     * Sets the parameter name which will be used to obtain the password from the login
-     * request..
-     * @param passwordParameter the parameter name. Defaults to "password".
-     */
     public void setPasswordParameter(String passwordParameter) {
         Assert.hasText(passwordParameter, "Password parameter must not be empty or null");
         this.passwordParameter = passwordParameter;
     }
 
-    /**
-     * Defines whether only HTTP POST requests will be allowed by this filter. If set to
-     * true, and an authentication request is received which is not a POST request, an
-     * exception will be raised immediately and authentication will not be attempted. The
-     * <tt>unsuccessfulAuthentication()</tt> method will be called as if handling a failed
-     * authentication.
-     * <p>
-     * Defaults to <tt>true</tt> but may be overridden by subclasses.
-     */
-    public void setPostOnly(boolean postOnly) {
-        this.postOnly = postOnly;
-    }
-
-    public final String getUsernameParameter() {
-        return this.usernameParameter;
-    }
-
-    public final String getPasswordParameter() {
-        return this.passwordParameter;
-    }
 }

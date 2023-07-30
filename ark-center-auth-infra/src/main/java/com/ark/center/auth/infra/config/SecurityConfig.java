@@ -1,82 +1,151 @@
 package com.ark.center.auth.infra.config;
 
-import com.ark.center.auth.infra.DefaultAuthenticationEntryPoint;
-import com.ark.center.auth.infra.authentication.DefaultUserDetailsService;
-import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
-import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.boot.actuate.health.HealthEndpoint;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.UUID;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new DefaultUserDetailsService();
-    }
+	// http://127.0.0.1:8089/oauth2/authorize?response_type=code&client_id=messaging-client&scope=message.read&redirect_uri=http://127.0.0.1:8089/authorized
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	@Order(1)
+	public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+			throws Exception {
+		OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+		http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+			.oidc(Customizer.withDefaults());	// Enable OpenID Connect 1.0
+		http
+			// Redirect to the login page when not authenticated from the
+			// authorization endpoint
+			.exceptionHandling((exceptions) -> exceptions
+				.defaultAuthenticationEntryPointFor(
+					new LoginUrlAuthenticationEntryPoint("/login"),
+					new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+				)
+			)
+			// Accept access tokens for User Info and/or Client Registration
+			.oauth2ResourceServer((resourceServer) -> resourceServer
+				.jwt(Customizer.withDefaults()));
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        LoginAuthenticationFilter loginAuthenticationFilter = new LoginAuthenticationFilter();
-        LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
-        loginAuthenticationFilter.setAuthenticationSuccessHandler(authenticationHandler);
-        loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
-        loginAuthenticationFilter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
-        httpSecurity.addFilterBefore(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+		return http.build();
+	}
 
-        // 使用无状态Session
-        httpSecurity.sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        httpSecurity.formLogin(Customizer.withDefaults());
+	@Bean 
+	@Order(2)
+	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
+			throws Exception {
+		http
+			.authorizeHttpRequests((authorize) -> authorize
+				.anyRequest().authenticated()
+			)
+			// Form login handles the redirect to the login page from the
+			// authorization server filter chain
+			.formLogin(Customizer.withDefaults());
 
-        httpSecurity.oauth2ResourceServer(configurer -> {
-            configurer.jwt(new Customizer<OAuth2ResourceServerConfigurer<org.springframework.security.config.annotation.web.builders.HttpSecurity>.JwtConfigurer>() {
-                        @Override
-                        public void customize(OAuth2ResourceServerConfigurer<HttpSecurity>.JwtConfigurer jwtConfigurer) {
-                            jwtConfigurer.decoder(new NimbusJwtDecoder())
-                                    .jwtAuthenticationConverter()
-                        }
-                    })
-        });
+		return http.build();
+	}
 
-        // 资源权限控制
-        httpSecurity.authorizeHttpRequests(requests -> requests
-                .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
-                    .permitAll()
-                .requestMatchers("/login/account")
-                    .permitAll()
-                .requestMatchers("/admin/test")
-                    .hasRole("ADMIN")
-                .anyRequest()
-                    .authenticated());
+	@Bean 
+	public UserDetailsService userDetailsService() {
+		UserDetails userDetails = User.withDefaultPasswordEncoder()
+				.username("user")
+				.password("password")
+				.roles("USER")
+				.build();
 
-        // 权限不足时的处理
-        httpSecurity.exceptionHandling(configurer -> configurer
-                .accessDeniedHandler((request, response, accessDeniedException) -> response.getWriter().write("access denied"))
-                .authenticationEntryPoint(new DefaultAuthenticationEntryPoint())
-        );
+		return new InMemoryUserDetailsManager(userDetails);
+	}
 
-        // 禁用csrf
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-        return httpSecurity.build();
-    }
+	@Bean
+	public RegisteredClientRepository registeredClientRepository() {
+		RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("messaging-client")
+				.clientSecret("{noop}secret")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+				.redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
+				.redirectUri("http://127.0.0.1:8080/authorized")
+				.scope(OidcScopes.OPENID)
+				.scope("message.read")
+				.scope("message.write")
+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+				.build();
+
+		return new InMemoryRegisteredClientRepository(registeredClient);
+	}
+
+	@Bean
+	public JWKSource<com.nimbusds.jose.proc.SecurityContext> jwkSource() {
+		KeyPair keyPair = generateRsaKey();
+		java.security.interfaces.RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
+		java.security.interfaces.RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+		RSAKey rsaKey = new RSAKey.Builder(publicKey)
+				.privateKey(privateKey)
+				.keyID(UUID.randomUUID().toString())
+				.build();
+		JWKSet jwkSet = new JWKSet(rsaKey);
+		return new ImmutableJWKSet<>(jwkSet);
+	}
+
+	private static KeyPair generateRsaKey() { 
+		KeyPair keyPair;
+		try {
+			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+			keyPairGenerator.initialize(2048);
+			keyPair = keyPairGenerator.generateKeyPair();
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException(ex);
+		}
+		return keyPair;
+	}
+
+	@Bean 
+	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
+		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+	}
+
+	@Bean 
+	public AuthorizationServerSettings authorizationServerSettings() {
+		return AuthorizationServerSettings.builder().build();
+	}
 
 }

@@ -1,5 +1,7 @@
 package com.ark.center.auth.infra.authentication;
 
+import com.ark.center.auth.domain.user.AuthUser;
+import com.ark.center.auth.domain.user.gateway.UserGateway;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -8,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,12 @@ import java.util.Map;
 public class DefaultUserDetailsService implements UserDetailsService, InitializingBean {
 
     private Map<String, UserDetails> userDetailsMap;
+    private UserGateway userGateway;
+
+    public DefaultUserDetailsService(UserGateway userGateway) {
+        this.userGateway = userGateway;
+    }
+
     @Override
     public void afterPropertiesSet() {
         userDetailsMap = new HashMap<>();
@@ -24,12 +33,12 @@ public class DefaultUserDetailsService implements UserDetailsService, Initializi
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = userDetailsMap.get(username);
+        AuthUser user = userGateway.retrieveUserByUserName(username);
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
-        return new User(user.getUsername(), user.getPassword(), user.isEnabled(), user.isAccountNonExpired(),
-                user.isCredentialsNonExpired(), user.isAccountNonLocked(), user.getAuthorities());
+        return new User(user.getUserName(), user.getPassword(), true, true,
+                true, true, Collections.emptyList());
     }
 
     public static void main(String[] args) {
