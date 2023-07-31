@@ -2,6 +2,7 @@ package com.ark.center.auth.infra.authentication.login;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.ark.center.auth.infra.authentication.SecurityConstants;
+import com.ark.center.auth.infra.authentication.common.RedisKeyConst;
 import com.ark.center.auth.infra.authentication.login.token.cache.UserCacheInfo;
 import com.ark.center.iam.client.permission.response.LoginUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +31,15 @@ public class RedisSecurityContextRepository implements SecurityContextRepository
         saveCache(createUserIdKey(userContext.getUserId()), accessToken, SecurityConstants.TOKEN_EXPIRES_SECONDS);
         return new UserCacheInfo(accessToken, SecurityConstants.TOKEN_EXPIRES_SECONDS);
     }
+
+    private String createAccessTokenKey(String accessToken) {
+        return RedisKeyConst.LOGIN_USER_ACCESS_TOKEN_KEY_PREFIX + accessToken;
+    }
+
+    private String createUserIdKey(Long userId) {
+        return RedisKeyConst.LOGIN_USER_ID_KEY_PREFIX + userId;
+    }
+
 
     private String generateAccessToken(LoginUserResponse userContext) {
         String accessToken;
