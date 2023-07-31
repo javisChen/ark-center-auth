@@ -1,7 +1,7 @@
 TRUNCATE TABLE auth_route;
 INSERT INTO kt.auth_route (id, application_id, name, code, component, pid, level_path, level, path, icon, hide_children,
                           type, sequence, status)
-VALUES (2, 1, '个人页', 'account', 'RouteView', 0, '2.', 1, '', 'user', 0, 1, 700, 1);
+VALUES (2, 1, '个人页', 'account', 'RouteView', 0, '2.', 1, '', 'authUser', 0, 1, 700, 1);
 INSERT INTO kt.auth_route (id, application_id, name, code, component, pid, level_path, level, path, icon, hide_children,
                           type, sequence, status)
 VALUES (3, 1, '结果页', 'result', 'PageView', 0, '3.', 1, '', 'check-circle-o', 0, 1, 500, 1);
@@ -134,7 +134,7 @@ INSERT INTO kt.auth_route (id, application_id, name, code, component, pid, level
 VALUES (70, 1, '测试子路由', '3213', '', 69, '6.70.', 2, '', '', 0, 1, 0, 1);
 INSERT INTO kt.auth_route (id, application_id, name, code, component, pid, level_path, level, path, icon, hide_children,
                           type, sequence, status)
-VALUES (71, 1, '用户管理', 'permission:user', 'PermissionUser', 44, '44.71.', 2, '/permission/user', '', 0, 2, 0, 1);
+VALUES (71, 1, '用户管理', 'permission:authUser', 'PermissionUser', 44, '44.71.', 2, '/permission/authUser', '', 0, 2, 0, 1);
 INSERT INTO kt.auth_route (id, application_id, name, code, component, pid, level_path, level, path, icon, hide_children,
                           type, sequence, status)
 VALUES (72, 1, '用户组管理', 'permission:usergroup', 'PermissionUserGroup', 44, '44.72.', 2, '/permission/usergroup', '', 0,
@@ -683,19 +683,19 @@ VALUES (35, 1, '/route/{id}', '/route/{id}', 'DELETE', 1, 6, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
 VALUES (36, 1, '/route/{routeId}/elements', '/route/{routeId}/elements', 'GET', 1, 6, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
-VALUES (37, 1, '/user', '/user', 'POST', 1, 1, 3, 0);
+VALUES (37, 1, '/authUser', '/authUser', 'POST', 1, 1, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
-VALUES (38, 1, '/user', '/user', 'GET', 1, 1, 3, 0);
+VALUES (38, 1, '/authUser', '/authUser', 'GET', 1, 1, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
-VALUES (39, 1, '/user', '/user', 'PUT', 1, 1, 3, 0);
+VALUES (39, 1, '/authUser', '/authUser', 'PUT', 1, 1, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
 VALUES (40, 1, '/users', '/users', 'POST', 1, 1, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
-VALUES (41, 1, '/user/info', '/user/info', 'GET', 1, 1, 3, 0);
+VALUES (41, 1, '/authUser/info', '/authUser/info', 'GET', 1, 1, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
-VALUES (42, 1, '/user/permission/routes', '/user/permission/routes', 'GET', 1, 1, 3, 0);
+VALUES (42, 1, '/authUser/permission/routes', '/authUser/permission/routes', 'GET', 1, 1, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
-VALUES (43, 1, '/user/permission/elements', '/user/permission/elements', 'GET', 1, 2, 3, 0);
+VALUES (43, 1, '/authUser/permission/elements', '/authUser/permission/elements', 'GET', 1, 2, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)
 VALUES (44, 1, '/usergroup/status', '/usergroup/status', 'PUT', 1, 2, 3, 0);
 INSERT INTO kt.auth_api (id, application_id, name, url, method, status, category_id, auth_type, has_path_variable)

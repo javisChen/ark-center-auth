@@ -26,7 +26,7 @@
                 "name": "修改用户",
                 "pid": 1,
                 "level": 2,
-                "path": "/user/update",
+                "path": "/authUser/update",
                 "icon": "",
                 "children": []
             },
@@ -35,7 +35,7 @@
                 "name": "新增用户",
                 "pid": 1,
                 "level": 2,
-                "path": "/user/add",
+                "path": "/authUser/add",
                 "icon": "",
                 "children": []
             }
@@ -54,7 +54,7 @@
                 "name": "新增菜单",
                 "pid": 4,
                 "level": 1,
-                "path": "/user/add",
+                "path": "/authUser/add",
                 "icon": "",
                 "children": []
             },
@@ -63,7 +63,7 @@
                 "name": "删除菜单",
                 "pid": 4,
                 "level": 2,
-                "path": "/user/delete",
+                "path": "/authUser/delete",
                 "icon": "",
                 "children": []
             },
@@ -72,7 +72,7 @@
                 "name": "修改菜单",
                 "pid": 4,
                 "level": 2,
-                "path": "/user/update",
+                "path": "/authUser/update",
                 "icon": "",
                 "children": []
             }
@@ -91,7 +91,7 @@
                 "name": "代码生成",
                 "pid": 8,
                 "level": 1,
-                "path": "/user/add",
+                "path": "/authUser/add",
                 "icon": "",
                 "children": [
                     {
@@ -99,7 +99,7 @@
                         "name": "工程生成",
                         "pid": 9,
                         "level": 2,
-                        "path": "/user/update",
+                        "path": "/authUser/update",
                         "icon": "",
                         "children": []
                     },
@@ -108,7 +108,7 @@
                         "name": "实体生成",
                         "pid": 9,
                         "level": 2,
-                        "path": "/user/delete",
+                        "path": "/authUser/delete",
                         "icon": "",
                         "children": []
                     }
@@ -119,7 +119,7 @@
                 "name": "日志管理",
                 "pid": 8,
                 "level": 1,
-                "path": "/user/add",
+                "path": "/authUser/add",
                 "icon": "",
                 "children": [
                     {
@@ -127,7 +127,7 @@
                         "name": "日志查看",
                         "pid": 12,
                         "level": 2,
-                        "path": "/user/update",
+                        "path": "/authUser/update",
                         "icon": "",
                         "children": []
                     }

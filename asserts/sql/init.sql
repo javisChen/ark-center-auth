@@ -8,7 +8,7 @@ create table if not exists auth.auth_api
     status            tinyint unsigned default '1'               not null comment '状态 1-已启用；2-已禁用；',
     category_id       bigint unsigned  default '0'               not null comment 'api分类id，关联api_category.id',
     auth_type         tinyint unsigned default '1'               not null comment '认证授权类型 1-无需认证授权 2-只需认证无需授权 3-需要认证和授权',
-    has_path_variable tinyint unsigned default '0'               not null comment 'url是否包含路径参数，例： /user/{userId}/api/{apiId} 0-不包含 1-包含',
+    has_path_variable tinyint unsigned default '0'               not null comment 'url是否包含路径参数，例： /authUser/{userId}/api/{apiId} 0-不包含 1-包含',
     gmt_modified      datetime         default CURRENT_TIMESTAMP not null,
     gmt_create        datetime         default CURRENT_TIMESTAMP not null,
     creator           bigint unsigned  default '0'               not null comment '创建人',

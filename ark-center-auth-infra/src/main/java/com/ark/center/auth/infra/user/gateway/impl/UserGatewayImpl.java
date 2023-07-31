@@ -22,17 +22,14 @@ public class UserGatewayImpl implements UserGateway {
         UserQry userQry = new UserQry();
         userQry.setPhone(phone);
         UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.getUser(userQry));
-//        UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.getUserByPhone(phone));
         return userConverter.toAuthUser(userInnerDTO);
     }
 
     @Override
     public AuthUser retrieveUserByUserName(String userName) {
         UserQry userQry = new UserQry();
-        userQry.setUserName(userName);
+        userQry.setUsername(userName);
         UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.getUser(userQry));
-//        UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.getUserByUserName(userName));
         return userConverter.toAuthUser(userInnerDTO);
     }
-
 }

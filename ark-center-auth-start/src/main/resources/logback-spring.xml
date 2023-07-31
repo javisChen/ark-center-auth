@@ -6,5 +6,6 @@
 
     <!-- Nacos Config -->
     <logger name="com.alibaba.cloud.nacos.configdata" level="DEBUG"/>
+    <logger name="feign" level="DEBUG"/>
 
 </configuration>

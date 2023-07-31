@@ -1,0 +1,50 @@
+package com.ark.center.auth.infra.authentication.login.token.generate;
+
+import com.ark.center.auth.infra.authentication.login.token.UserToken;
+import org.springframework.lang.Nullable;
+import org.springframework.security.core.SpringSecurityCoreVersion;
+import org.springframework.util.Assert;
+
+import java.time.Instant;
+
+public abstract class AbstractUserToken implements UserToken {
+
+    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+
+    private final String tokenValue;
+
+    private final Instant issuedAt;
+
+    private final Instant expiresAt;
+
+    protected AbstractUserToken(String tokenValue) {
+        this(tokenValue, null, null);
+    }
+
+    protected AbstractUserToken(String tokenValue, @Nullable Instant issuedAt, @Nullable Instant expiresAt) {
+        Assert.hasText(tokenValue, "tokenValue cannot be empty");
+        if (issuedAt != null && expiresAt != null) {
+            Assert.isTrue(expiresAt.isAfter(issuedAt), "expiresAt must be after issuedAt");
+        }
+        this.tokenValue = tokenValue;
+        this.issuedAt = issuedAt;
+        this.expiresAt = expiresAt;
+    }
+
+    public String getTokenValue() {
+        return this.tokenValue;
+    }
+
+    @Nullable
+    public Instant getIssuedAt() {
+        return this.issuedAt;
+    }
+
+    @Nullable
+    public Instant getExpiresAt() {
+        return this.expiresAt;
+    }
+
+
+
+}

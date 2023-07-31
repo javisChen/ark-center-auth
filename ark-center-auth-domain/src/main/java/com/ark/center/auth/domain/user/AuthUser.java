@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class AuthUser {
-
     private Long id;
     private String phone;
-    private String userName;
-    private String password;
+    private String username;
+    private String userCode;
+    private Boolean isSuperAdmin;
     private Integer status;
-
+    private String password;
 }
