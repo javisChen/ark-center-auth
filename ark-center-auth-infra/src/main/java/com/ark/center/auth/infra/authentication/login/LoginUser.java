@@ -1,29 +1,30 @@
 package com.ark.center.auth.infra.authentication.login;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
+import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Setter
 @Getter
-public class LoginUser extends User {
+public class LoginUser implements UserDetails, CredentialsContainer {
 
     private Long userId;
     private String userCode;
     private Boolean isSuperAdmin;
+    private String password;
+    private String username;
+    private Set<GrantedAuthority> authorities;
+    private boolean accountNonExpired;
+    private boolean accountNonLocked;
+    private boolean credentialsNonExpired;
+    private boolean enabled;
 
-    public LoginUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, authorities);
+    @Override
+    public void eraseCredentials() {
+        this.password = null;
     }
-
-    public LoginUser(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
-        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-    }
-
-
 }

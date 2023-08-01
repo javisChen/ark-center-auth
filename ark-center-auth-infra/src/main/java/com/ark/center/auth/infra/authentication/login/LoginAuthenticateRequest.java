@@ -5,8 +5,10 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuthLoginDTO {
+public class LoginAuthenticateRequest {
 
-    private String accessToken;
+    private String username;
+
+    private String password;
 
 }

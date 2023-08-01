@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.login.token;
+package com.ark.center.auth.infra.authentication.token;
 
 import org.springframework.lang.Nullable;
 

@@ -1,9 +1,10 @@
-package com.ark.center.auth.infra.authentication.login.token.generate;
+package com.ark.center.auth.infra.authentication.token.generate;
 
 
 import com.ark.center.auth.infra.authentication.SecurityConstants;
 import com.ark.center.auth.infra.authentication.login.LoginUser;
-import com.ark.center.auth.infra.authentication.login.token.UserToken;
+import com.ark.center.auth.infra.authentication.token.JwtUserToken;
+import com.ark.center.auth.infra.authentication.token.UserToken;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;

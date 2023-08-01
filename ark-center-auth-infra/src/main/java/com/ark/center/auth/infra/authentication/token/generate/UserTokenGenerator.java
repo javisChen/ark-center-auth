@@ -1,8 +1,8 @@
-package com.ark.center.auth.infra.authentication.login.token.generate;
+package com.ark.center.auth.infra.authentication.token.generate;
 
 
 import com.ark.center.auth.infra.authentication.login.LoginUser;
-import com.ark.center.auth.infra.authentication.login.token.UserToken;
+import com.ark.center.auth.infra.authentication.token.UserToken;
 
 public interface UserTokenGenerator {
 

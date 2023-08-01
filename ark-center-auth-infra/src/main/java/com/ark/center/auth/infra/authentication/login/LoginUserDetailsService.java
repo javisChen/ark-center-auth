@@ -27,8 +27,18 @@ public class LoginUserDetailsService implements UserDetailsService, Initializing
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
-        LoginUser loginUser = new LoginUser(user.getUsername(), user.getPassword(), true, true,
-                true, true, Collections.emptyList());
+        return buildLoginUser(user);
+    }
+
+    private LoginUser buildLoginUser(AuthUser user) {
+        LoginUser loginUser = new LoginUser();
+        loginUser.setUsername(user.getUsername());
+        loginUser.setPassword(user.getPassword());
+        loginUser.setAccountNonExpired(true);
+        loginUser.setAccountNonLocked(true);
+        loginUser.setEnabled(true);
+        loginUser.setCredentialsNonExpired(true);
+        loginUser.setAuthorities(Collections.emptySet());
         loginUser.setUserId(user.getId());
         loginUser.setUserCode(user.getUserCode());
         loginUser.setIsSuperAdmin(user.getIsSuperAdmin());

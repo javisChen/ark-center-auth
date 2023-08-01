@@ -1,15 +1,11 @@
-package com.ark.center.auth.infra.authentication.login.token.generate;
+package com.ark.center.auth.infra.authentication.token;
 
-import com.ark.center.auth.infra.authentication.login.token.UserToken;
 import org.springframework.lang.Nullable;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.util.Assert;
 
 import java.time.Instant;
 
 public abstract class AbstractUserToken implements UserToken {
-
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
 
     private final String tokenValue;
 

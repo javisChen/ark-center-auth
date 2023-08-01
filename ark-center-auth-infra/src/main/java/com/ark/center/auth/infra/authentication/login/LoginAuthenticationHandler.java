@@ -37,7 +37,7 @@ public class LoginAuthenticationHandler implements AuthenticationSuccessHandler,
 
     private void writeSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         LoginAuthenticationToken authenticationToken = (LoginAuthenticationToken) authentication;
-        SingleResponse<AuthLoginDTO> serverResponse = SingleResponse.ok(new AuthLoginDTO(authenticationToken.getAccessToken()));
+        SingleResponse<LoginAuthenticateResponse> serverResponse = SingleResponse.ok(new LoginAuthenticateResponse(authenticationToken.getAccessToken()));
         doWrite(JSON.toJSONBytes(serverResponse), response, HttpServletResponse.SC_OK);
     }
 
