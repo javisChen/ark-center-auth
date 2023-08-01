@@ -49,7 +49,7 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
         LoginAuthenticateRequest authenticateRequest = readFromRequest(request);
-        UsernamePasswordAuthenticationToken authRequest = LoginAuthenticationToken
+        UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken
                 .unauthenticated(authenticateRequest.getUsername(), authenticateRequest.getPassword());
         setDetails(request, authRequest);
         return this.getAuthenticationManager().authenticate(authRequest);

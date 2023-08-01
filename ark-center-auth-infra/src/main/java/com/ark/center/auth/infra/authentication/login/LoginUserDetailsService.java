@@ -3,11 +3,13 @@ package com.ark.center.auth.infra.authentication.login;
 import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Collections;
+import java.util.Set;
 
 public class LoginUserDetailsService implements UserDetailsService, InitializingBean {
 
@@ -27,7 +29,9 @@ public class LoginUserDetailsService implements UserDetailsService, Initializing
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
-        return buildLoginUser(user);
+        LoginUser loginUser = buildLoginUser(user);
+        loginUser.setAuthorities(Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        return loginUser;
     }
 
     private LoginUser buildLoginUser(AuthUser user) {
