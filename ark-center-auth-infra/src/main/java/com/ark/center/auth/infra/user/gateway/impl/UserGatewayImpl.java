@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class UserGatewayImpl implements UserGateway {
 
     private final UserFacade userFacade;
+
     private final UserConverter userConverter;
 
     @Override
@@ -31,5 +32,10 @@ public class UserGatewayImpl implements UserGateway {
         userQry.setUsername(userName);
         UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.getUser(userQry));
         return userConverter.toAuthUser(userInnerDTO);
+    }
+
+    @Override
+    public Boolean checkHasPermission(String requestUri, String applicationCode, String method, String userCode) {
+        return null;
     }
 }

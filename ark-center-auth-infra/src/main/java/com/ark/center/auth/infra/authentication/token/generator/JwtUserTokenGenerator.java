@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.token.generate;
+package com.ark.center.auth.infra.authentication.token.generator;
 
 
 import com.ark.center.auth.infra.authentication.SecurityConstants;

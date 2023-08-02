@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.token.cache;
+package com.ark.center.auth.infra.authentication.token.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.web.context.SecurityContextRepository;

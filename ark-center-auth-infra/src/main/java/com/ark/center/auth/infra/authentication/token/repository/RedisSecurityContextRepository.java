@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.token.cache;
+package com.ark.center.auth.infra.authentication.token.repository;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSONArray;
@@ -10,6 +10,7 @@ import com.ark.component.cache.CacheService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -61,7 +62,7 @@ public class RedisSecurityContextRepository extends AbstractSecurityContextRepos
 
         String accessToken = authentication.getAccessToken();
 
-        Map<String, Object> map = BeanUtil.beanToMap(loginUser, false, false);
+        Map<String, Object> map = BeanUtil.beanToMap(loginUser, false, true);
         map.put("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
 
         cacheService.hashSet(createAccessTokenKey(accessToken), map, SecurityConstants.TOKEN_EXPIRES_SECONDS);
@@ -73,14 +74,17 @@ public class RedisSecurityContextRepository extends AbstractSecurityContextRepos
         SecurityContext context = securityContextHolderStrategy.createEmptyContext();
         String accessToken = resolveToken(request);
         if (StringUtils.isNotEmpty(accessToken)) {
-            LoginUser loginUser = convert(accessToken);
+            List<Object> objects = cacheService.hashMultiGet(createAccessTokenKey(accessToken), hashKeys);
+            if (CollectionUtils.isEmpty(objects)) {
+                return context;
+            }
+            LoginUser loginUser = convert(objects);
             context.setAuthentication(new LoginAuthenticationToken(loginUser, accessToken));
         }
         return context;
     }
 
-    private LoginUser convert(String accessToken) {
-        List<Object> objects = cacheService.hashMultiGet(createAccessTokenKey(accessToken), hashKeys);
+    private LoginUser convert(List<Object> objects) {
         LoginUser loginUser = new LoginUser();
         loginUser.setUserId(Long.parseLong(objects.get(0).toString()));
         loginUser.setUserCode(String.valueOf(objects.get(1)));

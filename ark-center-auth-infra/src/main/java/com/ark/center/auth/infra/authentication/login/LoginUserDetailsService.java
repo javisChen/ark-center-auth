@@ -30,7 +30,7 @@ public class LoginUserDetailsService implements UserDetailsService, Initializing
             throw new UsernameNotFoundException(username);
         }
         LoginUser loginUser = buildLoginUser(user);
-        loginUser.setAuthorities(Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        loginUser.setAuthorities(Set.of(new SimpleGrantedAuthority("ROLE_S"),new SimpleGrantedAuthority("ROLE_D")));
         return loginUser;
     }
 
