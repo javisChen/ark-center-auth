@@ -6,7 +6,7 @@ public interface UserGateway {
 
     AuthUser retrieveUserByPhone(String phone);
 
-    AuthUser retrieveUserByUserName(String userName);
+    AuthUser retrieveUserByUsername(String username);
 
     Boolean checkHasPermission(String requestUri, String applicationCode, String method, String userCode);
 }

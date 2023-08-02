@@ -2,7 +2,6 @@ package com.ark.center.auth.infra.config;
 
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.DefaultAuthenticationEntryPoint;
-import com.ark.center.auth.infra.authentication.ApiAuthorizationManager;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationProvider;
@@ -16,13 +15,7 @@ import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointR
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDecisionManager;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.annotation.Jsr250Voter;
-import org.springframework.security.access.vote.AuthenticatedVoter;
-import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,12 +27,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 //@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -61,16 +50,6 @@ public class SecurityConfigB {
     public UserTokenGenerator userTokenGenerator(JWKSource<com.nimbusds.jose.proc.SecurityContext> jwkSource) {
         JwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource);
         return new JwtUserTokenGenerator(jwtEncoder);
-    }
-
-    @Bean
-    public AccessDecisionManager accessDecisionManager() {
-        List<AccessDecisionVoter<?>> decisionVoters = Arrays.asList(
-                new RoleVoter(),
-                new AuthenticatedVoter(),
-                new Jsr250Voter()
-        );
-        return new MyAccessDecisionManager(decisionVoters);
     }
 
     @Bean
@@ -102,16 +81,10 @@ public class SecurityConfigB {
     }
 
     @Bean
-    public AuthorizationManager<RequestAuthorizationContext> authorizationManager() {
-        return new ApiAuthorizationManager(securityCoreProperties);
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity,
-                                           AuthenticationProvider authenticationProvider,
-                                           LoginAuthenticationFilter loginAuthenticationFilter,
-                                           AuthorizationManager<RequestAuthorizationContext> authorizationManager,
-                                           SecurityContextRepository securityContextRepository) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
+                                                   AuthenticationProvider authenticationProvider,
+                                                   LoginAuthenticationFilter loginAuthenticationFilter,
+                                                   SecurityContextRepository securityContextRepository) throws Exception {
         // 设置上下文存储
         httpSecurity.securityContext(configurer -> configurer.securityContextRepository(securityContextRepository));
 
@@ -131,7 +104,7 @@ public class SecurityConfigB {
                 .requestMatchers("/login/account")
                     .permitAll()
                 .anyRequest()
-                    .access(authorizationManager)
+                        .authenticated()
                 );
 
         // 权限不足时的处理

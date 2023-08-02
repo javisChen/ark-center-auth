@@ -1,9 +1,11 @@
 package com.ark.center.auth.application.access;
 
+import com.ark.center.auth.application.access.support.ApiCacheHolder;
 import com.ark.center.auth.client.access.request.ApiAccessRequest;
 import com.ark.center.auth.client.access.response.ApiAccessResponse;
 import com.ark.center.auth.client.access.response.UserResponse;
 import com.ark.center.auth.domain.user.service.UserPermissionService;
+import com.ark.center.auth.infra.api.support.ApiCommonUtils;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationToken;
 import com.ark.center.auth.infra.authentication.login.LoginUser;
 import com.ark.center.auth.infra.config.SecurityCoreProperties;
@@ -45,23 +47,32 @@ public class AccessAppService {
             return ApiAccessResponse.success();
         }
 
-        // 检查API是否只需认证
-        if (isMatchJustNeedAuthenticationUri(requestUri, method)) {
+        // 检查API是否无需认证和授权
+        if (isMatchNoNeedAuthUri(requestUri, method)) {
             return ApiAccessResponse.success();
         }
 
         Authentication authentication = context.getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
+        boolean isAuthenticated = authentication == null || !authentication.isAuthenticated();
+
+        // 检查API是否只需认证并且当前用户是否认证成功
+        if (isMatchJustNeedAuthenticationUri(requestUri, method)) {
+            return ApiAccessResponse.success(isAuthenticated);
+        }
+
+        // 如果还未认证，直接返回
+        if (!isAuthenticated) {
             return ApiAccessResponse.success(false);
         }
 
         // 检查API是否需要授权
-        if (isMatchNoNeedAuthorizationUri(requestUri, method)) {
+        if (isMatchNeedAuthorizationUri(requestUri, method)) {
             return ApiAccessResponse.success();
         }
 
         // 检查是否有API访问权
-        boolean access = access(requestUri, applicationCode, method, ((LoginAuthenticationToken) authentication).getLoginUser().getUserCode());
+        String userCode = ((LoginAuthenticationToken) authentication).getLoginUser().getUserCode();
+        boolean access = hasPermission(requestUri, applicationCode, method, userCode);
         if (access) {
             return ApiAccessResponse.success(convertToUserResponse(((LoginAuthenticationToken) authentication).getLoginUser()));
         }
@@ -70,7 +81,7 @@ public class AccessAppService {
 
 
 
-    private boolean access(String requestUri, String applicationCode, String method, String userCode) {
+    private boolean hasPermission(String requestUri, String applicationCode, String method, String userCode) {
         return userPermissionService.checkHasApiPermission(applicationCode, userCode, requestUri, method);
     }
 
@@ -102,21 +113,28 @@ public class AccessAppService {
 
     /**
      * 尝试匹配无需授权的资源
-     * 系统的无需授权资源 + 配置上的定义
      * @return 匹配成功=true，不成功=false
      */
-    public boolean isMatchNoNeedAuthorizationUri(String requestUri, String method) {
-        Map<String, String> cache = apiCacheHolder.getNoNeedAuthorizationApiCache();
+    public boolean isMatchNeedAuthorizationUri(String requestUri, String method) {
+        Map<String, String> cache = apiCacheHolder.getNeedAuthorizationApiCache();
+        return isMatchUri(cache, requestUri, method);
+    }
+
+    /**
+     * 尝试匹配无需认证授权的资源
+     * @return 匹配成功=true，不成功=false
+     */
+    public boolean isMatchNoNeedAuthUri(String requestUri, String method) {
+        Map<String, String> cache = apiCacheHolder.getNoNeedAuthApiCache();
         return isMatchUri(cache, requestUri, method);
     }
 
     /**
      * 尝试匹配无需认证的资源
-     * 系统的无需授权资源 + 配置上的定义
      * @return 匹配成功=true，不成功=false
      */
     public boolean isMatchJustNeedAuthenticationUri(String requestUri, String method) {
-        Map<String, String> cache = apiCacheHolder.getNoNeedAuthenticationApiCache();
+        Map<String, String> cache = apiCacheHolder.getNeedAuthenticationApiCache();
         return isMatchUri(cache, requestUri, method);
     }
 

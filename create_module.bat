@@ -23,7 +23,7 @@ mkdir "%project%-domain\src\main\java\%package%\domain\%module%\vo"
 mkdir "%project%-infra\src\main\java\%package%\infra\%module%"
 mkdir "%project%-infra\src\main\java\%package%\infra\%module%\gateway\db\xml"
 mkdir "%project%-infra\src\main\java\%package%\infra\%module%\gateway\impl"
-mkdir "%project%-infra\src\main\java\%package%\infra\%module%\assembler"
+mkdir "%project%-infra\src\main\java\%package%\infra\%module%\converter"
 
 mkdir "%project%-app\src\main\java\%package%\application\%module%"
 mkdir "%project%-app\src\main\java\%package%\application\%module%\executor"

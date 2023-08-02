@@ -23,7 +23,7 @@ mkdir -p "${project}-domain/src/main/java/${package}/domain/${module}/vo"
 mkdir -p "${project}-infra/src/main/java/${package}/infra/${module}"
 mkdir -p "${project}-infra/src/main/java/${package}/infra/${module}/gateway/db/xml"
 mkdir -p "${project}-infra/src/main/java/${package}/infra/${module}/gateway/impl"
-mkdir -p "${project}-infra/src/main/java/${package}/infra/${module}/assembler"
+mkdir -p "${project}-infra/src/main/java/${package}/infra/${module}/converter"
 
 mkdir -p "${project}-app/src/main/java/${package}/application/${module}"
 mkdir -p "${project}-app/src/main/java/${package}/application/${module}/executor"

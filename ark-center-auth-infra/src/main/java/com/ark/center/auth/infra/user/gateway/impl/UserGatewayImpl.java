@@ -4,7 +4,9 @@ import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.center.auth.infra.user.facade.UserFacade;
+import com.ark.center.auth.infra.user.gateway.facade.UserPermissionFacade;
 import com.ark.center.iam.client.user.dto.UserInnerDTO;
+import com.ark.center.iam.client.user.query.UserPermissionQry;
 import com.ark.center.iam.client.user.query.UserQry;
 import com.ark.component.microservice.rpc.util.RpcUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class UserGatewayImpl implements UserGateway {
 
     private final UserFacade userFacade;
+    private final UserPermissionFacade userPermissionFacade;
 
     private final UserConverter userConverter;
 
@@ -27,15 +30,20 @@ public class UserGatewayImpl implements UserGateway {
     }
 
     @Override
-    public AuthUser retrieveUserByUserName(String userName) {
+    public AuthUser retrieveUserByUsername(String username) {
         UserQry userQry = new UserQry();
-        userQry.setUsername(userName);
+        userQry.setUsername(username);
         UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.getUser(userQry));
         return userConverter.toAuthUser(userInnerDTO);
     }
 
     @Override
     public Boolean checkHasPermission(String requestUri, String applicationCode, String method, String userCode) {
-        return null;
+        UserPermissionQry userPermissionQry = new UserPermissionQry();
+        userPermissionQry.setRequestUri(requestUri);
+        userPermissionQry.setApplicationCode(applicationCode);
+        userPermissionQry.setMethod(method);
+        userPermissionQry.setUserCode(userCode);
+        return RpcUtils.checkAndGetData(userPermissionFacade.checkApiHasPermission(userPermissionQry));
     }
 }

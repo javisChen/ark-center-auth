@@ -1,9 +1,9 @@
 package com.ark.center.auth.adapter.access.web;
 
 import com.ark.center.auth.application.access.AccessAppService;
-import com.ark.center.iam.client.access.AccessApi;
-import com.ark.center.iam.client.access.request.ApiAccessRequest;
-import com.ark.center.iam.client.access.response.ApiAccessResponse;
+import com.ark.center.auth.client.access.AccessApi;
+import com.ark.center.auth.client.access.request.ApiAccessRequest;
+import com.ark.center.auth.client.access.response.ApiAccessResponse;
 import com.ark.component.dto.SingleResponse;
 import com.ark.component.web.base.BaseController;
 import lombok.RequiredArgsConstructor;
