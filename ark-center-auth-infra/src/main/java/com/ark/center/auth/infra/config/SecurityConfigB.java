@@ -6,11 +6,13 @@ import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.LoginUserDetailsService;
+import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.center.auth.infra.authentication.token.generator.JwtUserTokenGenerator;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.center.auth.infra.authentication.token.repository.RedisSecurityContextRepository;
 import com.ark.component.cache.CacheService;
 import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +49,7 @@ public class SecurityConfigB {
     }
 
     @Bean
-    public UserTokenGenerator userTokenGenerator(JWKSource<com.nimbusds.jose.proc.SecurityContext> jwkSource) {
+    public UserTokenGenerator userTokenGenerator(JWKSource<SecurityContext> jwkSource) {
         JwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource);
         return new JwtUserTokenGenerator(jwtEncoder);
     }
@@ -56,40 +58,40 @@ public class SecurityConfigB {
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
                                                          PasswordEncoder passwordEncoder,
                                                          UserTokenGenerator userTokenGenerator
-                                                         ) {
+    ) {
         LoginAuthenticationProvider provider = new LoginAuthenticationProvider(userTokenGenerator);
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(userDetailsService);
         return provider;
     }
 
-    @Bean
     public LoginAuthenticationFilter authenticationFilter(AuthenticationConfiguration authenticationConfiguration,
                                                           SecurityContextRepository securityContextRepository) throws Exception {
         LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
-        LoginAuthenticationFilter loginAuthenticationFilter = new LoginAuthenticationFilter();
-        loginAuthenticationFilter.setAuthenticationSuccessHandler(authenticationHandler);
-        loginAuthenticationFilter.setAuthenticationFailureHandler(authenticationHandler);
-        loginAuthenticationFilter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
-        loginAuthenticationFilter.setSecurityContextRepository(securityContextRepository);
-        return loginAuthenticationFilter;
-    }
-
-    @Bean
-    public SecurityContextRepository securityContextRepository(CacheService cacheService) {
-        return new RedisSecurityContextRepository(cacheService);
+        LoginAuthenticationFilter filter = new LoginAuthenticationFilter();
+        filter.setAuthenticationSuccessHandler(authenticationHandler);
+        filter.setAuthenticationFailureHandler(authenticationHandler);
+        filter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
+        filter.setSecurityContextRepository(securityContextRepository);
+        return filter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
-                                                   AuthenticationProvider authenticationProvider,
-                                                   LoginAuthenticationFilter loginAuthenticationFilter,
-                                                   SecurityContextRepository securityContextRepository) throws Exception {
-        // 设置上下文存储
-        httpSecurity.securityContext(configurer -> configurer.securityContextRepository(securityContextRepository));
+                                                   AuthenticationConfiguration authenticationConfiguration,
+                                                   CacheService cacheService,
+                                                   AuthenticationProvider authenticationProvider) throws Exception {
+
+
+        // Context存储
+        RedisSecurityContextRepository contextRepository = new RedisSecurityContextRepository(cacheService);
+        httpSecurity.securityContext(configurer -> configurer.securityContextRepository(contextRepository));
+
+        // 登出
+        logout(httpSecurity, cacheService);
 
         // 设置登录认证过滤器
-        httpSecurity.addFilterBefore(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        addFilters(httpSecurity, authenticationConfiguration, contextRepository);
 
         // 添加Provider
         httpSecurity.authenticationProvider(authenticationProvider);
@@ -97,15 +99,18 @@ public class SecurityConfigB {
         // 暂时禁用SessionManagement
         httpSecurity.sessionManagement(AbstractHttpConfigurer::disable);
 
+        // 禁用csrf
+        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+
         // 资源权限控制
         httpSecurity.authorizeHttpRequests(requests -> requests
                 .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
                     .permitAll()
-                .requestMatchers("/login/account")
+                .requestMatchers("/login/account", "/logout")
                     .permitAll()
                 .anyRequest()
-                        .authenticated()
-                );
+                    .authenticated()
+        );
 
         // 权限不足时的处理
         httpSecurity.exceptionHandling(configurer -> configurer
@@ -113,9 +118,19 @@ public class SecurityConfigB {
                 .authenticationEntryPoint(new DefaultAuthenticationEntryPoint())
         );
 
-        // 禁用csrf
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
+    }
+
+    private void logout(HttpSecurity httpSecurity, CacheService cacheService) throws Exception {
+        AuthLogoutHandler handler = new AuthLogoutHandler(cacheService);
+        httpSecurity.logout(configurer -> configurer
+                .addLogoutHandler(handler)
+                .addLogoutHandler(handler)
+        );
+    }
+
+    private void addFilters(HttpSecurity httpSecurity, AuthenticationConfiguration authenticationConfiguration, RedisSecurityContextRepository contextRepository) throws Exception {
+        httpSecurity.addFilterBefore(authenticationFilter(authenticationConfiguration, contextRepository), UsernamePasswordAuthenticationFilter.class);
     }
 
 }

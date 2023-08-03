@@ -3,29 +3,27 @@ package com.ark.center.auth.client.access.response;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 @Data
 @AllArgsConstructor
 @Builder
 public class ApiAccessResponse {
 
-    private UserResponse userResponse;
-    private Boolean result = false;
+    private Integer code;
 
-    public static ApiAccessResponse success() {
-        return success(true);
-    }
-
-    public static ApiAccessResponse success(boolean result) {
+    public static ApiAccessResponse fail(int code) {
         return ApiAccessResponse.builder()
-                .result(result)
+                .code(code)
                 .build();
     }
 
+    public static ApiAccessResponse success() {
+        return success(null);
+    }
     public static ApiAccessResponse success(UserResponse userResponse) {
         return ApiAccessResponse.builder()
-                .result(true)
-                .userResponse(userResponse)
+                .code(HttpStatus.OK.value())
                 .build();
     }
 

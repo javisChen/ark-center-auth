@@ -3,7 +3,6 @@ package com.ark.center.auth.infra.authentication.token.repository;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.ark.center.auth.infra.authentication.SecurityConstants;
-import com.ark.center.auth.infra.authentication.common.RedisKeyConst;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationToken;
 import com.ark.center.auth.infra.authentication.login.LoginUser;
 import com.ark.component.cache.CacheService;
@@ -24,11 +23,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * RedisToken管理器
- */
 @Slf4j
 @Component
 public class RedisSecurityContextRepository extends AbstractSecurityContextRepository {
@@ -58,6 +55,11 @@ public class RedisSecurityContextRepository extends AbstractSecurityContextRepos
 
         LoginAuthenticationToken authentication = (LoginAuthenticationToken) context.getAuthentication();
 
+        // logout的时候authentication就会为空
+        if (authentication == null) {
+            return;
+        }
+
         LoginUser loginUser = authentication.getLoginUser();
 
         String accessToken = authentication.getAccessToken();
@@ -65,22 +67,27 @@ public class RedisSecurityContextRepository extends AbstractSecurityContextRepos
         Map<String, Object> map = BeanUtil.beanToMap(loginUser, false, true);
         map.put("authorities", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
 
-        cacheService.hashSet(createAccessTokenKey(accessToken), map, SecurityConstants.TOKEN_EXPIRES_SECONDS);
+        cacheService.hashSet(RedisKeyUtils.createAccessTokenKey(accessToken), map, SecurityConstants.TOKEN_EXPIRES_SECONDS);
 
-        cacheService.set(createUserIdKey(loginUser.getUserId()), accessToken, SecurityConstants.TOKEN_EXPIRES_SECONDS);
+        cacheService.set(RedisKeyUtils.createUserIdKey(loginUser.getUserId()), accessToken, SecurityConstants.TOKEN_EXPIRES_SECONDS);
     }
 
     private SecurityContext readSecurityContextFromCache(HttpServletRequest request) {
         SecurityContext context = securityContextHolderStrategy.createEmptyContext();
         String accessToken = resolveToken(request);
-        if (StringUtils.isNotEmpty(accessToken)) {
-            List<Object> objects = cacheService.hashMultiGet(createAccessTokenKey(accessToken), hashKeys);
-            if (CollectionUtils.isEmpty(objects)) {
-                return context;
-            }
-            LoginUser loginUser = convert(objects);
-            context.setAuthentication(new LoginAuthenticationToken(loginUser, accessToken));
+        if (StringUtils.isEmpty(accessToken)) {
+            return context;
         }
+        List<Object> values = cacheService.hashMultiGet(RedisKeyUtils.createAccessTokenKey(accessToken), hashKeys);
+        if (CollectionUtils.isEmpty(values)) {
+            return context;
+        }
+        values = values.stream().filter(Objects::nonNull).toList();
+        if (CollectionUtils.isEmpty(values)) {
+            return context;
+        }
+        LoginUser loginUser = convert(values);
+        context.setAuthentication(new LoginAuthenticationToken(loginUser, accessToken));
         return context;
     }
 
@@ -113,16 +120,8 @@ public class RedisSecurityContextRepository extends AbstractSecurityContextRepos
     @Override
     public boolean containsContext(HttpServletRequest request) {
         String token = resolveToken(request);
-        return cacheService.get(createAccessTokenKey(token), LoginUser.class) != null;
+        return cacheService.get(RedisKeyUtils.createAccessTokenKey(token), LoginUser.class) != null;
     }
 
-
-    private String createAccessTokenKey(String accessToken) {
-        return RedisKeyConst.LOGIN_USER_ACCESS_TOKEN_KEY_PREFIX + accessToken;
-    }
-
-    private String createUserIdKey(Long userId) {
-        return RedisKeyConst.LOGIN_USER_ID_KEY_PREFIX + userId;
-    }
 
 }

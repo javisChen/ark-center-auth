@@ -8,10 +8,11 @@ import com.ark.center.auth.domain.user.service.UserPermissionService;
 import com.ark.center.auth.infra.api.support.ApiCommonUtils;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationToken;
 import com.ark.center.auth.infra.authentication.login.LoginUser;
-import com.ark.center.auth.infra.config.SecurityCoreProperties;
+import com.ark.center.auth.infra.config.AuthProperties;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,7 +32,7 @@ public class AccessAppService {
 
     private final UserPermissionService userPermissionService;
 
-    private final SecurityCoreProperties securityCoreProperties;
+    private final AuthProperties authProperties;
     public ApiAccessResponse getApiAccess(ApiAccessRequest request) {
 
         SecurityContext context = SecurityContextHolder.getContext();
@@ -42,10 +43,15 @@ public class AccessAppService {
         // 先尝试uri是否匹配系统中存在的包含路径参数的api，如果存在的话就替换成统一的格式
         requestUri = attemptReplaceHasPathVariableUrl(requestUri);
 
-        // 尝试是否匹配白名单中的uri
-        if (isMatchDefaultAllowUrl(requestUri)) {
-            return ApiAccessResponse.success();
-        }
+//        // 尝试是否匹配黑名单中的URI
+//        if (isMatchBlockUri(requestUri)) {
+//            return ApiAccessResponse.fail(HttpStatus.FORBIDDEN.value());
+//        }
+//
+//        // 尝试是否匹配白名单中的URI
+//        if (isMatchAllowUri(requestUri)) {
+//            return ApiAccessResponse.success();
+//        }
 
         // 检查API是否无需认证和授权
         if (isMatchNoNeedAuthUri(requestUri, method)) {
@@ -53,33 +59,34 @@ public class AccessAppService {
         }
 
         Authentication authentication = context.getAuthentication();
-        boolean isAuthenticated = authentication == null || !authentication.isAuthenticated();
+        boolean isAuthenticated = authentication != null && authentication.isAuthenticated();
 
         // 检查API是否只需认证并且当前用户是否认证成功
         if (isMatchJustNeedAuthenticationUri(requestUri, method)) {
-            return ApiAccessResponse.success(isAuthenticated);
+            if (isAuthenticated) {
+                return ApiAccessResponse.success();
+            } else {
+                return ApiAccessResponse.fail(HttpStatus.UNAUTHORIZED.value());
+            }
         }
 
         // 如果还未认证，直接返回
         if (!isAuthenticated) {
-            return ApiAccessResponse.success(false);
+            return ApiAccessResponse.fail(HttpStatus.UNAUTHORIZED.value());
         }
 
         // 检查API是否需要授权
         if (isMatchNeedAuthorizationUri(requestUri, method)) {
-            return ApiAccessResponse.success();
+            // 检查是否有API访问权
+            String userCode = ((LoginAuthenticationToken) authentication).getLoginUser().getUserCode();
+            boolean hasPermission = hasPermission(requestUri, applicationCode, method, userCode);
+            if (hasPermission) {
+                return ApiAccessResponse.success();
+            }
         }
-
-        // 检查是否有API访问权
-        String userCode = ((LoginAuthenticationToken) authentication).getLoginUser().getUserCode();
-        boolean access = hasPermission(requestUri, applicationCode, method, userCode);
-        if (access) {
-            return ApiAccessResponse.success(convertToUserResponse(((LoginAuthenticationToken) authentication).getLoginUser()));
-        }
-        return ApiAccessResponse.success(false);
+        //
+        return ApiAccessResponse.fail(HttpStatus.FORBIDDEN.value());
     }
-
-
 
     private boolean hasPermission(String requestUri, String applicationCode, String method, String userCode) {
         return userPermissionService.checkHasApiPermission(applicationCode, userCode, requestUri, method);
@@ -94,8 +101,17 @@ public class AccessAppService {
         return userResponse;
     }
 
-    public boolean isMatchDefaultAllowUrl(String requestUri) {
-        List<String> allowList = securityCoreProperties.getAllowList();
+    public boolean isMatchBlockUri(String requestUri) {
+        List<String> allowList = authProperties.getBlockList();
+        if (CollectionUtils.isEmpty(allowList)) {
+            return false;
+        }
+        return allowList.stream()
+                .anyMatch(item -> pathMatcher.match(item, requestUri));
+    }
+
+    public boolean isMatchAllowUri(String requestUri) {
+        List<String> allowList = authProperties.getAllowList();
         if (CollectionUtils.isEmpty(allowList)) {
             return false;
         }

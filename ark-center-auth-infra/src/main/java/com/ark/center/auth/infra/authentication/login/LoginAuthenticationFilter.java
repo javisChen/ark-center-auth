@@ -1,7 +1,5 @@
 package com.ark.center.auth.infra.authentication.login;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +13,13 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import java.io.IOException;
-
 @Slf4j
 public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login/account",
-            "POST");
+    private static final String LOGIN_URI = "/login/account";
+
+    private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER
+            = new AntPathRequestMatcher(LOGIN_URI, HttpMethod.POST.name());
 
     private final AuthenticationConverter authenticationConverter = new LoginAuthenticationConverter();
 
@@ -45,8 +43,4 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
         authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
     }
 
-    @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        super.successfulAuthentication(request, response, chain, authResult);
-    }
 }
