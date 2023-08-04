@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     @GetMapping("/admin/test")
-    @PreAuthorize("hasAnyAuthority('ROLE_D')")
+    @PreAuthorize("hasRole('ROLE_SS')")
     public String testAdmin() {
         return "testAdmin";
     }
 
     @GetMapping("/test")
-    @PreAuthorize("hasRole('ROLE_DEV')")
+//    @PreAuthorize("hasRole('ROLE_DEV')")
     public Object test() {
         return SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }

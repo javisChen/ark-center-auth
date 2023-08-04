@@ -3,14 +3,10 @@ package com.ark.center.auth.application.access;
 import com.ark.center.auth.application.access.support.ApiCacheHolder;
 import com.ark.center.auth.client.access.request.ApiAccessRequest;
 import com.ark.center.auth.client.access.response.ApiAccessResponse;
-import com.ark.center.auth.client.access.response.UserResponse;
 import com.ark.center.auth.domain.user.service.UserPermissionService;
 import com.ark.center.auth.infra.api.support.ApiCommonUtils;
-import com.ark.center.auth.infra.config.AuthProperties;
-import com.ark.component.security.base.user.LoginUser;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -32,7 +28,6 @@ public class AccessAppService {
 
     private final UserPermissionService userPermissionService;
 
-    private final AuthProperties authProperties;
     public ApiAccessResponse getApiAccess(ApiAccessRequest request) {
 
         SecurityContext context = SecurityContextHolder.getContext();
@@ -42,16 +37,6 @@ public class AccessAppService {
         String method = request.getHttpMethod();
         // 先尝试uri是否匹配系统中存在的包含路径参数的api，如果存在的话就替换成统一的格式
         requestUri = attemptReplaceHasPathVariableUrl(requestUri);
-
-//        // 尝试是否匹配黑名单中的URI
-//        if (isMatchBlockUri(requestUri)) {
-//            return ApiAccessResponse.fail(HttpStatus.FORBIDDEN.value());
-//        }
-//
-//        // 尝试是否匹配白名单中的URI
-//        if (isMatchAllowUri(requestUri)) {
-//            return ApiAccessResponse.success();
-//        }
 
         // 检查API是否无需认证和授权
         if (isMatchNoNeedAuthUri(requestUri, method)) {
@@ -84,39 +69,11 @@ public class AccessAppService {
                 return ApiAccessResponse.success();
             }
         }
-        //
         return ApiAccessResponse.fail(HttpStatus.FORBIDDEN.value());
     }
 
     private boolean hasPermission(String requestUri, String applicationCode, String method, String userCode) {
         return userPermissionService.checkHasApiPermission(applicationCode, userCode, requestUri, method);
-    }
-
-    private UserResponse convertToUserResponse(LoginUser userContext) {
-        UserResponse userResponse = new UserResponse();
-        userResponse.setUserId(userContext.getUserId());
-        userResponse.setUserCode(userContext.getUserCode());
-        userResponse.setUsername(userContext.getUsername());
-        userResponse.setIsSuperAdmin(userContext.getIsSuperAdmin());
-        return userResponse;
-    }
-
-    public boolean isMatchBlockUri(String requestUri) {
-        List<String> allowList = authProperties.getBlockList();
-        if (CollectionUtils.isEmpty(allowList)) {
-            return false;
-        }
-        return allowList.stream()
-                .anyMatch(item -> pathMatcher.match(item, requestUri));
-    }
-
-    public boolean isMatchAllowUri(String requestUri) {
-        List<String> allowList = authProperties.getAllowList();
-        if (CollectionUtils.isEmpty(allowList)) {
-            return false;
-        }
-        return allowList.stream()
-                .anyMatch(item -> pathMatcher.match(item, requestUri));
     }
 
     public String attemptReplaceHasPathVariableUrl(String requestUri) {

@@ -10,6 +10,7 @@ import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.center.auth.infra.authentication.token.generator.JwtUserTokenGenerator;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.component.cache.CacheService;
+import com.ark.component.security.core.config.SecurityProperties;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
@@ -79,9 +80,10 @@ public class AuthSecurityConfiguration {
                                                    SecurityContextRepository securityContextRepository,
                                                    AuthenticationConfiguration authenticationConfiguration,
                                                    CacheService cacheService,
-                                                   JWKSource<SecurityContext> jwkSource,
+                                                   SecurityProperties securityProperties,
                                                    AuthenticationProvider authenticationProvider) throws Exception {
 
+        httpSecurity.securityContext(configurer -> configurer.securityContextRepository(securityContextRepository));
 
         // 登出
         logout(httpSecurity, cacheService);
@@ -101,6 +103,8 @@ public class AuthSecurityConfiguration {
         // 资源权限控制
         httpSecurity.authorizeHttpRequests(requests -> requests
                 .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
+                    .permitAll()
+                .requestMatchers(securityProperties.getAllowList().stream().toList().toArray(new String[0]))
                     .permitAll()
                 .requestMatchers("/login/account", "/logout")
                     .permitAll()
