@@ -1,11 +1,11 @@
 package com.ark.center.auth.infra.authentication.token.generator;
 
-import com.ark.component.security.base.user.LoginUser;
 import com.ark.center.auth.infra.authentication.token.JwtUserToken;
 import com.ark.center.auth.infra.authentication.token.UserToken;
+import com.ark.component.security.base.user.LoginUser;
 import com.ark.component.security.core.config.SecurityConstants;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 
 import java.time.Instant;
@@ -33,7 +33,7 @@ public class JwtUserTokenGenerator implements UserTokenGenerator {
     @Override
     public UserToken generate(LoginUser loginUser) {
         Instant issuedAt = Instant.now();
-        JwsAlgorithm jwsAlgorithm = SignatureAlgorithm.RS256;
+        JwsAlgorithm jwsAlgorithm = MacAlgorithm.HS256;
         Instant expiresAt = issuedAt.plus(SecurityConstants.TOKEN_EXPIRES_SECONDS, ChronoUnit.SECONDS);
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder();
         claimsBuilder
