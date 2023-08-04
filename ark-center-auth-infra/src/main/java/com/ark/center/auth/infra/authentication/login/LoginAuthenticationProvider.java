@@ -2,6 +2,8 @@ package com.ark.center.auth.infra.authentication.login;
 
 import com.ark.center.auth.infra.authentication.token.UserToken;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
+import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.core.authentication.LoginAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;

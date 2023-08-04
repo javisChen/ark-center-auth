@@ -1,7 +1,7 @@
 package com.ark.center.auth.infra.config;
 
 import com.ark.center.auth.domain.user.gateway.UserGateway;
-import com.ark.center.auth.infra.DefaultAuthenticationEntryPoint;
+import com.ark.center.auth.infra.authentication.DefaultAuthenticationEntryPoint;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationProvider;
@@ -9,7 +9,6 @@ import com.ark.center.auth.infra.authentication.login.LoginUserDetailsService;
 import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.center.auth.infra.authentication.token.generator.JwtUserTokenGenerator;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
-import com.ark.center.auth.infra.authentication.token.repository.RedisSecurityContextRepository;
 import com.ark.component.cache.CacheService;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
@@ -36,7 +35,7 @@ import org.springframework.security.web.context.SecurityContextRepository;
 //@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
-public class SecurityConfigB {
+public class AuthSecurityConfiguration {
 
     @Bean
     public UserDetailsService userDetailsService(UserGateway userGateway) {
@@ -57,8 +56,7 @@ public class SecurityConfigB {
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
                                                          PasswordEncoder passwordEncoder,
-                                                         UserTokenGenerator userTokenGenerator
-    ) {
+                                                         UserTokenGenerator userTokenGenerator) {
         LoginAuthenticationProvider provider = new LoginAuthenticationProvider(userTokenGenerator);
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(userDetailsService);
@@ -78,20 +76,18 @@ public class SecurityConfigB {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
+                                                   SecurityContextRepository securityContextRepository,
                                                    AuthenticationConfiguration authenticationConfiguration,
                                                    CacheService cacheService,
+                                                   JWKSource<SecurityContext> jwkSource,
                                                    AuthenticationProvider authenticationProvider) throws Exception {
 
-
-        // Context存储
-        RedisSecurityContextRepository contextRepository = new RedisSecurityContextRepository(cacheService);
-        httpSecurity.securityContext(configurer -> configurer.securityContextRepository(contextRepository));
 
         // 登出
         logout(httpSecurity, cacheService);
 
         // 设置登录认证过滤器
-        addFilters(httpSecurity, authenticationConfiguration, contextRepository);
+        addFilters(httpSecurity, authenticationConfiguration, securityContextRepository);
 
         // 添加Provider
         httpSecurity.authenticationProvider(authenticationProvider);
@@ -121,15 +117,19 @@ public class SecurityConfigB {
         return httpSecurity.build();
     }
 
+
     private void logout(HttpSecurity httpSecurity, CacheService cacheService) throws Exception {
         AuthLogoutHandler handler = new AuthLogoutHandler(cacheService);
         httpSecurity.logout(configurer -> configurer
-                .addLogoutHandler(handler)
+                .clearAuthentication(false)
+                .logoutSuccessHandler(handler)
                 .addLogoutHandler(handler)
         );
     }
 
-    private void addFilters(HttpSecurity httpSecurity, AuthenticationConfiguration authenticationConfiguration, RedisSecurityContextRepository contextRepository) throws Exception {
+    private void addFilters(HttpSecurity httpSecurity,
+                            AuthenticationConfiguration authenticationConfiguration,
+                            SecurityContextRepository contextRepository) throws Exception {
         httpSecurity.addFilterBefore(authenticationFilter(authenticationConfiguration, contextRepository), UsernamePasswordAuthenticationFilter.class);
     }
 

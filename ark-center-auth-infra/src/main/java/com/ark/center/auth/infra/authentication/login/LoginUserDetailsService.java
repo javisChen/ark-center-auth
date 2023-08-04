@@ -2,6 +2,7 @@ package com.ark.center.auth.infra.authentication.login;
 
 import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
+import com.ark.component.security.base.user.LoginUser;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

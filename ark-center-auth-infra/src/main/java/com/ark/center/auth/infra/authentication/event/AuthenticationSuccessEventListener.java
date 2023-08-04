@@ -13,6 +13,6 @@ public class AuthenticationSuccessEventListener implements ApplicationListener<A
 
     @Override
     public void onApplicationEvent(AuthenticationSuccessEvent event) {
-        log.info("用户认证成功：用户名 = {}，登录时间 = {}", event.getAuthentication(), LocalDateTime.now());
+        log.info("用户认证成功：用户名 = {}，登录时间 = {}", event.getAuthentication().getName(), LocalDateTime.now());
     }
 }

@@ -1,5 +1,5 @@
 
-package com.ark.center.auth.infra;
+package com.ark.center.auth.infra.authentication;
 
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.dto.ServerResponse;

@@ -1,10 +1,10 @@
 package com.ark.center.auth.infra.authentication.logout;
 
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
-import com.ark.center.auth.infra.authentication.login.LoginUser;
-import com.ark.center.auth.infra.authentication.token.repository.RedisKeyUtils;
 import com.ark.component.cache.CacheService;
 import com.ark.component.dto.ServerResponse;
+import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.core.context.repository.RedisKeyUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.HttpStatus;
@@ -19,7 +19,7 @@ import java.io.IOException;
 public class AuthLogoutHandler implements LogoutSuccessHandler, LogoutHandler {
 
     private final CacheService cacheService;
-    private BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
+    private final BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
 
     public AuthLogoutHandler(CacheService cacheService) {
         this.cacheService = cacheService;

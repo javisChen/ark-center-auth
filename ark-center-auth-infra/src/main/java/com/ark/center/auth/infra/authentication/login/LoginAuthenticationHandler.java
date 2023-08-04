@@ -3,6 +3,7 @@ package com.ark.center.auth.infra.authentication.login;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.dto.ServerResponse;
 import com.ark.component.dto.SingleResponse;
+import com.ark.component.security.core.authentication.LoginAuthenticationToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,10 +1,9 @@
 package com.ark.center.auth.infra.authentication.token.generator;
 
-
-import com.ark.center.auth.infra.authentication.SecurityConstants;
-import com.ark.center.auth.infra.authentication.login.LoginUser;
+import com.ark.component.security.base.user.LoginUser;
 import com.ark.center.auth.infra.authentication.token.JwtUserToken;
 import com.ark.center.auth.infra.authentication.token.UserToken;
+import com.ark.component.security.core.config.SecurityConstants;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -38,10 +37,10 @@ public class JwtUserTokenGenerator implements UserTokenGenerator {
         Instant expiresAt = issuedAt.plus(SecurityConstants.TOKEN_EXPIRES_SECONDS, ChronoUnit.SECONDS);
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder();
         claimsBuilder
-                .claim("userCode", loginUser.getUserCode())
-                .claim("userId", loginUser.getUserId())
-                .claim("userName", loginUser.getUsername())
-                .claim("isSuperAdmin", loginUser.getIsSuperAdmin())
+                .claim(LoginUser.JWT_CLAIM_USER_CODE, loginUser.getUserCode())
+                .claim(LoginUser.JWT_CLAIM_USER_ID, loginUser.getUserId())
+                .claim(LoginUser.JWT_CLAIM_USERNAME, loginUser.getUsername())
+                .claim(LoginUser.JWT_CLAIM_USER_IS_SUPER_ADMIN, loginUser.getIsSuperAdmin())
                 .issuer("auth")
                 .subject(loginUser.getUsername())
                 .audience(Collections.emptyList())

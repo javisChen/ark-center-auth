@@ -3,7 +3,7 @@ package com.ark.center.auth.infra.authentication.login;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson2.JSON;
-import com.ark.center.auth.infra.authentication.SecurityConstants;
+import com.ark.component.security.core.config.SecurityConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
