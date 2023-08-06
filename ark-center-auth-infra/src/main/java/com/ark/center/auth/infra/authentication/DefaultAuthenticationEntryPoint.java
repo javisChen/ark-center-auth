@@ -23,9 +23,9 @@ public class DefaultAuthenticationEntryPoint implements AuthenticationEntryPoint
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
 			throws IOException {
 
-		ServerResponse responseBody = SingleResponse.error("auth", "UNAUTHORIZED", "访问该资源需要先进行身份验证");
+		ServerResponse responseBody = SingleResponse.error("auth", String.valueOf(HttpStatus.SC_UNAUTHORIZED), "访问该资源需要先进行身份验证");
 		ResponseUtils.write(responseBody, response, HttpStatus.SC_UNAUTHORIZED);
-		
+
 	}
 
 	@Override

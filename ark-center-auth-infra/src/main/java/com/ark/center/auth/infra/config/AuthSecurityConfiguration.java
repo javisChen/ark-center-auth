@@ -13,8 +13,6 @@ import com.ark.component.cache.CacheService;
 import com.ark.component.security.core.config.SecurityProperties;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
-import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -85,6 +83,14 @@ public class AuthSecurityConfiguration {
 
         httpSecurity.securityContext(configurer -> configurer.securityContextRepository(securityContextRepository));
 
+        httpSecurity
+                // 暂时禁用SessionManagement
+                .sessionManagement(AbstractHttpConfigurer::disable)
+                // 禁用csrf
+                .csrf(AbstractHttpConfigurer::disable)
+                // 禁用匿名登录
+                .anonymous(AbstractHttpConfigurer::disable);
+
         // 登出
         logout(httpSecurity, cacheService);
 
@@ -94,22 +100,10 @@ public class AuthSecurityConfiguration {
         // 添加Provider
         httpSecurity.authenticationProvider(authenticationProvider);
 
-        // 暂时禁用SessionManagement
-        httpSecurity.sessionManagement(AbstractHttpConfigurer::disable);
-
-        // 禁用csrf
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-
-        // 资源权限控制
+        // 权限拦截全部交给AccessController接口处理，由网关调用
         httpSecurity.authorizeHttpRequests(requests -> requests
-                .requestMatchers(EndpointRequest.to(HealthEndpoint.class))
-                    .permitAll()
-                .requestMatchers(securityProperties.getAllowList().stream().toList().toArray(new String[0]))
-                    .permitAll()
-                .requestMatchers("/login/account", "/logout")
-                    .permitAll()
                 .anyRequest()
-                    .authenticated()
+                    .permitAll()
         );
 
         // 权限不足时的处理

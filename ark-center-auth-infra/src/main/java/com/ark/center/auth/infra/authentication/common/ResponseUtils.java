@@ -11,11 +11,11 @@ import java.nio.charset.StandardCharsets;
 public class ResponseUtils {
 
     public static void write(ServerResponse serverResponse, HttpServletResponse response, int status) throws IOException {
-        String body = JSON.toJSONString(serverResponse);
+        byte[] body = JSON.toJSONBytes(serverResponse);
         response.setStatus(status);
         response.setCharacterEncoding(StandardCharsets.UTF_8.displayName());
         response.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-        response.setContentLength(body.length());
-        response.getWriter().write(body);
+        response.setContentLength(body.length);
+        response.getOutputStream().write(body);
     }
 }

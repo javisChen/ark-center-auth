@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     @GetMapping("/admin/test")
-//    @PreAuthorize("hasRole('ROLE_SS')")
+//    @PreAuthorize("hasRole('ROLE_S')")
     public String testAdmin() {
         return "testAdmin";
     }
