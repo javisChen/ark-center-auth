@@ -10,6 +10,7 @@ import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.center.auth.infra.authentication.token.generator.JwtUserTokenGenerator;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.component.cache.CacheService;
+import com.ark.component.security.core.authentication.filter.AccessCheckFilter;
 import com.ark.component.security.core.config.SecurityProperties;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
 
 @Configuration
@@ -83,6 +85,7 @@ public class AuthSecurityConfiguration {
 
         httpSecurity.securityContext(configurer -> configurer.securityContextRepository(securityContextRepository));
 
+        httpSecurity.addFilterBefore(new AccessCheckFilter(), SecurityContextHolderFilter.class);
         httpSecurity
                 // 暂时禁用SessionManagement
                 .sessionManagement(AbstractHttpConfigurer::disable)
