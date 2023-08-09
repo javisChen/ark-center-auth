@@ -38,12 +38,12 @@ public class UserGatewayImpl implements UserGateway {
     }
 
     @Override
-    public Boolean checkHasPermission(String requestUri, String applicationCode, String method, String userCode) {
+    public Boolean checkHasPermission(String requestUri, String applicationCode, String method, Long userId) {
         UserPermissionQry userPermissionQry = new UserPermissionQry();
         userPermissionQry.setRequestUri(requestUri);
         userPermissionQry.setApplicationCode(applicationCode);
         userPermissionQry.setMethod(method);
-        userPermissionQry.setUserCode(userCode);
+        userPermissionQry.setUserId(userId);
         return RpcUtils.checkAndGetData(userPermissionFacade.checkApiHasPermission(userPermissionQry));
     }
 }
