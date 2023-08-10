@@ -64,8 +64,8 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         // 检查API是否需要授权
         if (isMatchNeedAuthorizationUri(requestUri, method)) {
             // 检查是否有API访问权
-            String userCode = loginAuthentication.getLoginUser().getUserCode();
-            if (hasPermission(requestUri, applicationCode, method, userCode)) {
+            Long userId = loginAuthentication.getLoginUser().getUserId();
+            if (hasPermission(requestUri, applicationCode, method, userId)) {
                 return authenticated;
             }
         }
@@ -77,8 +77,8 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         return ApiAccessAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private boolean hasPermission(String requestUri, String applicationCode, String method, String userCode) {
-        return userPermissionService.checkHasApiPermission(applicationCode, userCode, requestUri, method);
+    private boolean hasPermission(String requestUri, String applicationCode, String method, Long userId) {
+        return userPermissionService.checkHasApiPermission(applicationCode, userId, requestUri, method);
     }
 
     public String attemptReplaceHasPathVariableUrl(String requestUri) {

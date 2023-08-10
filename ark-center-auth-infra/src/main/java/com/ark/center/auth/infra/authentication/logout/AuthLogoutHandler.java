@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenResolv
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-
 import java.io.IOException;
 
 public class AuthLogoutHandler implements LogoutSuccessHandler, LogoutHandler {

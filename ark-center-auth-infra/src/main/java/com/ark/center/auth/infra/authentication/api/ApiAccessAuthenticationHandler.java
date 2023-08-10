@@ -1,9 +1,8 @@
-package com.ark.center.auth.infra.authentication.login;
+package com.ark.center.auth.infra.authentication.api;
 
 import com.ark.center.auth.infra.authentication.DefaultAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
-import com.ark.component.dto.SingleResponse;
-import com.ark.component.security.core.authentication.LoginAuthenticationToken;
+import com.ark.component.dto.ServerResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,12 +12,8 @@ import org.springframework.security.core.Authentication;
 
 import java.io.IOException;
 
-/**
- * 登录认证处理器
- */
 @Slf4j
-public class LoginAuthenticationHandler extends DefaultAuthenticationHandler {
-
+public class ApiAccessAuthenticationHandler extends DefaultAuthenticationHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         writeSuccess(response, authentication);
@@ -30,8 +25,7 @@ public class LoginAuthenticationHandler extends DefaultAuthenticationHandler {
     }
 
     private void writeSuccess(HttpServletResponse response, Authentication authentication) throws IOException {
-        LoginAuthenticationToken authenticationToken = (LoginAuthenticationToken) authentication;
-        SingleResponse<LoginAuthenticateResponse> serverResponse = SingleResponse.ok(new LoginAuthenticateResponse(authenticationToken.getAccessToken()));
+        ServerResponse serverResponse = ServerResponse.ok();
         ResponseUtils.write(serverResponse, response, HttpStatus.SC_OK);
     }
 

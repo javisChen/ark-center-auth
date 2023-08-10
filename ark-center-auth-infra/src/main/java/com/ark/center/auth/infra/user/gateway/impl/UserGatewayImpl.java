@@ -18,7 +18,6 @@ public class UserGatewayImpl implements UserGateway {
 
     private final UserFacade userFacade;
     private final UserPermissionFacade userPermissionFacade;
-
     private final UserConverter userConverter;
 
     @Override

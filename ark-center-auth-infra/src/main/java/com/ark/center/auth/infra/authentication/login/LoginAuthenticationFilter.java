@@ -16,7 +16,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Slf4j
 public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private static final String LOGIN_URI = "/login/account";
+    private static final String LOGIN_URI = "/v1/login/account";
 
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER
             = new AntPathRequestMatcher(LOGIN_URI, HttpMethod.POST.name());

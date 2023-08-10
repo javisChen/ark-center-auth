@@ -3,6 +3,7 @@ package com.ark.center.auth.infra.config;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.domain.user.service.UserPermissionService;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationFilter;
+import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.api.ApiCacheHolder;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
@@ -12,7 +13,6 @@ import com.ark.center.auth.infra.authentication.login.LoginUserDetailsService;
 import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.component.cache.CacheService;
-import com.ark.component.security.core.authentication.AuthenticationErrorHandler;
 import com.ark.component.security.core.config.SecurityConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -30,18 +30,17 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     @Override
     public void init(HttpSecurity http) throws Exception {
         context = http.getSharedObject(ApplicationContext.class);
+        CacheService cacheService = context.getBean(CacheService.class);
         SecurityConfiguration.applyDefaultSecurity(http);
+        configureLogout(http, cacheService);
     }
 
     @Override
     public void configure(HttpSecurity httpSecurity) throws Exception {
-        CacheService cacheService = context.getBean(CacheService.class);
         UserGateway userGateway = context.getBean(UserGateway.class);
         UserTokenGenerator userTokenGenerator = context.getBean(UserTokenGenerator.class);
         ApiCacheHolder apiCacheHolder = context.getBean(ApiCacheHolder.class);
         UserPermissionService userPermissionService = context.getBean(UserPermissionService.class);
-
-        configureLogout(httpSecurity, cacheService);
 
         // Filters
         addFilters(httpSecurity);
@@ -55,13 +54,12 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
 
     private void addFilters(HttpSecurity httpSecurity) {
         AuthenticationManager authenticationManager = httpSecurity.getSharedObject(AuthenticationManager.class);
-        AuthenticationErrorHandler errorHandler = httpSecurity.getSharedObject(AuthenticationErrorHandler.class);
 
         SecurityContextRepository securityContextRepository = context.getBean(SecurityContextRepository.class);
 
-        addLoginFilters(httpSecurity, authenticationManager, securityContextRepository, errorHandler);
+        addLoginFilters(httpSecurity, authenticationManager, securityContextRepository);
 
-        addAuthFilters(httpSecurity, authenticationManager, errorHandler);
+        addAuthFilters(httpSecurity, authenticationManager);
     }
 
     @NotNull
@@ -85,8 +83,8 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     }
 
 
-    private void addAuthFilters(HttpSecurity httpSecurity, AuthenticationManager authenticationManager, AuthenticationErrorHandler errorHandler) {
-        LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
+    private void addAuthFilters(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) {
+        ApiAccessAuthenticationHandler authenticationHandler = new ApiAccessAuthenticationHandler();
         ApiAccessAuthenticationFilter filter = new ApiAccessAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(authenticationHandler);
         filter.setAuthenticationFailureHandler(authenticationHandler);
@@ -94,10 +92,10 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
         httpSecurity.addFilterBefore(filter, LoginAuthenticationFilter.class);
     }
 
-
     private void configureLogout(HttpSecurity httpSecurity, CacheService cacheService) throws Exception {
         AuthLogoutHandler handler = new AuthLogoutHandler(cacheService);
         httpSecurity.logout(configurer -> configurer
+                .logoutUrl("/v1/logout")
                 .clearAuthentication(false)
                 .logoutSuccessHandler(handler)
                 .addLogoutHandler(handler)
@@ -106,8 +104,7 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
 
     private void addLoginFilters(HttpSecurity httpSecurity,
                                  AuthenticationManager authenticationManager,
-                                 SecurityContextRepository contextRepository,
-                                 AuthenticationErrorHandler errorHandler) {
+                                 SecurityContextRepository contextRepository) {
         LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
         LoginAuthenticationFilter filter = new LoginAuthenticationFilter();
         filter.setAuthenticationSuccessHandler(authenticationHandler);
