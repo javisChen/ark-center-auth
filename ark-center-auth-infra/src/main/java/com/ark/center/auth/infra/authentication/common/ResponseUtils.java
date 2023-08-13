@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSON;
 import com.ark.component.dto.ServerResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.entity.ContentType;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
