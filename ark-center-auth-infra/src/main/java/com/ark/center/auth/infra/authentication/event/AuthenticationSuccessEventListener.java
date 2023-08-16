@@ -17,7 +17,14 @@ public class AuthenticationSuccessEventListener implements ApplicationListener<A
     public void onApplicationEvent(AuthenticationSuccessEvent event) {
         Authentication authentication = event.getAuthentication();
         if (authentication instanceof LoginAuthenticationToken) {
-            log.info("用户认证成功：用户名 = {}，登录时间 = {}", event.getAuthentication().getName(), LocalDateTime.now());
+            handlerForLoginSuccess(event);
         }
+    }
+
+    private void handlerForLoginSuccess(AuthenticationSuccessEvent event) {
+        log.info("用户认证成功：用户名 = {}，登录时间 = {}", event.getAuthentication().getName(), LocalDateTime.now());
+
+        // 清除用户Api权限缓存
+
     }
 }

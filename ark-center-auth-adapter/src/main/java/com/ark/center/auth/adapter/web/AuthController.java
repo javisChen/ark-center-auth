@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController extends BaseController {
 
     public static void main(String[] args) {
-        String id = convertToUUID("F1C539DC61424F7A9F2CB3EF9E73C93B");
+        String id = convertToUUID("649A57507B0A4432A76C097219603A8D");
+//        String id = convertToUUID("9BC8D5DFDDFA4D46A9C08428B5B796FD");
         System.out.println(id);
     }
 
     private static String convertToUUID(String uuidStr) {
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(uuidStr, 0, 8).append("-")
-                .append(uuidStr, 8, 12).append("-")
-                .append(uuidStr, 12, 16).append("-")
-                .append(uuidStr, 16, 20).append("-")
-                .append(uuidStr.substring(20));
-        return stringBuffer.toString();
+        String stringBuffer = uuidStr.substring(0, 8) + "-" +
+                uuidStr.substring(8, 12) + "-" +
+                uuidStr.substring(12, 16) + "-" +
+                uuidStr.substring(16, 20) + "-" +
+                uuidStr.substring(20);
+        return stringBuffer;
     }
 
     @GetMapping("/admin/test")

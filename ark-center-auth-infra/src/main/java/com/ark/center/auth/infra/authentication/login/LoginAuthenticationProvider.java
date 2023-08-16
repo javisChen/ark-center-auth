@@ -19,6 +19,8 @@ public class LoginAuthenticationProvider extends DaoAuthenticationProvider {
     @Override
     protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
         LoginUser loginUser = (LoginUser) user;
+
+        //
         UserToken userToken = this.userTokenGenerator.generate(loginUser);
         return new LoginAuthenticationToken(loginUser, userToken.getTokenValue());
     }
