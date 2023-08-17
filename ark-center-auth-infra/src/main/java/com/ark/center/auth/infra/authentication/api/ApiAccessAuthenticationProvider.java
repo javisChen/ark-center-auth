@@ -25,6 +25,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
 
     private final UserPermissionService userPermissionService;
 
+
     public ApiAccessAuthenticationProvider(ApiCacheHolder apiCacheHolder, UserPermissionService userPermissionService) {
         this.apiCacheHolder = apiCacheHolder;
         this.userPermissionService = userPermissionService;
@@ -65,7 +66,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         if (isMatchNeedAuthorizationUri(requestUri, method)) {
             // 检查是否有API访问权
             Long userId = loginAuthentication.getLoginUser().getUserId();
-            if (hasPermission(requestUri, applicationCode, method, userId)) {
+            if (hasPermission(requestUri, userId)) {
                 return authenticated;
             }
         }
@@ -77,12 +78,10 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         return ApiAccessAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private boolean hasPermission(String requestUri, String applicationCode, String method, Long userId) {
-        // 先从缓存中检查是否具有权限
-        if (true) {
-            return true;
-        }
-        return userPermissionService.checkHasApiPermission(applicationCode, userId, requestUri, method);
+    private boolean hasPermission(String requestUri, Long userId) {
+        List<String> strings = userPermissionService.queryUserApiPermission(userId);
+        return strings.stream()
+                .anyMatch(item -> pathMatcher.match(item, requestUri));
     }
 
     public String attemptReplaceHasPathVariableUrl(String requestUri) {

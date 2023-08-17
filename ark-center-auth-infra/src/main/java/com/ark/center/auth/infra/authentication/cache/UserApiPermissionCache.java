@@ -2,7 +2,9 @@ package com.ark.center.auth.infra.authentication.cache;
 
 import cn.hutool.core.thread.NamedThreadFactory;
 import com.ark.center.auth.infra.user.gateway.facade.UserPermissionFacade;
+import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
 import com.ark.component.cache.CacheService;
+import com.ark.component.microservice.rpc.util.RpcUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,8 @@ public class UserApiPermissionCache implements InitializingBean {
 
     private final UserPermissionFacade userPermissionFacade;
 
+    private final static String USER_API_PERM_KEY = "role:%s:perm:apis";
+
     @Override
     public void afterPropertiesSet() throws Exception {
         initL1Cache();
@@ -51,27 +55,37 @@ public class UserApiPermissionCache implements InitializingBean {
     }
 
     @NotNull
-    private List<String> build(Long key) {
+    private List<String> build(Long userId) {
+
         // L2
-        Set<Object> objects = l2Cache.setMembers(String.valueOf(key));
+        String l2CacheKey = cacheKey(userId);
+        Set<Object> objects = l2Cache.setMembers(l2CacheKey);
         if (CollectionUtils.isNotEmpty(objects)) {
             return objects.stream().map(item -> (String) item).toList();
         }
 
         // DB
-
-        return objects.stream().map(item -> (String) item).toList();
+        List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.getApiPermissions(userId));
+        List<String> result = apiList.stream().map(api -> api.getUri() + ":" + api.getMethod()).toList();
+7
+        l2Cache.setAdd(l2CacheKey, result.toArray());
+        return result;
     }
 
 
     public void remove(Long userId) {
-
+        l1Cache.invalidate(userId);
+        l2Cache.remove(cacheKey(userId));
     }
 
     public List<String> get(Long userId) {
         List<String> strings = l1Cache.get(userId);
         System.out.println(l1Cache.stats());
         return strings;
+    }
+
+    private String cacheKey(Long userId) {
+        return String.format(USER_API_PERM_KEY, userId);
     }
 
 }
