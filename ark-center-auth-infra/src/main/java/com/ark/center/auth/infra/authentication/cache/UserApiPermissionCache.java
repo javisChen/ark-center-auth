@@ -67,7 +67,7 @@ public class UserApiPermissionCache implements InitializingBean {
         // DB
         List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.getApiPermissions(userId));
         List<String> result = apiList.stream().map(api -> api.getUri() + ":" + api.getMethod()).toList();
-7
+
         l2Cache.setAdd(l2CacheKey, result.toArray());
         return result;
     }
