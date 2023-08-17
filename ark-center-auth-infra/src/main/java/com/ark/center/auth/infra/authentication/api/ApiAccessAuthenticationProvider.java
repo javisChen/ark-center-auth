@@ -1,5 +1,6 @@
 package com.ark.center.auth.infra.authentication.api;
 
+import com.ark.center.auth.domain.user.AuthUserApiPermission;
 import com.ark.center.auth.domain.user.service.UserPermissionService;
 import com.ark.center.auth.infra.api.support.ApiCommonUtils;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
@@ -59,6 +60,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
 
         // 如果还未认证，直接返回
         if (!isAuthenticated) {
+            log.warn("用户未登录或凭证已失效");
             throw AuthException.of(HttpStatus.UNAUTHORIZED.value(), "访问资源需要先进行身份验证");
         }
 
@@ -66,10 +68,11 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         if (isMatchNeedAuthorizationUri(requestUri, method)) {
             // 检查是否有API访问权
             Long userId = loginAuthentication.getLoginUser().getUserId();
-            if (hasPermission(requestUri, userId)) {
+            if (hasPermission(requestUri, method, userId)) {
                 return authenticated;
             }
         }
+        log.warn("请检查用户角色是否已经对该[{} {}]进行授权", requestUri, method);
         throw AuthException.of(HttpStatus.FORBIDDEN.value(), "权限不足，请联系管理员授权");
     }
 
@@ -78,10 +81,11 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         return ApiAccessAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private boolean hasPermission(String requestUri, Long userId) {
-        List<String> strings = userPermissionService.queryUserApiPermission(userId);
-        return strings.stream()
-                .anyMatch(item -> pathMatcher.match(item, requestUri));
+    private boolean hasPermission(String requestUri, String method, Long userId) {
+        List<AuthUserApiPermission> apiPermissions = userPermissionService.queryUserApiPermission(userId);
+        return apiPermissions.stream()
+                .anyMatch(item -> pathMatcher.match(item.getUri(), requestUri)
+                        && item.getMethod().equals(method));
     }
 
     public String attemptReplaceHasPathVariableUrl(String requestUri) {

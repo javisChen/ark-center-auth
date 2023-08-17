@@ -1,6 +1,9 @@
 package com.ark.center.auth.infra.authentication.cache;
 
 import cn.hutool.core.thread.NamedThreadFactory;
+import com.alibaba.fastjson2.JSON;
+import com.ark.center.auth.domain.user.AuthUserApiPermission;
+import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.center.auth.infra.user.gateway.facade.UserPermissionFacade;
 import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
 import com.ark.component.cache.CacheService;
@@ -9,13 +12,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -26,9 +28,11 @@ import java.util.concurrent.TimeUnit;
 public class UserApiPermissionCache implements InitializingBean {
 
     private final CacheService l2Cache;
-    private LoadingCache<Long, List<String>> l1Cache;
+    private LoadingCache<Long, List<AuthUserApiPermission>> l1Cache;
 
     private final UserPermissionFacade userPermissionFacade;
+
+    private final UserConverter userConverter;
 
     private final static String USER_API_PERM_KEY = "role:%s:perm:apis";
 
@@ -45,7 +49,7 @@ public class UserApiPermissionCache implements InitializingBean {
                 .recordStats()
                 .executor(executorService)
                 // 1个小时没有访问就删除
-                .expireAfterAccess(1, TimeUnit.HOURS)
+                .expireAfterAccess(1, TimeUnit.MINUTES)
                 // 最大容量，超过会自动清理空间
                 .maximumSize(1024)
                 .removalListener((key, value, cause) -> {
@@ -55,21 +59,20 @@ public class UserApiPermissionCache implements InitializingBean {
     }
 
     @NotNull
-    private List<String> build(Long userId) {
+    private List<AuthUserApiPermission> build(Long userId) {
 
         // L2
         String l2CacheKey = cacheKey(userId);
-        Set<Object> objects = l2Cache.setMembers(l2CacheKey);
-        if (CollectionUtils.isNotEmpty(objects)) {
-            return objects.stream().map(item -> (String) item).toList();
+        String cache = l2Cache.get(l2CacheKey, String.class);
+        if (StringUtils.isNotBlank(cache)) {
+            // todo 二级缓存续期
+            return JSON.parseArray(cache, AuthUserApiPermission.class);
         }
-
         // DB
         List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.getApiPermissions(userId));
-        List<String> result = apiList.stream().map(api -> api.getUri() + ":" + api.getMethod()).toList();
-
-        l2Cache.setAdd(l2CacheKey, result.toArray());
-        return result;
+        List<AuthUserApiPermission> userApiPermissions = userConverter.toAuthUserApiPermission(apiList);
+        l2Cache.set(l2CacheKey, JSON.toJSONString(userApiPermissions), 12L, TimeUnit.HOURS);
+        return userApiPermissions;
     }
 
 
@@ -78,10 +81,8 @@ public class UserApiPermissionCache implements InitializingBean {
         l2Cache.remove(cacheKey(userId));
     }
 
-    public List<String> get(Long userId) {
-        List<String> strings = l1Cache.get(userId);
-        System.out.println(l1Cache.stats());
-        return strings;
+    public List<AuthUserApiPermission> get(Long userId) {
+        return l1Cache.get(userId);
     }
 
     private String cacheKey(Long userId) {

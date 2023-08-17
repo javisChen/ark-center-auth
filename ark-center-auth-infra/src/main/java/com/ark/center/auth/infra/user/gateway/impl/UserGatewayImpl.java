@@ -1,6 +1,7 @@
 package com.ark.center.auth.infra.user.gateway.impl;
 
 import com.ark.center.auth.domain.user.AuthUser;
+import com.ark.center.auth.domain.user.AuthUserApiPermission;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
 import com.ark.center.auth.infra.user.converter.UserConverter;
@@ -51,7 +52,7 @@ public class UserGatewayImpl implements UserGateway {
     }
 
     @Override
-    public List<String> queryUserApiPermissions(Long userId) {
+    public List<AuthUserApiPermission> queryUserApiPermissions(Long userId) {
         return userApiPermissionCache.get(userId);
     }
 }

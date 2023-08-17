@@ -1,6 +1,7 @@
 package com.ark.center.auth.domain.user.gateway;
 
 import com.ark.center.auth.domain.user.AuthUser;
+import com.ark.center.auth.domain.user.AuthUserApiPermission;
 
 import java.util.List;
 
@@ -12,5 +13,5 @@ public interface UserGateway {
 
     Boolean checkHasPermission(String requestUri, String applicationCode, String method, Long userId);
 
-    List<String> queryUserApiPermissions(Long userId);
+    List<AuthUserApiPermission> queryUserApiPermissions(Long userId);
 }

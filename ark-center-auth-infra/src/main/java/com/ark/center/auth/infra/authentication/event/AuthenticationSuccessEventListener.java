@@ -1,5 +1,6 @@
 package com.ark.center.auth.infra.authentication.event;
 
+import com.ark.center.auth.domain.user.AuthUserApiPermission;
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,8 @@ public class AuthenticationSuccessEventListener implements ApplicationListener<A
         userApiPermissionCache.remove(userId);
         log.info("用户Api权限清除成功");
 
-        List<String> userApiList = userApiPermissionCache.get(userId);
-        log.info("用户Api权限: {} \n", String.join("\n", userApiList));
+        List<AuthUserApiPermission> userApiList = userApiPermissionCache.get(userId);
+        log.info("用户Api权限: {} \n", userApiList);
 
     }
 }
