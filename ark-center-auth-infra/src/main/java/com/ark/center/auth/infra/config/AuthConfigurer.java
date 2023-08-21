@@ -5,7 +5,7 @@ import com.ark.center.auth.domain.user.service.UserPermissionService;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationProvider;
-import com.ark.center.auth.infra.authentication.api.ApiCacheHolder;
+import com.ark.center.auth.infra.authentication.cache.ApiCache;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationProvider;
@@ -39,7 +39,7 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     public void configure(HttpSecurity httpSecurity) throws Exception {
         UserGateway userGateway = context.getBean(UserGateway.class);
         UserTokenGenerator userTokenGenerator = context.getBean(UserTokenGenerator.class);
-        ApiCacheHolder apiCacheHolder = context.getBean(ApiCacheHolder.class);
+        ApiCache apiCache = context.getBean(ApiCache.class);
         UserPermissionService userPermissionService = context.getBean(UserPermissionService.class);
 
         // Filters
@@ -48,7 +48,7 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
         // Providers
         addProviders(httpSecurity,
                 loginAuthenticationProvider(userGateway, userTokenGenerator),
-                apiAccessAuthenticationProvider(apiCacheHolder, userPermissionService));
+                apiAccessAuthenticationProvider(apiCache, userPermissionService));
 
     }
 
@@ -63,8 +63,8 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     }
 
     @NotNull
-    private ApiAccessAuthenticationProvider apiAccessAuthenticationProvider(ApiCacheHolder apiCacheHolder, UserPermissionService userPermissionService) {
-        return new ApiAccessAuthenticationProvider(apiCacheHolder, userPermissionService);
+    private ApiAccessAuthenticationProvider apiAccessAuthenticationProvider(ApiCache apiCache, UserPermissionService userPermissionService) {
+        return new ApiAccessAuthenticationProvider(apiCache, userPermissionService);
     }
 
     @NotNull

@@ -1,8 +1,9 @@
-package com.ark.center.auth.infra.authentication.api;
+package com.ark.center.auth.infra.authentication.cache;
 
 import com.ark.center.auth.domain.api.AuthApi;
 import com.ark.center.auth.domain.user.gateway.ApiGateway;
 import com.ark.center.auth.infra.api.support.ApiCommonUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,8 @@ import java.util.stream.Collectors;
  * Api缓存
  */
 @Component
-public class ApiCacheHolder implements InitializingBean {
+@Slf4j
+public class ApiCache implements InitializingBean {
 
     private final ApiGateway apiGateway;
 
@@ -40,16 +42,28 @@ public class ApiCacheHolder implements InitializingBean {
      */
     private List<String> hasPathVariableApiCache;
 
-    public ApiCacheHolder(ApiGateway apiGateway) {
+    public ApiCache(ApiGateway apiGateway) {
         this.apiGateway = apiGateway;
     }
 
-    public void init() {
-        List<AuthApi> apis = apiGateway.retrieveApis();
-        noNeedAuthApiCache = collectNoNeedAuthApis(apis);
-        needAuthorizationApiCache = collectNeedAuthorizationApis(apis);
-        needAuthenticationApiCache = collectNeedAuthenticationApis(apis);
-        hasPathVariableApiCache = collectHasPathVariableApis(apis);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        refresh(true);
+    }
+
+    public synchronized void refresh(boolean throwEx) {
+        try {
+            List<AuthApi> apis = apiGateway.retrieveApis();
+            noNeedAuthApiCache = collectNoNeedAuthApis(apis);
+            needAuthorizationApiCache = collectNeedAuthorizationApis(apis);
+            needAuthenticationApiCache = collectNeedAuthenticationApis(apis);
+            hasPathVariableApiCache = collectHasPathVariableApis(apis);
+        } catch (Exception e) {
+            log.error("refresh api cache failure", e);
+            if (throwEx) {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -70,7 +84,7 @@ public class ApiCacheHolder implements InitializingBean {
      */
     private Map<String, String> collectNeedAuthorizationApis(List<AuthApi> apis) {
         return apis.stream()
-                .filter(AuthApi::isNeedAuthentication)
+                .filter(AuthApi::isNeedAuthorization)
                 .collect(collectMatchApi());
     }
 
@@ -82,7 +96,7 @@ public class ApiCacheHolder implements InitializingBean {
      */
     private Map<String, String> collectNeedAuthenticationApis(List<AuthApi> apis) {
         return apis.stream()
-                .filter(AuthApi::isNeedAuthorization)
+                .filter(AuthApi::isNeedAuthentication)
                 .collect(collectMatchApi());
     }
 
@@ -114,12 +128,4 @@ public class ApiCacheHolder implements InitializingBean {
         return hasPathVariableApiCache;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        init();
-    }
-
-    public void update() {
-        init();
-    }
 }

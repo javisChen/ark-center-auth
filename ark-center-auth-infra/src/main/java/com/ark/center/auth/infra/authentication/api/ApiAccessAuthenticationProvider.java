@@ -3,6 +3,8 @@ package com.ark.center.auth.infra.authentication.api;
 import com.ark.center.auth.domain.user.AuthUserApiPermission;
 import com.ark.center.auth.domain.user.service.UserPermissionService;
 import com.ark.center.auth.infra.api.support.ApiCommonUtils;
+import com.ark.center.auth.infra.authentication.cache.ApiCache;
+import com.ark.component.security.base.user.LoginUser;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
 import com.ark.component.security.core.authentication.exception.AuthException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +24,13 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    private final ApiCacheHolder apiCacheHolder;
+    private final ApiCache apiCache;
 
     private final UserPermissionService userPermissionService;
 
 
-    public ApiAccessAuthenticationProvider(ApiCacheHolder apiCacheHolder, UserPermissionService userPermissionService) {
-        this.apiCacheHolder = apiCacheHolder;
+    public ApiAccessAuthenticationProvider(ApiCache apiCache, UserPermissionService userPermissionService) {
+        this.apiCache = apiCache;
         this.userPermissionService = userPermissionService;
     }
 
@@ -67,8 +69,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         // 检查API是否需要授权
         if (isMatchNeedAuthorizationUri(requestUri, method)) {
             // 检查是否有API访问权
-            Long userId = loginAuthentication.getLoginUser().getUserId();
-            if (hasPermission(requestUri, method, userId)) {
+            if (hasPermission(requestUri, method, loginAuthentication.getLoginUser())) {
                 return authenticated;
             }
         }
@@ -81,15 +82,18 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         return ApiAccessAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-    private boolean hasPermission(String requestUri, String method, Long userId) {
-        List<AuthUserApiPermission> apiPermissions = userPermissionService.queryUserApiPermission(userId);
+    private boolean hasPermission(String requestUri, String method, LoginUser user) {
+        if (user.getUserCode().equals("SuperAdmin")) {
+            return true;
+        }
+        List<AuthUserApiPermission> apiPermissions = userPermissionService.queryUserApiPermission(user.getUserId());
         return apiPermissions.stream()
                 .anyMatch(item -> pathMatcher.match(item.getUri(), requestUri)
                         && item.getMethod().equals(method));
     }
 
     public String attemptReplaceHasPathVariableUrl(String requestUri) {
-        List<String> hasPathVariableApiCache = apiCacheHolder.getHasPathVariableApiCache();
+        List<String> hasPathVariableApiCache = apiCache.getHasPathVariableApiCache();
         return hasPathVariableApiCache.stream()
                 .filter(item -> pathMatcher.match(item, requestUri))
                 .findFirst()
@@ -102,7 +106,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
      * @return 匹配成功=true，不成功=false
      */
     public boolean isMatchNeedAuthorizationUri(String requestUri, String method) {
-        Map<String, String> cache = apiCacheHolder.getNeedAuthorizationApiCache();
+        Map<String, String> cache = apiCache.getNeedAuthorizationApiCache();
         return isMatchUri(cache, requestUri, method);
     }
 
@@ -112,7 +116,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
      * @return 匹配成功=true，不成功=false
      */
     public boolean isMatchNoNeedAuthUri(String requestUri, String method) {
-        Map<String, String> cache = apiCacheHolder.getNoNeedAuthApiCache();
+        Map<String, String> cache = apiCache.getNoNeedAuthApiCache();
         return isMatchUri(cache, requestUri, method);
     }
 
@@ -122,7 +126,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
      * @return 匹配成功=true，不成功=false
      */
     public boolean isMatchJustNeedAuthenticationUri(String requestUri, String method) {
-        Map<String, String> cache = apiCacheHolder.getNeedAuthenticationApiCache();
+        Map<String, String> cache = apiCache.getNeedAuthenticationApiCache();
         return isMatchUri(cache, requestUri, method);
     }
 

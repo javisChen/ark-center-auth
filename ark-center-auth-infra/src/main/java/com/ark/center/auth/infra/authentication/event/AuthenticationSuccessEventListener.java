@@ -1,6 +1,5 @@
 package com.ark.center.auth.infra.authentication.event;
 
-import com.ark.center.auth.domain.user.AuthUserApiPermission;
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -31,13 +29,10 @@ public class AuthenticationSuccessEventListener implements ApplicationListener<A
     private void handlerForLoginSuccess(AuthenticationSuccessEvent event, LoginAuthenticationToken loginAuthenticationToken) {
         log.info("用户认证成功: 用户名 = {}，登录时间 = {}", loginAuthenticationToken.getName(), LocalDateTime.now());
 
-        // 清除用户Api权限缓存
         Long userId = loginAuthenticationToken.getLoginUser().getUserId();
-        userApiPermissionCache.remove(userId);
-        log.info("用户Api权限清除成功");
 
-        List<AuthUserApiPermission> userApiList = userApiPermissionCache.get(userId);
-        log.info("用户Api权限: {} \n", userApiList);
+        // 刷新权限缓存
+        userApiPermissionCache.refresh(userId);
 
     }
 }

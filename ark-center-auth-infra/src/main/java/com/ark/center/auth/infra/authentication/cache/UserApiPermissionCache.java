@@ -60,7 +60,6 @@ public class UserApiPermissionCache implements InitializingBean {
 
     @NotNull
     private List<AuthUserApiPermission> build(Long userId) {
-
         // L2
         String l2CacheKey = cacheKey(userId);
         String cache = l2Cache.get(l2CacheKey, String.class);
@@ -89,4 +88,9 @@ public class UserApiPermissionCache implements InitializingBean {
         return String.format(USER_API_PERM_KEY, userId);
     }
 
+    public void refresh(Long userId) {
+        remove(userId);
+        List<AuthUserApiPermission> permissions = get(userId);
+        log.info("用户id [{}] Api权限刷新成功: {} \n", userId, permissions);
+    }
 }
