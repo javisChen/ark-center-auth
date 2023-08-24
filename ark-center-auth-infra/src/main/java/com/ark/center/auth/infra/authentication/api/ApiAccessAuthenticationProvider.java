@@ -73,7 +73,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
                 return authenticated;
             }
         }
-        log.warn("请检查用户角色是否已经对该[{} {}]进行授权", requestUri, method);
+        log.warn("请检查用户角色是否已经对该[{} {}]进行授权或者检查资源是否再Iam中录入", requestUri, method);
         throw AuthException.of(HttpStatus.FORBIDDEN.value(), "权限不足，请联系管理员授权");
     }
 
