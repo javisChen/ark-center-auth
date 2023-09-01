@@ -3,6 +3,7 @@ package com.ark.center.auth.infra.authentication.login;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -16,7 +17,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Slf4j
 public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private static final String LOGIN_URI = "/v1/login/account";
+    private static final String LOGIN_URI = "/v1/login/*";
 
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER
             = new AntPathRequestMatcher(LOGIN_URI, HttpMethod.POST.name());
@@ -34,6 +35,7 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
                 && request.getContentType().contains(MediaType.APPLICATION_JSON_VALUE)) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
+        String mode = StringUtils.substringAfterLast(request.getRequestURI(), "/");
         Authentication authentication = authenticationConverter.convert(request);
         setDetails(request, (UsernamePasswordAuthenticationToken) authentication);
         return this.getAuthenticationManager().authenticate(authentication);

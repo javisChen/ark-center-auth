@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.login;
+package com.ark.center.auth.infra.authentication.login.account;
 
 import com.ark.center.auth.infra.authentication.token.UserToken;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
@@ -8,19 +8,17 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class LoginAuthenticationProvider extends DaoAuthenticationProvider {
+public class AccountLoginAuthenticationProvider extends DaoAuthenticationProvider {
 
     private final UserTokenGenerator userTokenGenerator;
 
-    public LoginAuthenticationProvider(UserTokenGenerator userTokenGenerator) {
+    public AccountLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator) {
         this.userTokenGenerator = userTokenGenerator;
     }
 
     @Override
     protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
         LoginUser loginUser = (LoginUser) user;
-
-        //
         UserToken userToken = this.userTokenGenerator.generate(loginUser);
         return new LoginAuthenticationToken(loginUser, userToken.getTokenValue());
     }

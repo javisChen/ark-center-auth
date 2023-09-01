@@ -2,6 +2,7 @@ package com.ark.center.auth.infra.authentication.login;
 
 import com.ark.center.auth.infra.authentication.DefaultAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
+import com.ark.center.auth.infra.authentication.login.response.LoginAuthenticateResponse;
 import com.ark.component.dto.SingleResponse;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
 import jakarta.servlet.FilterChain;

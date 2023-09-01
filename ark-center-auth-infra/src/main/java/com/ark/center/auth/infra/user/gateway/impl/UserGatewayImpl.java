@@ -26,9 +26,9 @@ public class UserGatewayImpl implements UserGateway {
     private final UserApiPermissionCache userApiPermissionCache;
 
     @Override
-    public AuthUser retrieveUserByPhone(String phone) {
+    public AuthUser retrieveUserByMobile(String phone) {
         UserQry userQry = new UserQry();
-        userQry.setPhone(phone);
+        userQry.setMobile(phone);
         UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.getUser(userQry));
         return userConverter.toAuthUser(userInnerDTO);
     }
