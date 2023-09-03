@@ -39,4 +39,5 @@ public class SmsLoginAuthenticationProvider extends AbstractUserDetailsAuthentic
     protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         return userDetailsService.loadUserByUsername(username);
     }
+
 }

@@ -82,13 +82,10 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
 
     private SmsLoginAuthenticationProvider smsAuthenticationProvider() {
         UserGateway userGateway = context.getBean(UserGateway.class);
-        UserTokenGenerator userTokenGenerator = context.getBean(UserTokenGenerator.class);
         UserConverter userConverter = context.getBean(UserConverter.class);
-        SmsLoginAuthenticationProvider provider = new SmsLoginAuthenticationProvider(userTokenGenerator, cacheService);
+        CacheService cacheService = context.getBean(CacheService.class);
         SmsLoginUserDetailsService detailsService = new SmsLoginUserDetailsService(userGateway, userConverter);
-        provider.setUserDetailsService(detailsService);
-        provider.setPasswordEncoder(new BCryptPasswordEncoder());
-        return provider;
+        return new SmsLoginAuthenticationProvider(detailsService, cacheService);
     }
 
     private void addProviders(HttpSecurity httpSecurity,
