@@ -193,7 +193,7 @@ create table if not exists auth.auth_user
     id           bigint unsigned auto_increment
     primary key,
     user_name    varchar(45)                                null comment '用户名',
-    phone        char(11)                                   not null comment '手机号码',
+    mobile        char(11)                                   not null comment '手机号码',
     code         varchar(45)      default ''                not null comment '用户编码',
     password     varchar(64)                                not null comment '用户密码',
     status       tinyint unsigned default '1'               not null comment '用户状态：1-已启用；2-已禁用；',
@@ -204,8 +204,8 @@ create table if not exists auth.auth_user
     is_deleted   bigint unsigned  default '0'               not null comment '删除标识 0-表示未删除 大于0-已删除',
     constraint uk_code
     unique (code, is_deleted),
-    constraint uk_phone
-    unique (phone, is_deleted)
+    constraint uk_mobile
+    unique (mobile, is_deleted)
     )
     comment '用户表' charset = utf8mb4;
 

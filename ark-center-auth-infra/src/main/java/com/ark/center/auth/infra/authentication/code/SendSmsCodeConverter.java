@@ -1,8 +1,9 @@
-package com.ark.center.auth.infra.authentication.login;
+package com.ark.center.auth.infra.authentication.code;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson2.JSON;
+import com.ark.center.auth.infra.authentication.login.LoginMode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -13,7 +14,7 @@ import org.springframework.security.web.authentication.AuthenticationConverter;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
-public abstract class LoginAuthenticationConverter<T> implements AuthenticationConverter, InitializingBean {
+public abstract class SendSmsCodeConverter<T> implements AuthenticationConverter, InitializingBean {
 
 	private Class<T> clazz;
 

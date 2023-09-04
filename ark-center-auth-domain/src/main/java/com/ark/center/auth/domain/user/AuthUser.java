@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class AuthUser {
     private Long id;
-    private String phone;
+    private String mobile;
     private String username;
     private String userCode;
     private Boolean isSuperAdmin;

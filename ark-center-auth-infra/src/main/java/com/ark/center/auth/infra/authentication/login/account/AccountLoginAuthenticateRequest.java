@@ -14,6 +14,4 @@ public class AccountLoginAuthenticateRequest {
     @Schema(description = "密码")
     private String password;
 
-    private String code;
-
 }

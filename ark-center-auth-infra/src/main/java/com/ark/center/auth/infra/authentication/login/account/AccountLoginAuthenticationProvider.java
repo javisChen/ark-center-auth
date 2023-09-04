@@ -1,26 +1,57 @@
 package com.ark.center.auth.infra.authentication.login.account;
 
-import com.ark.center.auth.infra.authentication.token.UserToken;
+import cn.hutool.core.lang.Assert;
+import com.ark.center.auth.domain.user.AuthUser;
+import com.ark.center.auth.domain.user.gateway.UserGateway;
+import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
+import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
+import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.component.security.base.user.LoginUser;
-import com.ark.component.security.core.authentication.LoginAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.Authentication;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class AccountLoginAuthenticationProvider extends DaoAuthenticationProvider {
+@Slf4j
+public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticationProvider<AccountAuthenticationToken> {
 
-    private final UserTokenGenerator userTokenGenerator;
+    private final UserGateway userGateway;
+    private final UserConverter userConverter;
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AccountLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator) {
-        this.userTokenGenerator = userTokenGenerator;
+    public AccountLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator,
+                                              UserGateway userGateway, UserConverter userConverter) {
+        super(userTokenGenerator);
+        this.userGateway = userGateway;
+        this.userConverter = userConverter;
     }
 
     @Override
-    protected Authentication createSuccessAuthentication(Object principal, Authentication authentication, UserDetails user) {
-        LoginUser loginUser = (LoginUser) user;
-        UserToken userToken = this.userTokenGenerator.generate(loginUser);
-        return new LoginAuthenticationToken(loginUser, userToken.getTokenValue());
+    protected void preCheckAuthentication(AccountAuthenticationToken authentication) throws AuthenticationException {
+        Assert.notBlank(authentication.getUsername(), () -> new BadCredentialsException("用户名或密码错误"));
+        Assert.notBlank(authentication.getPassword(), () -> new BadCredentialsException("用户名或密码错误"));
     }
 
+    @Override
+    protected void additionalAuthenticationChecks(LoginUser user, AccountAuthenticationToken authenticationToken) {
+        String presentedPassword = authenticationToken.getCredentials().toString();
+        if (!this.passwordEncoder.matches(presentedPassword, user.getPassword())) {
+            log.warn("Password does not match stored value");
+            throw new BadCredentialsException("用户名或密码错误");
+        }
+    }
+
+    @Override
+    protected UserDetails retrieveUser(AccountAuthenticationToken authentication) throws AuthenticationException {
+        AuthUser authUser = userGateway.retrieveUserByUsername(authentication.getUsername());
+        Assert.notNull(authUser, () -> new UserNotFoundException("用户名或密码错误"));
+        return userConverter.toLoginUser(authUser);
+    }
+
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 }

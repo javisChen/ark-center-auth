@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.login.sms;
+package com.ark.center.auth.infra.authentication.login.mobile;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,7 +7,7 @@ import org.springframework.util.Assert;
 
 import java.util.Collection;
 
-public class SmsAuthenticationToken extends AbstractAuthenticationToken {
+public class MobileAuthenticationToken extends AbstractAuthenticationToken {
 
 	private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
 
@@ -15,28 +15,28 @@ public class SmsAuthenticationToken extends AbstractAuthenticationToken {
 
 	private String code;
 
-	public SmsAuthenticationToken(String mobile, String code) {
+	public MobileAuthenticationToken(String mobile, String code) {
 		super(null);
 		this.mobile = mobile;
 		this.code = code;
 		setAuthenticated(false);
 	}
 
-	public SmsAuthenticationToken(String mobile, String code,
-								  Collection<? extends GrantedAuthority> authorities) {
+	public MobileAuthenticationToken(String mobile, String code,
+									 Collection<? extends GrantedAuthority> authorities) {
 		super(authorities);
 		this.mobile = mobile;
 		this.code = code;
 		super.setAuthenticated(true); // must use super, as we override
 	}
 
-	public static SmsAuthenticationToken unauthenticated(String principal, String credentials) {
-		return new SmsAuthenticationToken(principal, credentials);
+	public static MobileAuthenticationToken unauthenticated(String principal, String credentials) {
+		return new MobileAuthenticationToken(principal, credentials);
 	}
 
-	public static SmsAuthenticationToken authenticated(String principal, String credentials,
-													   Collection<? extends GrantedAuthority> authorities) {
-		return new SmsAuthenticationToken(principal, credentials, authorities);
+	public static MobileAuthenticationToken authenticated(String principal, String credentials,
+														  Collection<? extends GrantedAuthority> authorities) {
+		return new MobileAuthenticationToken(principal, credentials, authorities);
 	}
 
 	@Override
@@ -62,4 +62,11 @@ public class SmsAuthenticationToken extends AbstractAuthenticationToken {
 		this.code = null;
 	}
 
+	public String getMobile() {
+		return mobile;
+	}
+
+	public String getCode() {
+		return code;
+	}
 }

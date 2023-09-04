@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.login.response;
+package com.ark.center.auth.infra.authentication.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

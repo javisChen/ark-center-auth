@@ -6,12 +6,13 @@ import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationFilte
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.cache.ApiCache;
+import com.ark.center.auth.infra.authentication.code.SendSmsCodeFilter;
+import com.ark.center.auth.infra.authentication.common.Uris;
+import com.ark.center.auth.infra.authentication.login.LoginAuthenticationConverter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.account.AccountLoginAuthenticationProvider;
-import com.ark.center.auth.infra.authentication.login.account.AccountLoginUserDetailsService;
-import com.ark.center.auth.infra.authentication.login.sms.SmsLoginAuthenticationProvider;
-import com.ark.center.auth.infra.authentication.login.sms.SmsLoginUserDetailsService;
+import com.ark.center.auth.infra.authentication.login.mobile.MobileLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.center.auth.infra.user.converter.UserConverter;
@@ -25,6 +26,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
+
+import java.util.List;
+import java.util.Map;
 
 public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer, HttpSecurity> {
 
@@ -57,11 +61,17 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     private void addFilters(HttpSecurity httpSecurity) {
         AuthenticationManager authenticationManager = httpSecurity.getSharedObject(AuthenticationManager.class);
 
-        SecurityContextRepository securityContextRepository = context.getBean(SecurityContextRepository.class);
+        addSendSmsCodeFilters(httpSecurity, authenticationManager);
 
-        addLoginFilters(httpSecurity, authenticationManager, securityContextRepository);
+        addLoginFilters(httpSecurity, authenticationManager);
 
         addAuthFilters(httpSecurity, authenticationManager);
+    }
+
+    private void addSendSmsCodeFilters(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) {
+        CacheService cacheService = context.getBean(CacheService.class);
+        SendSmsCodeFilter filter = new SendSmsCodeFilter(cacheService);
+        httpSecurity.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @NotNull
@@ -73,28 +83,26 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
         UserGateway userGateway = context.getBean(UserGateway.class);
         UserTokenGenerator userTokenGenerator = context.getBean(UserTokenGenerator.class);
         UserConverter userConverter = context.getBean(UserConverter.class);
-        AccountLoginAuthenticationProvider provider = new AccountLoginAuthenticationProvider(userTokenGenerator);
-        AccountLoginUserDetailsService detailsService = new AccountLoginUserDetailsService(userGateway, userConverter);
-        provider.setUserDetailsService(detailsService);
+        AccountLoginAuthenticationProvider provider = new AccountLoginAuthenticationProvider(userTokenGenerator, userGateway, userConverter);
         provider.setPasswordEncoder(new BCryptPasswordEncoder());
         return provider;
     }
 
-    private SmsLoginAuthenticationProvider smsAuthenticationProvider() {
+    private MobileLoginAuthenticationProvider smsAuthenticationProvider() {
         UserGateway userGateway = context.getBean(UserGateway.class);
+        UserTokenGenerator userTokenGenerator = context.getBean(UserTokenGenerator.class);
         UserConverter userConverter = context.getBean(UserConverter.class);
         CacheService cacheService = context.getBean(CacheService.class);
-        SmsLoginUserDetailsService detailsService = new SmsLoginUserDetailsService(userGateway, userConverter);
-        return new SmsLoginAuthenticationProvider(userGateway, cacheService);
+        return new MobileLoginAuthenticationProvider(userTokenGenerator, userGateway, cacheService, userConverter);
     }
 
     private void addProviders(HttpSecurity httpSecurity,
                               AccountLoginAuthenticationProvider accountLoginAuthenticationProvider,
-                              SmsLoginAuthenticationProvider smsLoginAuthenticationProvider,
+                              MobileLoginAuthenticationProvider mobileLoginAuthenticationProvider,
                               ApiAccessAuthenticationProvider apiAccessAuthenticationProvider) {
         httpSecurity
                 .authenticationProvider(accountLoginAuthenticationProvider)
-                .authenticationProvider(smsLoginAuthenticationProvider)
+                .authenticationProvider(mobileLoginAuthenticationProvider)
                 .authenticationProvider(apiAccessAuthenticationProvider);
     }
 
@@ -111,18 +119,22 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     private void configureLogout(HttpSecurity httpSecurity, CacheService cacheService) throws Exception {
         AuthLogoutHandler handler = new AuthLogoutHandler(cacheService);
         httpSecurity.logout(configurer -> configurer
-                .logoutUrl("/v1/logout")
+                .logoutUrl(Uris.LOGOUT)
                 .clearAuthentication(false)
                 .logoutSuccessHandler(handler)
                 .addLogoutHandler(handler)
         );
     }
 
+    @SuppressWarnings("rawtypes")
     private void addLoginFilters(HttpSecurity httpSecurity,
-                                 AuthenticationManager authenticationManager,
-                                 SecurityContextRepository contextRepository) {
+                                 AuthenticationManager authenticationManager) {
+        SecurityContextRepository contextRepository = context.getBean(SecurityContextRepository.class);
+        Map<String, LoginAuthenticationConverter> beans = context.getBeansOfType(LoginAuthenticationConverter.class);
+        List<LoginAuthenticationConverter> converters = beans.values().stream().toList();
+
         LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
-        LoginAuthenticationFilter filter = new LoginAuthenticationFilter();
+        LoginAuthenticationFilter filter = new LoginAuthenticationFilter(converters);
         filter.setAuthenticationSuccessHandler(authenticationHandler);
         filter.setAuthenticationFailureHandler(authenticationHandler);
         filter.setSecurityContextRepository(contextRepository);

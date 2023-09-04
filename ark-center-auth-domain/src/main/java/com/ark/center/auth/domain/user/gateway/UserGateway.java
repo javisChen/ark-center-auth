@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface UserGateway {
 
-    AuthUser retrieveUserByMobile(String phone);
+    AuthUser retrieveUserByMobile(String mobile);
 
     AuthUser retrieveUserByUsername(String username);
 

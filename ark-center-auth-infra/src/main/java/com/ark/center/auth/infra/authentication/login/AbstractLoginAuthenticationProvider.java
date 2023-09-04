@@ -1,12 +1,15 @@
 
 package com.ark.center.auth.infra.authentication.login;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import cn.hutool.core.util.ClassUtil;
+import com.ark.center.auth.infra.authentication.token.UserToken;
+import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
+import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.core.authentication.LoginAuthenticationToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -16,19 +19,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.cache.NullUserCache;
 import org.springframework.util.Assert;
 
-public abstract class AbstractLoginAuthenticationProvider
+@Slf4j
+public abstract class AbstractLoginAuthenticationProvider<T extends Authentication>
 		implements AuthenticationProvider, InitializingBean {
 
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	private UserCache userCache = new NullUserCache();
-
-	protected boolean hideUserNotFoundExceptions = true;
-
+	private final UserCache userCache = new NullUserCache();
 	private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
+	private final UserTokenGenerator userTokenGenerator;
 
-	protected abstract void additionalAuthenticationChecks(UserDetails userDetails,
-			UsernamePasswordAuthenticationToken authentication) throws AuthenticationException;
+	protected AbstractLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator) {
+		this.userTokenGenerator = userTokenGenerator;
+	}
+
+	protected abstract void preCheckAuthentication(T authentication) throws AuthenticationException;
 
 	@Override
 	public final void afterPropertiesSet() throws Exception {
@@ -37,60 +40,51 @@ public abstract class AbstractLoginAuthenticationProvider
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		String username = determineUsername(authentication);
-		boolean cacheWasUsed = true;
-		UserDetails user = this.userCache.getUserFromCache(username);
-		if (user == null) {
-			cacheWasUsed = false;
-			try {
-				user = retrieveUser(username, (UsernamePasswordAuthenticationToken) authentication);
-			}
-			catch (UserNotFoundException ex) {
-				this.logger.debug("Failed to find user '" + username + "'");
-				if (!this.hideUserNotFoundExceptions) {
-					throw ex;
-				}
-				throw new BadCredentialsException("用户名或密码错误");
-			}
-			Assert.notNull(user, "用户名或密码错误");
-		}
+
+		log.info("User login processing, authentication = [{}]", authentication);
+
+		@SuppressWarnings("unchecked")
+		T authenticationToken = (T) authentication;
+
 		try {
-			additionalAuthenticationChecks(user, (UsernamePasswordAuthenticationToken) authentication);
+			preCheckAuthentication(authenticationToken);
+		} catch (AuthenticationException e) {
+			log.error("Pre check not pass, Reason = [{}]", e.getMessage());
+			throw new BadCredentialsException(e.getMessage());
 		}
-		catch (AuthenticationException ex) {
-			if (!cacheWasUsed) {
-				throw ex;
-			}
-			cacheWasUsed = false;
-			user = retrieveUser(username, (UsernamePasswordAuthenticationToken) authentication);
-			additionalAuthenticationChecks(user, (UsernamePasswordAuthenticationToken) authentication);
+
+        UserDetails user;
+        try {
+            user = retrieveUser(authenticationToken);
+        } catch (UserNotFoundException ex) {
+			throw new BadCredentialsException(ex.getMessage());
+		} catch (Exception ex) {
+			log.error("Failed to find user", ex);
+			throw new BadCredentialsException("服务器网络波动，请稍候重试");
 		}
-		if (!cacheWasUsed) {
-			this.userCache.putUserInCache(user);
-		}
-		return createSuccessAuthentication(user, authentication, user);
+		additionalAuthenticationChecks(((LoginUser) user), authenticationToken);
+
+		postHandle(user, authenticationToken);
+
+		return createSuccessAuthentication(user);
 	}
 
-	private String determineUsername(Authentication authentication) {
-		return (authentication.getPrincipal() == null) ? "NONE_PROVIDED" : authentication.getName();
+	protected void postHandle(UserDetails user, T authenticationToken) {
+
 	}
 
-	protected Authentication createSuccessAuthentication(Object principal, Authentication authentication,
-			UserDetails user) {
-		UsernamePasswordAuthenticationToken result = UsernamePasswordAuthenticationToken.authenticated(principal,
-				authentication.getCredentials(), this.authoritiesMapper.mapAuthorities(user.getAuthorities()));
-		result.setDetails(authentication.getDetails());
-		this.logger.debug("Authenticated user");
-		return result;
+	protected abstract void additionalAuthenticationChecks(LoginUser user, T authenticationToken);
+
+	protected Authentication createSuccessAuthentication(UserDetails user) {
+		LoginUser loginUser = (LoginUser) user;
+		UserToken userToken = userTokenGenerator.generate(loginUser);
+		return new LoginAuthenticationToken(loginUser, userToken.getTokenValue());
 	}
 
-	protected abstract UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication)
-			throws AuthenticationException;
+	protected abstract UserDetails retrieveUser(T authentication) throws AuthenticationException;
 
 	@Override
 	public boolean supports(Class<?> authentication) {
-		return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
+		return ClassUtil.getTypeArgument(getClass()).isAssignableFrom(authentication);
 	}
-
-
 }
