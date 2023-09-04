@@ -85,7 +85,7 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
         UserConverter userConverter = context.getBean(UserConverter.class);
         CacheService cacheService = context.getBean(CacheService.class);
         SmsLoginUserDetailsService detailsService = new SmsLoginUserDetailsService(userGateway, userConverter);
-        return new SmsLoginAuthenticationProvider(detailsService, cacheService);
+        return new SmsLoginAuthenticationProvider(userGateway, cacheService);
     }
 
     private void addProviders(HttpSecurity httpSecurity,

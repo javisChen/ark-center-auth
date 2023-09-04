@@ -1,24 +1,24 @@
 package com.ark.center.auth.infra.authentication.login.sms;
 
+import com.ark.center.auth.domain.user.gateway.UserGateway;
+import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
 import com.ark.center.auth.infra.cache.AuthCacheKey;
 import com.ark.component.cache.CacheService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-public class SmsLoginAuthenticationProvider extends AbstractUserDetailsAuthenticationProvider {
+public class SmsLoginAuthenticationProvider extends AbstractLoginAuthenticationProvider {
 
-    private final UserDetailsService userDetailsService;
+    private final UserGateway userGateway;
+
     private final CacheService cacheService;
 
-    public SmsLoginAuthenticationProvider(UserDetailsService userDetailsService,
-                                          CacheService cacheService) {
-        this.userDetailsService = userDetailsService;
-
+    public SmsLoginAuthenticationProvider(UserGateway userGateway, CacheService cacheService) {
+        this.userGateway = userGateway;
         this.cacheService = cacheService;
     }
 
@@ -37,7 +37,7 @@ public class SmsLoginAuthenticationProvider extends AbstractUserDetailsAuthentic
 
     @Override
     protected UserDetails retrieveUser(String username, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
-        return userDetailsService.loadUserByUsername(username);
+        return userGateway.retrieveUserByMobile(username);
     }
 
 }

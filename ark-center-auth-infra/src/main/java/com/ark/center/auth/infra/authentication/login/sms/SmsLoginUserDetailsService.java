@@ -2,6 +2,7 @@ package com.ark.center.auth.infra.authentication.login.sms;
 
 import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
+import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.component.security.base.user.LoginUser;
 import org.springframework.beans.factory.InitializingBean;
@@ -30,7 +31,7 @@ public class SmsLoginUserDetailsService implements UserDetailsService, Initializ
     public UserDetails loadUserByUsername(String mobile) throws UsernameNotFoundException {
         AuthUser user = userGateway.retrieveUserByMobile(mobile);
         if (user == null) {
-            throw new MobileNotFoundException(mobile);
+            throw new UserNotFoundException(mobile);
         }
         LoginUser loginUser = userConverter.toLoginUser(user);
         loginUser.setAuthorities(Set.of(
