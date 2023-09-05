@@ -1,19 +1,16 @@
 package com.ark.center.auth.infra.authentication.login;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ClassUtil;
-import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 
-import java.nio.charset.StandardCharsets;
-
 @Slf4j
-public abstract class LoginAuthenticationConverter<T> implements AuthenticationConverter, InitializingBean {
+public abstract class LoginAuthenticationConverter<T> extends RequestConverter<T> implements AuthenticationConverter, InitializingBean {
 
 	private Class<T> clazz;
 
@@ -26,17 +23,15 @@ public abstract class LoginAuthenticationConverter<T> implements AuthenticationC
 
 	@Override
 	public Authentication convert(HttpServletRequest request) {
-		T authenticateRequest = readFromRequest(request);
+		T authenticateRequest = getRequest(request);
 		return internalConvert(request, authenticateRequest);
 	}
 
-	protected abstract Authentication internalConvert(HttpServletRequest request, T authenticateRequest);
-
-	private T readFromRequest(HttpServletRequest request) {
-		T authenticateRequest;
+	@NotNull
+	private T getRequest(HttpServletRequest request) {
+		T authenticateRequest = null;
 		try {
-			String reqBody = IoUtil.read(request.getInputStream()).toString(StandardCharsets.UTF_8);
-			authenticateRequest = JSON.to(this.clazz, reqBody);
+			authenticateRequest = readFromRequest(request);
 		} catch (Exception e) {
 			log.error("读取认证参数失败", e);
 			throw new AuthenticationServiceException("认证参数不合法");
@@ -46,6 +41,23 @@ public abstract class LoginAuthenticationConverter<T> implements AuthenticationC
 		}
 		return authenticateRequest;
 	}
+
+	protected abstract Authentication internalConvert(HttpServletRequest request, T authenticateRequest);
+
+//	private T readFromRequest(HttpServletRequest request) {
+//		T request;
+//		try {
+//			String reqBody = IoUtil.read(request.getInputStream()).toString(StandardCharsets.UTF_8);
+//			request = readFromRequest(request)
+//		} catch (Exception e) {
+//			log.error("读取认证参数失败", e);
+//			throw new AuthenticationServiceException("认证参数不合法");
+//		}
+//		if (request == null) {
+//			throw new AuthenticationServiceException("认证参数不合法");
+//		}
+//		return request;
+//	}
 
 	protected abstract boolean supports(LoginMode loginMode);
 

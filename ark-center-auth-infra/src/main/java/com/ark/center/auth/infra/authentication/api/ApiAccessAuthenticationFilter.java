@@ -12,13 +12,13 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import static com.ark.center.auth.infra.authentication.common.Uris.ACCESS_API;
+
 @Slf4j
 public class ApiAccessAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private static final String ACCESS_API_URI = "/v1/access/api";
-
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER
-            = new AntPathRequestMatcher(ACCESS_API_URI, HttpMethod.POST.name());
+            = new AntPathRequestMatcher(ACCESS_API, HttpMethod.POST.name());
 
     private final AuthenticationConverter authenticationConverter = new ApiAccessAuthenticationConverter();
 

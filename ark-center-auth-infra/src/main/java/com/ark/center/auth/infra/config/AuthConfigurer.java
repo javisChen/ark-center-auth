@@ -6,7 +6,7 @@ import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationFilte
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.cache.ApiCache;
-import com.ark.center.auth.infra.authentication.code.SendSmsCodeFilter;
+import com.ark.center.auth.infra.authentication.login.code.SendSmsCodeFilter;
 import com.ark.center.auth.infra.authentication.common.Uris;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationConverter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
@@ -61,17 +61,18 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     private void addFilters(HttpSecurity httpSecurity) {
         AuthenticationManager authenticationManager = httpSecurity.getSharedObject(AuthenticationManager.class);
 
-        addSendSmsCodeFilters(httpSecurity, authenticationManager);
-
         addLoginFilters(httpSecurity, authenticationManager);
 
         addAuthFilters(httpSecurity, authenticationManager);
+
+        addSendSmsCodeFilters(httpSecurity, authenticationManager);
+
     }
 
     private void addSendSmsCodeFilters(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) {
         CacheService cacheService = context.getBean(CacheService.class);
         SendSmsCodeFilter filter = new SendSmsCodeFilter(cacheService);
-        httpSecurity.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(filter, ApiAccessAuthenticationFilter.class);
     }
 
     @NotNull

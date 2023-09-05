@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.code;
+package com.ark.center.auth.infra.authentication.login.code;
 
 import cn.hutool.core.util.RandomUtil;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SendSmsCodeFilter extends OncePerRequestFilter {
 
+    private final SendSmsCodeConverter sendSmsCodeConverter = new SendSmsCodeConverter();
+
     private final CacheService cacheService;
 
     private final RequestMatcher requiresAuthenticationRequestMatcher =
@@ -39,7 +41,8 @@ public class SendSmsCodeFilter extends OncePerRequestFilter {
             return;
         }
 
-        String mobile = request.getParameter("mobile");
+        SendSmsCodeRequest sendSmsCodeRequest = sendSmsCodeConverter.readFromRequest(request);
+        String mobile = sendSmsCodeRequest.getMobile();
         if (StringUtils.isBlank(mobile)) {
             return;
         }
@@ -55,10 +58,12 @@ public class SendSmsCodeFilter extends OncePerRequestFilter {
             // 保存新的验证码
             cacheService.set(codeCacheKey, code, 2L, TimeUnit.MINUTES);
 
-            ResponseUtils.writeOk(ServerResponse.ok(), response);
         } catch (Exception ex) {
 
         }
+
+        ResponseUtils.writeOk(ServerResponse.ok(), response);
+
 
     }
 
