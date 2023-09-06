@@ -12,6 +12,6 @@ public class MobileLoginAuthenticateRequest {
     private String mobile;
 
     @Schema(description = "验证码")
-    private String code;
+    private String captcha;
 
 }

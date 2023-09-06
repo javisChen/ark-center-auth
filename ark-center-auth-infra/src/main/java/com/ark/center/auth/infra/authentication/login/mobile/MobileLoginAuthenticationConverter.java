@@ -14,7 +14,7 @@ public class MobileLoginAuthenticationConverter extends LoginAuthenticationConve
     @Override
 	protected Authentication internalConvert(HttpServletRequest request, MobileLoginAuthenticateRequest authenticateRequest) {
 		return MobileAuthenticationToken
-				.unauthenticated(authenticateRequest.getMobile(), authenticateRequest.getCode());
+				.unauthenticated(authenticateRequest.getMobile(), authenticateRequest.getCaptcha());
 	}
 
     @Override
