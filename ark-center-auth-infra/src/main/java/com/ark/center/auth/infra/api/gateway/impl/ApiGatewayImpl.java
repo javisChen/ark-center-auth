@@ -21,6 +21,7 @@ public class ApiGatewayImpl implements ApiGateway {
 
     @Override
     public List<AuthApi> retrieveApis() {
+        // todo 认证中心自己做一层缓存，不要跟Iam耦合
         List<ApiDetailsDTO> dtoList = RpcUtils.checkAndGetData(apiFacade.queryApis(new ApiQry()));
         return apiConverter.toAuthApi(dtoList);
     }
