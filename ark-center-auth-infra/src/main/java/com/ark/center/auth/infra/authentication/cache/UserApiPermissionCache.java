@@ -77,7 +77,7 @@ public class UserApiPermissionCache implements InitializingBean {
 
     public void remove(Long userId) {
         l1Cache.invalidate(userId);
-        l2Cache.remove(cacheKey(userId));
+        l2Cache.del(cacheKey(userId));
     }
 
     public List<AuthUserApiPermission> get(Long userId) {

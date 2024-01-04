@@ -53,7 +53,7 @@ public class SendSmsCodeFilter extends OncePerRequestFilter {
             String codeCacheKey = String.format(AuthCacheKey.CACHE_KEY_USER_MOBILE_LOGIN_CODE, mobile);
 
             // 删除原本存在的验证码
-            cacheService.remove(codeCacheKey);
+            cacheService.del(codeCacheKey);
 
             // 保存新的验证码
             cacheService.set(codeCacheKey, code, 2L, TimeUnit.MINUTES);
