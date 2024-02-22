@@ -63,16 +63,16 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- 外部服务 -->
             <dependency>
                 <groupId>com.ark.center</groupId>
                 <artifactId>ark-center-iam-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- 外部服务 -->
             <dependency>
                 <groupId>com.ark.center</groupId>
-                <artifactId>ark-center-iam-client</artifactId>
+                <artifactId>ark-center-iam-shared-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

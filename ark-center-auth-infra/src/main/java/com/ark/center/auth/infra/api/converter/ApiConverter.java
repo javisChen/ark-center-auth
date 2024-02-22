@@ -1,7 +1,7 @@
 package com.ark.center.auth.infra.api.converter;
 
 import com.ark.center.auth.domain.api.AuthApi;
-import com.ark.center.iam.client.api.dto.ApiDetailsDTO;
+import com.ark.center.iam.model.api.dto.ApiDetailsDTO;
 import org.mapstruct.Mapper;
 
 import java.util.List;

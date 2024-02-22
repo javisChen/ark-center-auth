@@ -1,8 +1,8 @@
 package com.ark.center.auth.adapter.api.consumer;
 
 import com.ark.center.auth.infra.authentication.cache.ApiCache;
-import com.ark.center.iam.client.api.common.ApiMqInfo;
-import com.ark.center.iam.client.api.dto.ApiChangedDTO;
+import com.ark.center.iam.model.api.common.ApiMqInfo;
+import com.ark.center.iam.model.api.dto.ApiChangedDTO;
 import com.ark.component.mq.MQType;
 import com.ark.component.mq.core.annotations.MQMessageListener;
 import com.ark.component.mq.core.processor.SimpleMessageHandler;

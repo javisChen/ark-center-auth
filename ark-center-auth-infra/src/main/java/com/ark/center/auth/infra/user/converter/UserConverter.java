@@ -2,8 +2,8 @@ package com.ark.center.auth.infra.user.converter;
 
 import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.AuthUserApiPermission;
-import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
-import com.ark.center.iam.client.user.dto.UserInnerDTO;
+import com.ark.center.iam.model.user.dto.UserApiPermissionDTO;
+import com.ark.center.iam.model.user.dto.UserInnerDTO;
 import com.ark.component.security.base.user.LoginUser;
 import org.mapstruct.Mapper;
 

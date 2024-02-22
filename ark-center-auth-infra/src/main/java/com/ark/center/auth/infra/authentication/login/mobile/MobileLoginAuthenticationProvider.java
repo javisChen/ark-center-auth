@@ -62,6 +62,6 @@ public class MobileLoginAuthenticationProvider extends AbstractLoginAuthenticati
     protected void postHandle(UserDetails user, MobileAuthenticationToken authenticationToken) {
         String mobile = authenticationToken.getMobile();
         String codeCacheKey = String.format(AuthCacheKey.CACHE_KEY_USER_MOBILE_LOGIN_CODE, mobile);
-        cacheService.remove(codeCacheKey);
+        cacheService.del(codeCacheKey);
     }
 }

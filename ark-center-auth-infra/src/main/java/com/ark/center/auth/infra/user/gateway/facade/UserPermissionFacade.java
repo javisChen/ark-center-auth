@@ -1,6 +1,6 @@
 package com.ark.center.auth.infra.user.gateway.facade;
 
-import com.ark.center.iam.client.user.UserPermissionQryApi;
+import com.ark.center.iam.client.user.UserPermissionQueryApi;
 import com.ark.component.microservice.rpc.exception.FeignCommonErrorDecoder;
 import org.springframework.cloud.openfeign.FeignClient;
 
@@ -12,5 +12,5 @@ import org.springframework.cloud.openfeign.FeignClient;
         dismiss404 = true,
         configuration = {FeignCommonErrorDecoder.class}
 )
-public interface UserPermissionFacade extends UserPermissionQryApi {
+public interface UserPermissionFacade extends UserPermissionQueryApi {
 }

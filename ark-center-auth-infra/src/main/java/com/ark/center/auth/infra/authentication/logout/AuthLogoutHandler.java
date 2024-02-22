@@ -35,9 +35,9 @@ public class AuthLogoutHandler implements LogoutSuccessHandler, LogoutHandler {
 
         String accessToken = bearerTokenResolver.resolve(request);
 
-        cacheService.remove(RedisKeyUtils.createAccessTokenKey(accessToken));
+        cacheService.del(RedisKeyUtils.createAccessTokenKey(accessToken));
 
-        cacheService.remove(RedisKeyUtils.createUserIdKey(user.getUserId()));
+        cacheService.del(RedisKeyUtils.createUserIdKey(user.getUserId()));
 
     }
 

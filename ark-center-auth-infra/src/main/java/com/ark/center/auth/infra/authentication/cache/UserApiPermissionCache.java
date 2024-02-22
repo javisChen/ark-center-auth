@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSON;
 import com.ark.center.auth.domain.user.AuthUserApiPermission;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.center.auth.infra.user.gateway.facade.UserPermissionFacade;
-import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
+import com.ark.center.iam.model.user.dto.UserApiPermissionDTO;
 import com.ark.component.cache.CacheService;
 import com.ark.component.microservice.rpc.util.RpcUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -68,7 +68,7 @@ public class UserApiPermissionCache implements InitializingBean {
             return JSON.parseArray(cache, AuthUserApiPermission.class);
         }
         // DB
-        List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.getApiPermissions(userId));
+        List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.queryApiPermissions(userId));
         List<AuthUserApiPermission> userApiPermissions = userConverter.toAuthUserApiPermission(apiList);
         l2Cache.set(l2CacheKey, JSON.toJSONString(userApiPermissions), 12L, TimeUnit.HOURS);
         return userApiPermissions;
@@ -77,7 +77,7 @@ public class UserApiPermissionCache implements InitializingBean {
 
     public void remove(Long userId) {
         l1Cache.invalidate(userId);
-        l2Cache.remove(cacheKey(userId));
+        l2Cache.del(cacheKey(userId));
     }
 
     public List<AuthUserApiPermission> get(Long userId) {

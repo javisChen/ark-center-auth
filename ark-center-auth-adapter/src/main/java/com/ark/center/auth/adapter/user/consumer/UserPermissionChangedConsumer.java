@@ -1,8 +1,8 @@
 package com.ark.center.auth.adapter.user.consumer;
 
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
-import com.ark.center.iam.client.user.common.UserMqInfo;
-import com.ark.center.iam.client.user.dto.UserApiPermissionChangedDTO;
+import com.ark.center.iam.model.user.common.UserMqInfo;
+import com.ark.center.iam.model.user.dto.UserApiPermissionChangedDTO;
 import com.ark.component.mq.MQType;
 import com.ark.component.mq.core.annotations.MQMessageListener;
 import com.ark.component.mq.core.processor.SimpleMessageHandler;

@@ -1,6 +1,6 @@
 package com.ark.center.auth.infra.user.facade;
 
-import com.ark.center.iam.client.user.UserQryApi;
+import com.ark.center.iam.client.user.UserQueryApi;
 import com.ark.component.microservice.rpc.exception.FeignCommonErrorDecoder;
 import org.springframework.cloud.openfeign.FeignClient;
 
@@ -12,5 +12,5 @@ import org.springframework.cloud.openfeign.FeignClient;
         dismiss404 = true,
         configuration = {FeignCommonErrorDecoder.class}
 )
-public interface UserFacade extends UserQryApi {
+public interface UserFacade extends UserQueryApi {
 }
