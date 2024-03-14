@@ -6,7 +6,7 @@ import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.center.auth.infra.user.facade.UserFacade;
-import com.ark.center.auth.infra.user.gateway.facade.UserPermissionFacade;
+import com.ark.center.auth.infra.user.facade.UserPermissionFacade;
 import com.ark.center.iam.model.user.dto.UserInnerDTO;
 import com.ark.center.iam.model.user.query.UserPermissionQuery;
 import com.ark.center.iam.model.user.query.UserQuery;

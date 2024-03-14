@@ -7,10 +7,11 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 @FeignClient(
         name = "${ark.center.iam.service.name:iam}",
-        path = "/v1/inner/users",
+        path = "/v1/users",
         url = "${ark.center.iam.service.uri:}",
         dismiss404 = true,
         configuration = {FeignCommonErrorDecoder.class}
 )
 public interface UserFacade extends UserQueryApi {
+
 }

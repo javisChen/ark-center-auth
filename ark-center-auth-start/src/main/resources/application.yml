@@ -51,6 +51,7 @@ mybatis-plus:
 logging:
   level:
     com.ark.center.auth.infra.user.facade: debug
+
 management:
   endpoints:
     web:

@@ -4,7 +4,7 @@ import cn.hutool.core.thread.NamedThreadFactory;
 import com.alibaba.fastjson2.JSON;
 import com.ark.center.auth.domain.user.AuthUserApiPermission;
 import com.ark.center.auth.infra.user.converter.UserConverter;
-import com.ark.center.auth.infra.user.gateway.facade.UserPermissionFacade;
+import com.ark.center.auth.infra.user.facade.UserPermissionFacade;
 import com.ark.center.iam.model.user.dto.UserApiPermissionDTO;
 import com.ark.component.cache.CacheService;
 import com.ark.component.microservice.rpc.util.RpcUtils;

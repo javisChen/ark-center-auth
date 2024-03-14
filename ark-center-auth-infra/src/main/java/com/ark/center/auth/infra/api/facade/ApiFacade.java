@@ -7,10 +7,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 @FeignClient(
         name = "${ark.center.iam.service.name:iam}",
-        path = "/v1/inner/apis",
+        path = "/v1/apis",
         url = "${ark.center.iam.service.uri:}",
         dismiss404 = true,
-        configuration = {FeignCommonErrorDecoder.class}
+        configuration = FeignCommonErrorDecoder.class
 )
 public interface ApiFacade extends ApiQueryApi {
 

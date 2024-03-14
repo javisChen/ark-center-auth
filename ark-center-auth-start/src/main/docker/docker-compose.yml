@@ -1,6 +1,6 @@
 version: '3'
 services:
-  iam:
+  auth:
     container_name: ark-center-auth
     image: ark-center-auth:1.0.0
     restart: always

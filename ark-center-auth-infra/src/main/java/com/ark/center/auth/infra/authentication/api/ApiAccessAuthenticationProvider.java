@@ -63,7 +63,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         // 如果还未认证，直接返回
         if (!isAuthenticated) {
             log.warn("用户未登录或凭证已失效");
-            throw AuthException.    of(HttpStatus.UNAUTHORIZED.value(), "访问资源需要先进行身份验证");
+            throw AuthException.of(HttpStatus.UNAUTHORIZED.value(), "访问资源需要先进行身份验证");
         }
 
         LoginUser loginUser = loginAuthentication.getLoginUser();
