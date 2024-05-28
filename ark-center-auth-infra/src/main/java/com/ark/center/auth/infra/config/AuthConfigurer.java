@@ -17,6 +17,7 @@ import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.component.cache.CacheService;
+import com.ark.component.mq.integration.MessageTemplate;
 import com.ark.component.security.core.config.SecurityConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -37,9 +38,9 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     @Override
     public void init(HttpSecurity http) throws Exception {
         context = http.getSharedObject(ApplicationContext.class);
-        CacheService cacheService = context.getBean(CacheService.class);
+
         SecurityConfiguration.applyDefaultSecurity(http);
-        configureLogout(http, cacheService);
+        configureLogout(http);
     }
 
     @Override
@@ -117,8 +118,10 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
         httpSecurity.addFilterBefore(filter, LoginAuthenticationFilter.class);
     }
 
-    private void configureLogout(HttpSecurity httpSecurity, CacheService cacheService) throws Exception {
-        AuthLogoutHandler handler = new AuthLogoutHandler(cacheService);
+    private void configureLogout(HttpSecurity httpSecurity) throws Exception {
+        CacheService cacheService = context.getBean(CacheService.class);
+        MessageTemplate messageTemplate = context.getBean(MessageTemplate.class);
+        AuthLogoutHandler handler = new AuthLogoutHandler(cacheService, messageTemplate);
         httpSecurity.logout(configurer -> configurer
                 .logoutUrl(Uris.LOGOUT)
                 .clearAuthentication(false)

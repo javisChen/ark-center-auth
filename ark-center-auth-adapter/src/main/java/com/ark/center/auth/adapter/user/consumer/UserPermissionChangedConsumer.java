@@ -1,8 +1,8 @@
 package com.ark.center.auth.adapter.user.consumer;
 
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
-import com.ark.center.iam.model.user.common.UserMqInfo;
-import com.ark.center.iam.model.user.dto.UserApiPermissionChangedDTO;
+import com.ark.center.iam.client.IamMQConst;
+import com.ark.center.iam.client.user.dto.UserApiPermissionChangedDTO;
 import com.ark.component.mq.MQType;
 import com.ark.component.mq.core.annotations.MQMessageListener;
 import com.ark.component.mq.core.processor.SimpleMessageHandler;
@@ -10,11 +10,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+;
+
 @MQMessageListener(
         mq = MQType.ROCKET,
-        consumerGroup = UserMqInfo.CG_USER_API_PERMS,
-        topic = UserMqInfo.TOPIC_IAM,
-        tags = UserMqInfo.TAG_USER_API_PERMS
+        consumerGroup = IamMQConst.CG_USER_API_PERMS,
+        topic = IamMQConst.TOPIC_IAM,
+        tags = IamMQConst.TAG_USER_API_PERMS
 )
 @Component
 @Slf4j

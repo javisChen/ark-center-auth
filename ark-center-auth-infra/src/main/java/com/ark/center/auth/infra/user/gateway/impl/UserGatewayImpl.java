@@ -7,9 +7,9 @@ import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.center.auth.infra.user.facade.UserFacade;
 import com.ark.center.auth.infra.user.facade.UserPermissionFacade;
-import com.ark.center.iam.model.user.dto.UserInnerDTO;
-import com.ark.center.iam.model.user.query.UserPermissionQuery;
-import com.ark.center.iam.model.user.query.UserQuery;
+import com.ark.center.iam.client.user.dto.UserInnerDTO;
+import com.ark.center.iam.client.user.query.UserPermissionQuery;
+import com.ark.center.iam.client.user.query.UserQuery;
 import com.ark.component.microservice.rpc.util.RpcUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,28 +27,28 @@ public class UserGatewayImpl implements UserGateway {
 
     @Override
     public AuthUser retrieveUserByMobile(String mobile) {
-        UserQuery userQry = new UserQuery();
-        userQry.setMobile(mobile);
-        UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.queryBasicInfo(userQry));
+        UserQuery userQuery = new UserQuery();
+        userQuery.setMobile(mobile);
+        UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.queryUserSimpleInfo(userQuery));
         return userConverter.toAuthUser(userInnerDTO);
     }
 
     @Override
     public AuthUser retrieveUserByUsername(String username) {
-        UserQuery userQry = new UserQuery();
-        userQry.setUsername(username);
-        UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.queryBasicInfo(userQry));
+        UserQuery userQuery = new UserQuery();
+        userQuery.setUsername(username);
+        UserInnerDTO userInnerDTO = RpcUtils.checkAndGetData(userFacade.queryUserSimpleInfo(userQuery));
         return userConverter.toAuthUser(userInnerDTO);
     }
 
     @Override
     public Boolean checkHasPermission(String requestUri, String applicationCode, String method, Long userId) {
-        UserPermissionQuery userPermissionQry = new UserPermissionQuery();
-        userPermissionQry.setRequestUri(requestUri);
-        userPermissionQry.setApplicationCode(applicationCode);
-        userPermissionQry.setMethod(method);
-        userPermissionQry.setUserId(userId);
-        return RpcUtils.checkAndGetData(userPermissionFacade.checkApiHasPermission(userPermissionQry));
+        UserPermissionQuery userPermissionQuery = new UserPermissionQuery();
+        userPermissionQuery.setRequestUri(requestUri);
+        userPermissionQuery.setApplicationCode(applicationCode);
+        userPermissionQuery.setMethod(method);
+        userPermissionQuery.setUserId(userId);
+        return RpcUtils.checkAndGetData(userPermissionFacade.hasApiPermission(userPermissionQuery));
     }
 
     @Override
