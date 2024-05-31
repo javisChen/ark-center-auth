@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 import java.util.Collections;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserConverter {
 
     AuthUser toAuthUser(UserInnerDTO userInnerDTO);
