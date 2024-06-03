@@ -6,6 +6,7 @@ import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
 import com.ark.center.iam.client.user.dto.UserInnerDTO;
 import com.ark.component.security.base.user.LoginUser;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 
 import java.util.Collections;
 import java.util.List;
