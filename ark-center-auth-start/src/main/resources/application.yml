@@ -40,6 +40,9 @@ spring:
     config:
       # 允许远程配置覆盖本地配置
       allow-override: ${config-allow-override:true}
+    openfeign:
+      okhttp:
+        enabled: true
   # Spring Config
   config:
     import:
@@ -51,6 +54,14 @@ mybatis-plus:
 logging:
   level:
     com.ark.center.auth.infra.user.facade: debug
+    com:
+      ark:
+        center:
+          auth:
+            infra:
+              api:
+                facade: debug
+    feign: debug
 
 management:
   endpoints:
