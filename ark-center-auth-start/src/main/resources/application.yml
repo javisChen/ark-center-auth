@@ -53,6 +53,7 @@ mybatis-plus:
   mapper-locations: classpath:com/ark/center/auth/infra/*/gateway/db/xml/*.xml
 logging:
   level:
+    root:
     com.ark.center.auth.infra.user.facade: debug
     com:
       ark:
@@ -62,7 +63,6 @@ logging:
               api:
                 facade: debug
     feign: debug
-
 management:
   endpoints:
     web:
