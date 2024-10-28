@@ -1,10 +1,10 @@
 package com.ark.center.auth.infra.user.gateway.impl;
 
-import com.ark.center.auth.domain.user.gateway.PermissionGateway;
+import com.ark.center.auth.domain.user.gateway.PermissionService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PermissionGatewayImpl implements PermissionGateway {
+public class PermissionServiceImpl implements PermissionService {
 
 
     @Override
