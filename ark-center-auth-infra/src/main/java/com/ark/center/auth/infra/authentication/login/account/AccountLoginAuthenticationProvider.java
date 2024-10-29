@@ -54,4 +54,5 @@ public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticat
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
+
 }

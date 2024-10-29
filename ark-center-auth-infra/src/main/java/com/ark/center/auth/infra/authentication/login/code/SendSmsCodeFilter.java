@@ -49,7 +49,7 @@ public class SendSmsCodeFilter extends OncePerRequestFilter {
         // todo 暂时是mock随机数打印出来，实际上要开发消息服务进行发送短信
         try {
             String code = RandomUtil.randomNumbers(6);
-            log.info("sms code generated -> [{}]", code);
+            log.info("Sms code is generated -> [{}]", code);
             String codeCacheKey = String.format(AuthCacheKey.CACHE_KEY_USER_MOBILE_LOGIN_CODE, mobile);
 
             // 删除原本存在的验证码
@@ -59,17 +59,15 @@ public class SendSmsCodeFilter extends OncePerRequestFilter {
             cacheService.set(codeCacheKey, code, 2L, TimeUnit.MINUTES);
 
         } catch (Exception ex) {
-
+            log.error(ex.getMessage(), ex);
         }
 
         ResponseUtils.writeOk(ServerResponse.ok(), response);
-
 
     }
 
     private boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
         return this.requiresAuthenticationRequestMatcher.matches(request);
     }
-
 
 }
