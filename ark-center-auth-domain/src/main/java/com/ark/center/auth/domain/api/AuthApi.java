@@ -12,15 +12,15 @@ public class AuthApi {
     private Integer status;
     private Boolean hasPathVariable;
 
-    public boolean isNeedAuthentication() {
-        return authType.equals(ApiAuthTypeEnums.NEED_AUTHENTICATION.getValue());
+    public boolean authenticationRequired() {
+        return authType.equals(ApiAuthTypeEnums.AUTHENTICATION_REQUIRED.getValue());
     }
 
-    public boolean isNeedAuthorization() {
-        return authType.equals(ApiAuthTypeEnums.NEED_AUTHORIZATION.getValue());
+    public boolean authorizationRequired() {
+        return authType.equals(ApiAuthTypeEnums.AUTHORIZATION_REQUIRED.getValue());
     }
-    public boolean isNoNeedAuth() {
-        return authType.equals(ApiAuthTypeEnums.NO_NEED_AUTH.getValue());
+    public boolean noAuthRequired() {
+        return authType.equals(ApiAuthTypeEnums.NO_AUTH_REQUIRED.getValue());
     }
 
 }

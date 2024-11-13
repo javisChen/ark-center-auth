@@ -54,14 +54,14 @@ mybatis-plus:
 logging:
   level:
     root:
-    com.ark.center.auth.infra.user.facade: debug
-    com:
-      ark:
-        center:
-          auth:
-            infra:
-              api:
-                facade: debug
+#    com.ark.center.auth.infra.user.facade: debug
+#    com:
+#      ark:
+#        center:
+#          auth:
+#            infra:
+#              api:
+#                facade: debug
     feign: debug
 management:
   endpoints:

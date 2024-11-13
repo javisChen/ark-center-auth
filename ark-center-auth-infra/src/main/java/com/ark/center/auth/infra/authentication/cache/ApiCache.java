@@ -3,6 +3,7 @@ package com.ark.center.auth.infra.authentication.cache;
 import com.ark.center.auth.domain.api.AuthApi;
 import com.ark.center.auth.domain.user.gateway.ApiGateway;
 import com.ark.center.auth.infra.api.support.ApiCommonUtils;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,21 +26,25 @@ public class ApiCache implements InitializingBean {
     /**
      * 无需授权api缓存
      */
+    @Getter
     private Map<String, String> noNeedAuthApiCache;
 
     /**
      * 无需授权api缓存
      */
+    @Getter
     private Map<String, String> needAuthorizationApiCache;
 
     /**
      * 无需认证api缓存
      */
+    @Getter
     private Map<String, String> needAuthenticationApiCache;
 
     /**
      * 包含路径参数的api缓存
      */
+    @Getter
     private List<String> hasPathVariableApiCache;
 
     public ApiCache(ApiGateway apiGateway) {
@@ -73,7 +78,7 @@ public class ApiCache implements InitializingBean {
      */
     private Map<String, String> collectNoNeedAuthApis(List<AuthApi> apis) {
         return apis.stream()
-                .filter(AuthApi::isNoNeedAuth)
+                .filter(AuthApi::noAuthRequired)
                 .collect(collectMatchApi());
     }
 
@@ -84,7 +89,7 @@ public class ApiCache implements InitializingBean {
      */
     private Map<String, String> collectNeedAuthorizationApis(List<AuthApi> apis) {
         return apis.stream()
-                .filter(AuthApi::isNeedAuthorization)
+                .filter(AuthApi::authorizationRequired)
                 .collect(collectMatchApi());
     }
 
@@ -96,7 +101,7 @@ public class ApiCache implements InitializingBean {
      */
     private Map<String, String> collectNeedAuthenticationApis(List<AuthApi> apis) {
         return apis.stream()
-                .filter(AuthApi::isNeedAuthentication)
+                .filter(AuthApi::authenticationRequired)
                 .collect(collectMatchApi());
     }
 
@@ -110,22 +115,6 @@ public class ApiCache implements InitializingBean {
                 .filter(item -> item.getHasPathVariable().equals(true))
                 .map(AuthApi::getUri)
                 .collect(Collectors.toList());
-    }
-
-    public Map<String, String> getNeedAuthorizationApiCache() {
-        return needAuthorizationApiCache;
-    }
-
-    public Map<String, String> getNoNeedAuthApiCache() {
-        return noNeedAuthApiCache;
-    }
-
-    public Map<String, String> getNeedAuthenticationApiCache() {
-        return needAuthenticationApiCache;
-    }
-
-    public List<String> getHasPathVariableApiCache() {
-        return hasPathVariableApiCache;
     }
 
 }
