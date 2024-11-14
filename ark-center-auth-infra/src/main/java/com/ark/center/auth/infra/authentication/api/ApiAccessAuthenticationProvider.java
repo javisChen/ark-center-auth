@@ -48,7 +48,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         requestUri = attemptReplaceHasPathVariableUrl(requestUri);
 
         // 检查API是否无需认证和授权
-        if (isMatchNoNeedAuthUri(requestUri, method)) {
+        if (isMatchNoRequiredAuthUri(requestUri, method)) {
             return authenticated;
         }
 
@@ -56,7 +56,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         boolean isAuthenticated = loginAuthentication != null && loginAuthentication.isAuthenticated();
 
         // 检查API是否只需认证并且当前用户是否认证成功
-        if (isMatchJustNeedAuthenticationUri(requestUri, method) && isAuthenticated) {
+        if (isMatchJustAuthenticationRequiredUri(requestUri, method) && isAuthenticated) {
             return authenticated;
         }
 
@@ -67,12 +67,9 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
         }
 
         LoginUser loginUser = loginAuthentication.getLoginUser();
-        // 检查API是否需要授权
-        if (isMatchNeedAuthorizationUri(requestUri, method)) {
-            // 检查是否有API访问权
-            if (hasPermission(requestUri, method, loginUser)) {
-                return authenticated;
-            }
+        // 检查API是否需要授权并且用户是否具有该API访问权
+        if (isMatchAuthorizationRequiredUri(requestUri, method) && hasPermission(requestUri, method, loginUser)) {
+            return authenticated;
         }
         if (loginUser.getUserCode().equals("SuperAdmin")) {
             return authenticated;
@@ -109,7 +106,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
      *
      * @return 匹配成功=true，不成功=false
      */
-    public boolean isMatchNeedAuthorizationUri(String requestUri, String method) {
+    public boolean isMatchAuthorizationRequiredUri(String requestUri, String method) {
         Map<String, String> cache = apiCache.getNeedAuthorizationApiCache();
         return isMatchUri(cache, requestUri, method);
     }
@@ -119,8 +116,8 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
      *
      * @return 匹配成功=true，不成功=false
      */
-    public boolean isMatchNoNeedAuthUri(String requestUri, String method) {
-        Map<String, String> cache = apiCache.getNoNeedAuthApiCache();
+    public boolean isMatchNoRequiredAuthUri(String requestUri, String method) {
+        Map<String, String> cache = apiCache.getNoRequiredAuthApiCache();
         return isMatchUri(cache, requestUri, method);
     }
 
@@ -129,7 +126,7 @@ public final class ApiAccessAuthenticationProvider implements AuthenticationProv
      *
      * @return 匹配成功=true，不成功=false
      */
-    public boolean isMatchJustNeedAuthenticationUri(String requestUri, String method) {
+    public boolean isMatchJustAuthenticationRequiredUri(String requestUri, String method) {
         Map<String, String> cache = apiCache.getNeedAuthenticationApiCache();
         return isMatchUri(cache, requestUri, method);
     }

@@ -5,7 +5,7 @@ import com.ark.center.auth.domain.user.AuthUserApiPermission;
 
 import java.util.List;
 
-public interface UserGateway {
+public interface UserService {
 
     AuthUser retrieveUserByMobile(String mobile);
 

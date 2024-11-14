@@ -68,7 +68,7 @@ public class UserApiPermissionCache implements InitializingBean {
             return JSON.parseArray(cache, AuthUserApiPermission.class);
         }
         // DB
-        List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.getApiPermissions(userId));
+        List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.queryApiPermissions(userId));
         List<AuthUserApiPermission> userApiPermissions = userConverter.toAuthUserApiPermission(apiList);
         l2Cache.set(l2CacheKey, JSON.toJSONString(userApiPermissions), 12L, TimeUnit.HOURS);
         return userApiPermissions;

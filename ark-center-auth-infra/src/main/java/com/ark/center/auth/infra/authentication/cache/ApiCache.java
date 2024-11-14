@@ -27,7 +27,7 @@ public class ApiCache implements InitializingBean {
      * 无需授权api缓存
      */
     @Getter
-    private Map<String, String> noNeedAuthApiCache;
+    private Map<String, String> noRequiredAuthApiCache;
 
     /**
      * 无需授权api缓存
@@ -59,7 +59,7 @@ public class ApiCache implements InitializingBean {
     public synchronized void refresh(boolean throwEx) {
         try {
             List<AuthApi> apis = apiGateway.retrieveApis();
-            noNeedAuthApiCache = collectNoNeedAuthApis(apis);
+            noRequiredAuthApiCache = collectNoNeedAuthApis(apis);
             needAuthorizationApiCache = collectNeedAuthorizationApis(apis);
             needAuthenticationApiCache = collectNeedAuthenticationApis(apis);
             hasPathVariableApiCache = collectHasPathVariableApis(apis);

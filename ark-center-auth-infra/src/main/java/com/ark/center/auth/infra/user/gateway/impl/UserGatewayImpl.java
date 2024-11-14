@@ -2,7 +2,7 @@ package com.ark.center.auth.infra.user.gateway.impl;
 
 import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.AuthUserApiPermission;
-import com.ark.center.auth.domain.user.gateway.UserGateway;
+import com.ark.center.auth.domain.user.gateway.UserService;
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.center.auth.infra.user.facade.UserFacade;
@@ -18,7 +18,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class UserGatewayImpl implements UserGateway {
+public class UserGatewayImpl implements UserService {
 
     private final UserFacade userFacade;
     private final UserPermissionFacade userPermissionFacade;

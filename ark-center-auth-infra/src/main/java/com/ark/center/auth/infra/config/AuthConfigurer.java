@@ -1,6 +1,6 @@
 package com.ark.center.auth.infra.config;
 
-import com.ark.center.auth.domain.user.gateway.UserGateway;
+import com.ark.center.auth.domain.user.gateway.UserService;
 import com.ark.center.auth.domain.user.service.UserPermissionService;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationHandler;
@@ -82,7 +82,7 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     }
 
     private AccountLoginAuthenticationProvider loginAuthenticationProvider() {
-        UserGateway userGateway = context.getBean(UserGateway.class);
+        UserService userGateway = context.getBean(UserService.class);
         UserTokenGenerator userTokenGenerator = context.getBean(UserTokenGenerator.class);
         UserConverter userConverter = context.getBean(UserConverter.class);
         AccountLoginAuthenticationProvider provider = new AccountLoginAuthenticationProvider(userTokenGenerator, userGateway, userConverter);
@@ -91,7 +91,7 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     }
 
     private MobileLoginAuthenticationProvider smsAuthenticationProvider() {
-        UserGateway userGateway = context.getBean(UserGateway.class);
+        UserService userGateway = context.getBean(UserService.class);
         UserTokenGenerator userTokenGenerator = context.getBean(UserTokenGenerator.class);
         UserConverter userConverter = context.getBean(UserConverter.class);
         CacheService cacheService = context.getBean(CacheService.class);
