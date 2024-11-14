@@ -1,7 +1,7 @@
 package com.ark.center.auth.domain.user.service;
 
 import com.ark.center.auth.domain.user.AuthUserApiPermission;
-import com.ark.center.auth.domain.user.gateway.UserService;
+import com.ark.center.auth.domain.user.gateway.UserGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserPermissionService {
 
-    private final UserService userGateway;
+    private final UserGateway userGateway;
 
     public boolean checkHasApiPermission(String applicationCode, Long userId, String requestUri, String method) {
         return userGateway.checkHasPermission(requestUri, applicationCode, method, userId);

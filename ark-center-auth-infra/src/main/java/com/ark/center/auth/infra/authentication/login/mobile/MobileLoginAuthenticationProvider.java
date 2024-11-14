@@ -2,7 +2,7 @@ package com.ark.center.auth.infra.authentication.login.mobile;
 
 import cn.hutool.core.lang.Assert;
 import com.ark.center.auth.domain.user.AuthUser;
-import com.ark.center.auth.domain.user.gateway.UserService;
+import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
@@ -16,14 +16,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class MobileLoginAuthenticationProvider extends AbstractLoginAuthenticationProvider<MobileAuthenticationToken> {
 
-    private final UserService userGateway;
+    private final UserGateway userGateway;
 
     private final CacheService cacheService;
 
     private final UserConverter userConverter;
 
     public MobileLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator,
-                                             UserService userGateway,
+                                             UserGateway userGateway,
                                              CacheService cacheService,
                                              UserConverter userConverter) {
         super(userTokenGenerator);

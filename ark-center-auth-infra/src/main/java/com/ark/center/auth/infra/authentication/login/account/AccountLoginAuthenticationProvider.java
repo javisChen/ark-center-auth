@@ -2,7 +2,7 @@ package com.ark.center.auth.infra.authentication.login.account;
 
 import cn.hutool.core.lang.Assert;
 import com.ark.center.auth.domain.user.AuthUser;
-import com.ark.center.auth.domain.user.gateway.UserService;
+import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
 import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
@@ -18,12 +18,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Slf4j
 public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticationProvider<AccountAuthenticationToken> {
 
-    private final UserService userGateway;
+    private final UserGateway userGateway;
     private final UserConverter userConverter;
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public AccountLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator,
-                                              UserService userGateway, UserConverter userConverter) {
+                                              UserGateway userGateway, UserConverter userConverter) {
         super(userTokenGenerator);
         this.userGateway = userGateway;
         this.userConverter = userConverter;
