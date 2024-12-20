@@ -48,6 +48,13 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
         ApiCache apiCache = context.getBean(ApiCache.class);
         UserPermissionService userPermissionService = context.getBean(UserPermissionService.class);
 
+        httpSecurity
+                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
+                    authorizationManagerRequestMatcherRegistry
+                            .requestMatchers("/captcha/**")
+                            .permitAll();
+                });
+
         // Filters
         addFilters(httpSecurity);
 
