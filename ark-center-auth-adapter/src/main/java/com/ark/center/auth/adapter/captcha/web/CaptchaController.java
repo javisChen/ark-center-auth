@@ -1,8 +1,8 @@
 package com.ark.center.auth.adapter.captcha.web;
 
-import com.ark.center.auth.client.captcha.CaptchaResult;
-import com.ark.center.auth.client.captcha.dto.GenerateCaptchaCommand;
-import com.ark.center.auth.client.captcha.dto.VerifyCaptchaCommand;
+import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
+import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
+import com.ark.center.auth.client.captcha.dto.CaptchaResultDTO;
 import com.ark.center.auth.captcha.CaptchaAppService;
 import com.ark.component.dto.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,10 +22,10 @@ public class CaptchaController {
     
     @Operation(summary = "生成验证码")
     @PostMapping("/generate")
-    public SingleResponse<CaptchaResult> generateCaptcha(
+    public SingleResponse<CaptchaResultDTO> generateCaptcha(
             @Parameter(description = "生成验证码请求") 
             @Validated @RequestBody GenerateCaptchaCommand command) {
-        CaptchaResult result = captchaService.create(command);
+        CaptchaResultDTO result = captchaService.create(command);
         result.setCode(null);
         return SingleResponse.ok(result);
     }

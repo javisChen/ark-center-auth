@@ -36,17 +36,8 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
     private ApplicationContext context;
 
     @Override
-    public void init(HttpSecurity http) throws Exception {
-        context = http.getSharedObject(ApplicationContext.class);
-
-        SecurityConfiguration.applyDefaultSecurity(http);
-        configureLogout(http);
-    }
-
-    @Override
-    public void configure(HttpSecurity httpSecurity) throws Exception {
-        ApiCache apiCache = context.getBean(ApiCache.class);
-        UserPermissionService userPermissionService = context.getBean(UserPermissionService.class);
+    public void init(HttpSecurity httpSecurity) throws Exception {
+        context = httpSecurity.getSharedObject(ApplicationContext.class);
 
         httpSecurity
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
@@ -54,6 +45,15 @@ public final class AuthConfigurer extends AbstractHttpConfigurer<AuthConfigurer,
                             .requestMatchers("/captcha/**")
                             .permitAll();
                 });
+
+        SecurityConfiguration.applyDefaultSecurity(httpSecurity);
+        configureLogout(httpSecurity);
+    }
+
+    @Override
+    public void configure(HttpSecurity httpSecurity) throws Exception {
+        ApiCache apiCache = context.getBean(ApiCache.class);
+        UserPermissionService userPermissionService = context.getBean(UserPermissionService.class);
 
         // Filters
         addFilters(httpSecurity);

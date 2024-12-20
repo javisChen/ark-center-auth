@@ -1,9 +1,9 @@
 package com.ark.center.auth.infra.captcha;
 
 import com.ark.center.auth.client.captcha.CaptchaType;
-import com.ark.center.auth.client.captcha.CaptchaResult;
-import com.ark.center.auth.client.captcha.dto.GenerateCaptchaCommand;
-import com.ark.center.auth.client.captcha.dto.VerifyCaptchaCommand;
+import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
+import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
+import com.ark.center.auth.client.captcha.dto.CaptchaResultDTO;
 
 /**
  * 验证码提供者接口
@@ -22,7 +22,7 @@ public interface CaptchaProvider {
      * @param command 创建验证码命令
      * @return 验证码结果
      */
-    CaptchaResult generate(GenerateCaptchaCommand command);
+    CaptchaResultDTO generate(GenerateCaptchaCommand command);
     
     /**
      * 验证验证码

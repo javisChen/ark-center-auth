@@ -1,13 +1,26 @@
 package com.ark.center.auth.client.captcha;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
-@Schema(description = "验证码类型")
+@Getter
+@Schema(
+    enumAsRef = true, 
+    description = """
+        验证码类型:
+         * `SMS` - 短信验证码
+         * `EMAIL` - 邮件验证码
+         * `IMAGE` - 图片验证码
+        """
+)
 public enum CaptchaType {
-    @Schema(description = "短信验证码")
-    SMS,
-    @Schema(description = "邮件验证码")
-    EMAIL,
-    @Schema(description = "图片验证码")
-    IMAGE
+    SMS("短信验证码"),
+    EMAIL("邮件验证码"),
+    IMAGE("图片验证码");
+
+    private final String description;
+
+    CaptchaType(String description) {
+        this.description = description;
+    }
 } 

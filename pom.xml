@@ -7,6 +7,7 @@
     <groupId>com.ark.center</groupId>
     <artifactId>ark-center-auth</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <modules>
         <module>ark-center-auth-client</module>
@@ -17,59 +18,68 @@
         <module>ark-center-auth-start</module>
     </modules>
 
-    <packaging>pom</packaging>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        
+        <!-- 依赖版本 -->
+        <ark-dependencies.version>1.0.0-SNAPSHOT</ark-dependencies.version>
+        <lombok.version>1.18.30</lombok.version>
+        <mapstruct.version>1.5.3.Final</mapstruct.version>
+        
+        <!-- 插件版本 -->
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+        <docker-maven-plugin.version>0.43.4</docker-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- 引入 ark 依赖管理 -->
             <dependency>
                 <groupId>com.ark.boot</groupId>
                 <artifactId>ark-dependencies</artifactId>
-                <version>${project.version}</version>
+                <version>${ark-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
 
+            <!-- 内部模块依赖 -->
             <dependency>
-                <groupId>com.ark.center</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ark-center-auth-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.ark.center</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ark-center-auth-adapter</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.ark.center</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ark-center-auth-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.ark.center</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ark-center-auth-infra</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.ark.center</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ark-center-auth-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- 外部服务 -->
+            <!-- 外部服务依赖 -->
             <dependency>
-                <groupId>com.ark.center</groupId>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>ark-center-iam-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

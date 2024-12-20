@@ -1,9 +1,9 @@
 package com.ark.center.auth.captcha;
 
-import com.ark.center.auth.client.captcha.CaptchaResult;
 import com.ark.center.auth.client.captcha.CaptchaType;
-import com.ark.center.auth.client.captcha.dto.GenerateCaptchaCommand;
-import com.ark.center.auth.client.captcha.dto.VerifyCaptchaCommand;
+import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
+import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
+import com.ark.center.auth.client.captcha.dto.CaptchaResultDTO;
 import com.ark.center.auth.infra.captcha.CaptchaProvider;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class CaptchaAppService {
      * @param command 创建验证码命令
      * @return 验证码结果
      */
-    public CaptchaResult create(GenerateCaptchaCommand command) {
+    public CaptchaResultDTO create(GenerateCaptchaCommand command) {
         return getProvider(command.getType()).generate(command);
     }
     
