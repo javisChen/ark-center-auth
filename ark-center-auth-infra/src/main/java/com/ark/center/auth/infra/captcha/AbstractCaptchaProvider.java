@@ -6,7 +6,6 @@ import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
 import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
 import com.ark.center.auth.client.captcha.dto.CaptchaResultDTO;
 import com.ark.component.cache.CacheService;
-import com.ark.component.exception.ExceptionFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,9 +26,8 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
     // 子类可以覆盖这些默认配置
     protected int codeLength = 6;        // 验证码长度
     protected long expireMinutes = 2;    // 过期时间(分钟)
-    protected String codePrefix = "captcha:";  // 缓存key前缀
+    protected String codePrefix = "cap:";  // 缓存key前缀
 
-    private static final String VERIFY_FAIL_COUNT_PREFIX = "captcha:fail:";
     private static final int CLEAR_CAPTCHA_FAIL_COUNT = 3;  // 清除验证码的失败次数
     
     @Override
@@ -41,9 +39,14 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
         log.info("[Captcha Generate] Start generating captcha, type={}, target={}, scene={}", 
                 type, target, scene);
 
-        String cacheKey = buildCacheKey(target, scene);
-        CaptchaResultDTO existingResult = getCachedResult(cacheKey);
-        
+        String cacheKey = buildCaptchaKey(target, scene);
+        CaptchaResultDTO existingResult = null;
+        try {
+            existingResult = getCachedResult(cacheKey);
+        } catch (Exception e) {
+            log.error("[Captcha Generate] Fail to get cached result", e);
+        }
+
         if (existingResult != null) {
             log.info("[Captcha Generate] Existing captcha found, type={}, target={}, scene={}", 
                     type, target, scene);
@@ -84,7 +87,7 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
                 type, target, scene);
 
         // 1. 获取并校验验证码
-        String cacheKey = buildCacheKey(target, scene);
+        String cacheKey = buildCaptchaKey(target, scene);
         CaptchaResultDTO savedResult = getCachedResult(cacheKey);
         
         if (savedResult == null) {
@@ -98,18 +101,19 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
         if (verified) {
             // 验证成功：删除验证码和失败计数
             cacheService.del(cacheKey);
-            cacheService.del(buildVerifyFailCountKey(target, scene));
+            cacheService.del(buildFailCountKey(target, scene));
             log.info("[Captcha Verify] Captcha verified successfully, type={}, target={}, scene={}", 
                     type, target, scene);
         } else {
             // 验证失败：增加失败计数
-            String failCountKey = buildVerifyFailCountKey(target, scene);
+            String failCountKey = buildFailCountKey(target, scene);
             long newFailCount = cacheService.incrBy(failCountKey, 1L);
             
-            // 失败3次后清除验证码
+            // 失败3次后清除验证码和失败计数
             if (newFailCount >= CLEAR_CAPTCHA_FAIL_COUNT) {
                 cacheService.del(cacheKey);
-                log.warn("[Captcha Verify] Clear captcha after {} failures, type={}, target={}, scene={}", 
+                cacheService.del(failCountKey);
+                log.warn("[Captcha Verify] Clear captcha and fail count after {} failures, type={}, target={}, scene={}", 
                         CLEAR_CAPTCHA_FAIL_COUNT, type, target, scene);
             }
             
@@ -140,12 +144,22 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
         return cacheService.get(key, CaptchaResultDTO.class);
     }
 
-    private String buildCacheKey(String target, CaptchaScene scene) {
-        return String.format("%s%s:%s:%s", codePrefix, getProviderType().name(), scene.name(), target).toLowerCase();
+    private String buildCaptchaKey(String target, CaptchaScene scene) {
+        return String.format("%s%s:%s:%s", 
+            codePrefix,
+            getProviderType().name().toLowerCase(),
+            scene.name().toLowerCase(), 
+            target
+        );
     }
 
-    private String buildVerifyFailCountKey(String target, CaptchaScene scene) {
-        return String.format("%s%s:%s:%s", VERIFY_FAIL_COUNT_PREFIX, getProviderType().name(), scene.name(), target).toLowerCase();
+    private String buildFailCountKey(String target, CaptchaScene scene) {
+        return String.format("%s%s:%s:f:%s",
+            codePrefix,
+            getProviderType().name().toLowerCase(),
+            scene.name().toLowerCase(),
+            target
+        );
     }
 
     protected abstract String generateCode();
