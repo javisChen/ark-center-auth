@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
         }
         """
 )
-public class CaptchaResultDTO {
+public class CaptchaContentDTO {
     
     @Schema(
         description = "验证码", 

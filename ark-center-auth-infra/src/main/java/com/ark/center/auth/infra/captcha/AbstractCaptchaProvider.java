@@ -4,7 +4,7 @@ import com.ark.center.auth.client.captcha.CaptchaScene;
 import com.ark.center.auth.client.captcha.CaptchaType;
 import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
 import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
-import com.ark.center.auth.client.captcha.dto.CaptchaResultDTO;
+import com.ark.center.auth.client.captcha.dto.CaptchaContentDTO;
 import com.ark.component.cache.CacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
     private static final int CLEAR_CAPTCHA_FAIL_COUNT = 3;  // 清除验证码的失败次数
     
     @Override
-    public CaptchaResultDTO generate(GenerateCaptchaCommand command) {
+    public CaptchaContentDTO generate(GenerateCaptchaCommand command) {
         CaptchaType type = getProviderType();
         String target = command.getTarget();
         CaptchaScene scene = command.getScene();
@@ -40,9 +40,9 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
                 type, target, scene);
 
         String cacheKey = buildCaptchaKey(target, scene);
-        CaptchaResultDTO existingResult = null;
+        CaptchaContentDTO existingResult = null;
         try {
-            existingResult = getCachedResult(cacheKey);
+            existingResult = getCachedCaptcha(cacheKey);
         } catch (Exception e) {
             log.error("[Captcha Generate] Fail to get cached result", e);
         }
@@ -54,13 +54,13 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
         }
 
         String code = generateCode();
-        CaptchaResultDTO result = buildResult(code);
+        CaptchaContentDTO result = buildResult(code);
 
         boolean saved = saveWithLock(cacheKey, result);
         if (!saved) {
             log.info("[Captcha Generate] Concurrent generation detected, type={}, target={}, scene={}", 
                     type, target, scene);
-            return getCachedResult(cacheKey);
+            return getCachedCaptcha(cacheKey);
         }
 
         try {
@@ -87,8 +87,8 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
                 type, target, scene);
 
         // 1. 获取并校验验证码
-        String cacheKey = buildCaptchaKey(target, scene);
-        CaptchaResultDTO savedResult = getCachedResult(cacheKey);
+        String captchaCacheKey = buildCaptchaKey(target, scene);
+        CaptchaContentDTO savedResult = getCachedCaptcha(captchaCacheKey);
         
         if (savedResult == null) {
             log.warn("[Captcha Verify] Captcha not found or expired, type={}, target={}, scene={}", 
@@ -100,7 +100,7 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
         boolean verified = savedResult.getCode().equals(command.getCode());
         if (verified) {
             // 验证成功：删除验证码和失败计数
-            cacheService.del(cacheKey);
+            cacheService.del(captchaCacheKey);
             cacheService.del(buildFailCountKey(target, scene));
             log.info("[Captcha Verify] Captcha verified successfully, type={}, target={}, scene={}", 
                     type, target, scene);
@@ -111,7 +111,7 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
             
             // 失败3次后清除验证码和失败计数
             if (newFailCount >= CLEAR_CAPTCHA_FAIL_COUNT) {
-                cacheService.del(cacheKey);
+                cacheService.del(captchaCacheKey);
                 cacheService.del(failCountKey);
                 log.warn("[Captcha Verify] Clear captcha and fail count after {} failures, type={}, target={}, scene={}", 
                         CLEAR_CAPTCHA_FAIL_COUNT, type, target, scene);
@@ -124,9 +124,9 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
         return verified;
     }
 
-    private CaptchaResultDTO buildResult(String code) {
+    private CaptchaContentDTO buildResult(String code) {
         long expireAt = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(expireMinutes);
-        return CaptchaResultDTO.builder()
+        return CaptchaContentDTO.builder()
                 .code(code)
                 .expireAt(expireAt)
                 .expireTime(LocalDateTime.ofInstant(
@@ -136,12 +136,12 @@ public abstract class AbstractCaptchaProvider implements CaptchaProvider {
                 .build();
     }
 
-    private boolean saveWithLock(String key, CaptchaResultDTO result) {
+    private boolean saveWithLock(String key, CaptchaContentDTO result) {
         return cacheService.setIfAbsent(key, result, expireMinutes, TimeUnit.MINUTES);
     }
 
-    private CaptchaResultDTO getCachedResult(String key) {
-        return cacheService.get(key, CaptchaResultDTO.class);
+    private CaptchaContentDTO getCachedCaptcha(String key) {
+        return cacheService.get(key, CaptchaContentDTO.class);
     }
 
     private String buildCaptchaKey(String target, CaptchaScene scene) {
