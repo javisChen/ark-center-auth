@@ -18,8 +18,4 @@ public interface Uris {
      */
     String LOGOUT = "/v1/logout";
 
-    /**
-     * 发送手机验证码
-     */
-    String SMS_CODE = "/v1/code/sms";
 }

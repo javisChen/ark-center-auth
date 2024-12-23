@@ -1,7 +1,7 @@
 package com.ark.center.auth.client.captcha.command;
 
-import com.ark.center.auth.client.captcha.CaptchaScene;
-import com.ark.center.auth.client.captcha.CaptchaType;
+import com.ark.center.auth.client.captcha.constant.CaptchaScene;
+import com.ark.center.auth.client.captcha.constant.CaptchaType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,7 +24,7 @@ public class GenerateCaptchaCommand {
 
     @Schema(
             description = "验证码类型",
-            required = true,
+            requiredMode = Schema.RequiredMode.REQUIRED,
             example = "SMS",
             defaultValue = "SMS",
             allowableValues = {"SMS", "EMAIL", "IMAGE"},

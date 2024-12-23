@@ -2,7 +2,7 @@ package com.ark.center.auth.infra.captcha;
 
 import cn.hutool.core.util.RandomUtil;
 
-import com.ark.center.auth.client.captcha.CaptchaType;
+import com.ark.center.auth.client.captcha.constant.CaptchaType;
 import com.ark.component.cache.CacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

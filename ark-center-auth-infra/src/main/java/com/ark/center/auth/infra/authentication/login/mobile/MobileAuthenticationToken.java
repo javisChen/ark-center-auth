@@ -2,14 +2,11 @@ package com.ark.center.auth.infra.authentication.login.mobile;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
 
 public class MobileAuthenticationToken extends AbstractAuthenticationToken {
-
-	private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
 
 	private final String mobile;
 

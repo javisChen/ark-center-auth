@@ -132,3 +132,9 @@ nacos-config-group: ${NACOS_CONFIG_GROUP:DEFAULT_GROUP}
 nacos-discovery-enabled: true
 nacos-config-enabled: true
 config-allow-override: true
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+  packages-to-scan: com.ark.center.auth.adapter

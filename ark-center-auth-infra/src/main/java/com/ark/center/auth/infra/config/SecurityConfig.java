@@ -4,12 +4,9 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.MediaType;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -18,12 +15,8 @@ import org.springframework.security.oauth2.server.authorization.client.InMemoryR
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 import java.util.UUID;
 
@@ -33,33 +26,33 @@ public class SecurityConfig {
 
     // http://127.0.0.1:8089/oauth2/authorize?response_type=code&client_id=messaging-client&scope=message.read&redirect_uri=http://127.0.0.1:8089/authorized
 
-    @Bean
-    @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
-            throws Exception {
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(Customizer.withDefaults());	// Enable OpenID Connect 1.0
-        http
-                // Redirect to the login page when not authenticated from the
-                // authorization endpoint
-                .exceptionHandling((exceptions) -> exceptions
-                        .defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
-                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
-                        )
-                )
-                // Accept access tokens for User Info and/or Client Registration
-                .oauth2ResourceServer(new Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>>() {
-                    @Override
-                    public void customize(OAuth2ResourceServerConfigurer<HttpSecurity> resourceServer) {
-                        resourceServer
-                                .jwt(Customizer.withDefaults());
-                    }
-                });
-
-        return http.build();
-    }
+//    @Bean
+//    @Order(1)
+//    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
+//            throws Exception {
+//        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+//        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+//                .oidc(Customizer.withDefaults());	// Enable OpenID Connect 1.0
+//        http
+//                // Redirect to the login page when not authenticated from the
+//                // authorization endpoint
+//                .exceptionHandling((exceptions) -> exceptions
+//                        .defaultAuthenticationEntryPointFor(
+//                                new LoginUrlAuthenticationEntryPoint("/login"),
+//                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+//                        )
+//                )
+//                // Accept access tokens for User Info and/or Client Registration
+//                .oauth2ResourceServer(new Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>>() {
+//                    @Override
+//                    public void customize(OAuth2ResourceServerConfigurer<HttpSecurity> resourceServer) {
+//                        resourceServer
+//                                .jwt(Customizer.withDefaults());
+//                    }
+//                });
+//
+//        return http.build();
+//    }
 
 //    @Bean
 //    @Order(2)
@@ -115,6 +108,11 @@ public class SecurityConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }

@@ -3,7 +3,7 @@ package com.ark.center.auth.infra.authentication.token.generator;
 import com.ark.center.auth.infra.authentication.token.JwtUserToken;
 import com.ark.center.auth.infra.authentication.token.UserToken;
 import com.ark.component.security.base.user.LoginUser;
-import com.ark.component.security.core.config.SecurityConstants;
+import com.ark.component.security.core.common.SecurityConstants;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
