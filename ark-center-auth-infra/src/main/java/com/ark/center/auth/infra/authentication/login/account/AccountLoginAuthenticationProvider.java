@@ -1,6 +1,7 @@
 package com.ark.center.auth.infra.authentication.login.account;
 
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
@@ -9,50 +10,108 @@ import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerat
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.component.security.base.user.LoginUser;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * 账号密码登录认证提供者
+ * 负责处理账号密码方式的登录认证
+ */
 @Slf4j
 public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticationProvider<AccountAuthenticationToken> {
 
+    private static final String INVALID_CREDENTIALS_MSG = "用户名或密码错误";
+    private static final String ACCOUNT_DISABLED_MSG = "账号已被禁用";
+    private static final String ACCOUNT_LOCKED_MSG = "账号已被锁定";
+    private static final String ACCOUNT_EXPIRED_MSG = "账号已过期";
+    private static final String SERVICE_ERROR_MSG = "系统繁忙，请稍后重试";
+
     private final UserGateway userGateway;
     private final UserConverter userConverter;
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private PasswordEncoder passwordEncoder;
 
     public AccountLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator,
-                                              UserGateway userGateway, UserConverter userConverter) {
+                                           UserGateway userGateway, 
+                                           UserConverter userConverter) {
         super(userTokenGenerator);
         this.userGateway = userGateway;
         this.userConverter = userConverter;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @Override
     protected void preCheckAuthentication(AccountAuthenticationToken authentication) throws AuthenticationException {
-        Assert.notBlank(authentication.getUsername(), () -> new BadCredentialsException("用户名或密码错误"));
-        Assert.notBlank(authentication.getPassword(), () -> new BadCredentialsException("用户名或密码错误"));
+        // 预检查用户名密码是否为空
+        if (StrUtil.hasBlank(authentication.getUsername(), authentication.getPassword())) {
+            throw new BadCredentialsException(INVALID_CREDENTIALS_MSG);
+        }
     }
 
     @Override
-    protected void additionalAuthenticationChecks(LoginUser user, AccountAuthenticationToken authenticationToken) {
-        String presentedPassword = authenticationToken.getCredentials().toString();
-        if (!this.passwordEncoder.matches(presentedPassword, user.getPassword())) {
-            log.warn("Password does not match stored value");
-            throw new BadCredentialsException("用户名或密码错误");
+    protected void additionalAuthenticationChecks(LoginUser user, AccountAuthenticationToken authentication) {
+        checkAccountStatus(user);
+        verifyPassword(user, authentication);
+    }
+
+    /**
+     * 检查账号状态
+     */
+    private void checkAccountStatus(LoginUser user) {
+        if (!user.isEnabled()) {
+            throw new DisabledException(ACCOUNT_DISABLED_MSG);
+        }
+        if (!user.isAccountNonLocked()) {
+            throw new LockedException(ACCOUNT_LOCKED_MSG);
+        }
+        if (!user.isAccountNonExpired()) {
+            throw new AccountExpiredException(ACCOUNT_EXPIRED_MSG);
+        }
+    }
+
+    /**
+     * 验证密码
+     */
+    private void verifyPassword(LoginUser user, AccountAuthenticationToken authentication) {
+        String presentedPassword = authentication.getCredentials().toString();
+        if (!passwordEncoder.matches(presentedPassword, user.getPassword())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to authenticate since password does not match for user: {}", 
+                    authentication.getUsername());
+            }
+            throw new BadCredentialsException(INVALID_CREDENTIALS_MSG);
         }
     }
 
     @Override
     protected UserDetails retrieveUser(AccountAuthenticationToken authentication) throws AuthenticationException {
-        AuthUser authUser = userGateway.retrieveUserByUsername(authentication.getUsername());
-        Assert.notNull(authUser, () -> new UserNotFoundException("用户名或密码错误"));
-        return userConverter.toLoginUser(authUser);
+        try {
+            AuthUser authUser = userGateway.retrieveUserByUsername(authentication.getUsername());
+            if (authUser == null) {
+                log.warn("User not found: {}", authentication.getUsername());
+                throw new UserNotFoundException(INVALID_CREDENTIALS_MSG);
+            }
+            return userConverter.toLoginUser(authUser);
+        } catch (UserNotFoundException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.error("Failed to authenticate user: {}", authentication.getUsername(), ex);
+            throw new AuthenticationServiceException(SERVICE_ERROR_MSG);
+        }
     }
 
+    /**
+     * 设置密码编码器
+     */
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        Assert.notNull(passwordEncoder, "passwordEncoder cannot be null");
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return AccountAuthenticationToken.class.isAssignableFrom(authentication);
+    }
 }

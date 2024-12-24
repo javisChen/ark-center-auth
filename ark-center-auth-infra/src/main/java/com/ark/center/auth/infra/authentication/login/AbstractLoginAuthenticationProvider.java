@@ -12,8 +12,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.cache.NullUserCache;
@@ -24,7 +22,6 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
 		implements AuthenticationProvider, InitializingBean {
 
 	private final UserCache userCache = new NullUserCache();
-	private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 	private final UserTokenGenerator userTokenGenerator;
 
 	protected AbstractLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator) {
