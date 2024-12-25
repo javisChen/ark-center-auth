@@ -5,14 +5,11 @@ import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerat
 import com.ark.center.auth.infra.config.configurers.ApiSecurityConfigurer;
 import com.ark.center.auth.infra.config.configurers.LoginSecurityConfigurer;
 import com.ark.center.auth.infra.config.configurers.LogoutSecurityConfigurer;
-import com.ark.component.security.core.config.SecurityConfiguration;
+import com.ark.component.security.core.configurers.CommonHttpConfigurer;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,8 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class AuthSecurityConfiguration {
 
     @Bean
-    public UserTokenGenerator userTokenGenerator(JWKSource<SecurityContext> jwkSource) {
-        JwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource);
+    public UserTokenGenerator userTokenGenerator(JwtEncoder jwtEncoder) {
         return new JwtUserTokenGenerator(jwtEncoder);
     }
 
@@ -38,11 +34,10 @@ public class AuthSecurityConfiguration {
                         .requestMatchers("/captcha/**")
                                 .permitAll()
                 )
+                .with(new CommonHttpConfigurer(), configurer -> {})
                 .with(new LogoutSecurityConfigurer(), configurer -> {})
                 .with(new LoginSecurityConfigurer(), configurer -> {})
                 .with(new ApiSecurityConfigurer(), configurer -> {});
-
-        SecurityConfiguration.applyDefaultSecurity(httpSecurity);
 
         return httpSecurity.build();
     }

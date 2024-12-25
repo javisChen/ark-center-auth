@@ -14,7 +14,7 @@ public interface UserToken {
      *
      * @return 返回Token值
      */
-    String getTokenValue();
+    String getToken();
 
     /**
      * 签发日期
@@ -35,4 +35,25 @@ public interface UserToken {
     default Instant getExpiresAt() {
         return null;
     }
+
+    /**
+     * 刷新令牌
+     *
+     * @return 返回刷新令牌
+     */
+    String getRefreshToken();
+
+    /**
+     * 令牌过期时间
+     *
+     * @return 返回令牌过期时间
+     */
+    Long getExpiresIn();
+
+    /**
+     * 令牌类型
+     *
+     * @return 返回令牌类型
+     */
+    String getTokenType();
 }

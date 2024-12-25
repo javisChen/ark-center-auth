@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.authentication.event;
+package com.ark.center.auth.authentication.event;
 
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
@@ -27,10 +27,8 @@ public class AuthenticationSuccessEventListener implements ApplicationListener<A
     }
 
     private void handlerForLoginSuccess(AuthenticationSuccessEvent event, LoginAuthenticationToken loginAuthenticationToken) {
-        log.info("用户认证成功: 用户名 = {}，登录时间 = {}", loginAuthenticationToken.getName(), LocalDateTime.now());
-
+        log.info("User successfully authenticated: {}, time = {}", loginAuthenticationToken, LocalDateTime.now());
         Long userId = loginAuthenticationToken.getLoginUser().getUserId();
-
         // 刷新权限缓存
         userApiPermissionCache.refresh(userId);
 

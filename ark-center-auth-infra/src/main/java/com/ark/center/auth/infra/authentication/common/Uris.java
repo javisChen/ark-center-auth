@@ -11,7 +11,7 @@ public interface Uris {
     /**
      * 登录
      */
-    String LOGIN = "/v1/login/*";
+    String LOGIN = "/v1/login";
 
     /**
      * 登出

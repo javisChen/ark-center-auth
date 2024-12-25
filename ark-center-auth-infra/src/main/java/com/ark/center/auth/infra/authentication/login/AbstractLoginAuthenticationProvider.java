@@ -1,4 +1,3 @@
-
 package com.ark.center.auth.infra.authentication.login;
 
 import cn.hutool.core.util.ClassUtil;
@@ -75,7 +74,12 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
 	protected Authentication createSuccessAuthentication(UserDetails user) {
 		LoginUser loginUser = (LoginUser) user;
 		UserToken userToken = userTokenGenerator.generate(loginUser);
-		return new LoginAuthenticationToken(loginUser, userToken.getTokenValue());
+		return new LoginAuthenticationToken(
+			loginUser, 
+			userToken.getToken(),
+			userToken.getRefreshToken(),
+			userToken.getExpiresIn()
+		);
 	}
 
 	protected abstract UserDetails retrieveUser(T authentication) throws AuthenticationException;

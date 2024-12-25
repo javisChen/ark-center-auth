@@ -27,7 +27,7 @@ public abstract class AbstractUserToken implements UserToken {
         this.expiresAt = expiresAt;
     }
 
-    public String getTokenValue() {
+    public String getToken() {
         return this.tokenValue;
     }
 
