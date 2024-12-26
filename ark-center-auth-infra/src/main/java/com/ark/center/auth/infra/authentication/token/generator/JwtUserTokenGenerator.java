@@ -6,6 +6,7 @@ import com.ark.component.security.base.user.LoginUser;
 import com.ark.component.security.core.common.SecurityConstants;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import lombok.RequiredArgsConstructor;
 import java.time.Instant;
@@ -22,7 +23,10 @@ import org.springframework.security.core.GrantedAuthority;
  */
 @RequiredArgsConstructor
 public class JwtUserTokenGenerator implements UserTokenGenerator {
+
     private final JwtEncoder jwtEncoder;
+
+    private final SignatureAlgorithm jwsAlgorithm = SignatureAlgorithm.RS256;
 
     /**
      * 生成用户Token
@@ -34,8 +38,11 @@ public class JwtUserTokenGenerator implements UserTokenGenerator {
     @Override
     public UserToken generate(LoginUser loginUser) {
         JwtClaimsSet claims = buildClaims(loginUser);
-        JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS256).build();
-        Jwt jwt = jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims));
+        JwsHeader jwsHeader = JwsHeader
+                .with(jwsAlgorithm)
+                .build();
+        JwtEncoderParameters parameters = JwtEncoderParameters.from(jwsHeader, claims);
+        Jwt jwt = jwtEncoder.encode(parameters);
         
         String refreshToken = generateRefreshToken();
         

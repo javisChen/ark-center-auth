@@ -6,15 +6,12 @@ import com.ark.center.auth.infra.config.configurers.ApiSecurityConfigurer;
 import com.ark.center.auth.infra.config.configurers.LoginSecurityConfigurer;
 import com.ark.center.auth.infra.config.configurers.LogoutSecurityConfigurer;
 import com.ark.component.security.core.configurers.CommonHttpConfigurer;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -30,10 +27,10 @@ public class AuthSecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/captcha/**")
-                                .permitAll()
-                )
+//                .authorizeHttpRequests(authorize -> authorize
+//                        .requestMatchers("/captcha/**")
+//                                .permitAll()
+//                )
                 .with(new CommonHttpConfigurer(), configurer -> {})
                 .with(new LogoutSecurityConfigurer(), configurer -> {})
                 .with(new LoginSecurityConfigurer(), configurer -> {})
