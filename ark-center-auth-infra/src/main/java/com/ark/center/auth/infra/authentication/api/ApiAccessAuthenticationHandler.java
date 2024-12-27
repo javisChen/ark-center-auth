@@ -1,6 +1,6 @@
 package com.ark.center.auth.infra.authentication.api;
 
-import com.ark.center.auth.infra.authentication.DefaultAuthenticationHandler;
+import com.ark.center.auth.infra.authentication.AuthenticationHandler;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.dto.ServerResponse;
 import jakarta.servlet.FilterChain;
@@ -13,7 +13,7 @@ import org.springframework.security.core.Authentication;
 import java.io.IOException;
 
 @Slf4j
-public class ApiAccessAuthenticationHandler extends DefaultAuthenticationHandler {
+public class ApiAccessAuthenticationHandler extends AuthenticationHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         writeSuccess(response, authentication);

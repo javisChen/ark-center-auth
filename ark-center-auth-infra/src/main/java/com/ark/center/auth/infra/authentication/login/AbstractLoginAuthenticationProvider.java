@@ -1,10 +1,8 @@
 package com.ark.center.auth.infra.authentication.login;
 
 import cn.hutool.core.util.ClassUtil;
-import com.ark.center.auth.infra.authentication.token.UserToken;
-import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.component.security.base.user.LoginUser;
-import com.ark.component.security.core.authentication.LoginAuthenticationToken;
+import com.ark.component.security.core.token.issuer.TokenIssuer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -21,10 +19,10 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
 		implements AuthenticationProvider, InitializingBean {
 
 	private final UserCache userCache = new NullUserCache();
-	private final UserTokenGenerator userTokenGenerator;
+	private final TokenIssuer tokenIssuer;
 
-	protected AbstractLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator) {
-		this.userTokenGenerator = userTokenGenerator;
+	protected AbstractLoginAuthenticationProvider(TokenIssuer tokenIssuer) {
+		this.tokenIssuer = tokenIssuer;
 	}
 
 	protected abstract void preCheckAuthentication(T authentication) throws AuthenticationException;
@@ -62,7 +60,7 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
 
 		postHandle(user, authenticationToken);
 
-		return createSuccessAuthentication(user);
+		return issueToken(user);
 	}
 
 	protected void postHandle(UserDetails user, T authenticationToken) {
@@ -71,15 +69,9 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
 
 	protected abstract void additionalAuthenticationChecks(LoginUser user, T authenticationToken);
 
-	protected Authentication createSuccessAuthentication(UserDetails user) {
+	protected Authentication issueToken(UserDetails user) {
 		LoginUser loginUser = (LoginUser) user;
-		UserToken userToken = userTokenGenerator.generate(loginUser);
-		return new LoginAuthenticationToken(
-			loginUser, 
-			userToken.getToken(),
-			userToken.getRefreshToken(),
-			userToken.getExpiresIn()
-		);
+		return tokenIssuer.issueToken(loginUser);
 	}
 
 	protected abstract UserDetails retrieveUser(T authentication) throws AuthenticationException;

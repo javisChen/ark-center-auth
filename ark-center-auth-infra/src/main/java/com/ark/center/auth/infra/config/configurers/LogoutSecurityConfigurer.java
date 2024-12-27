@@ -18,8 +18,7 @@ public class LogoutSecurityConfigurer extends AbstractHttpConfigurer<LogoutSecur
         ApplicationContext context = httpSecurity.getSharedObject(ApplicationContext.class);
 
         AuthLogoutHandler handler = new AuthLogoutHandler(
-                context.getBean(CacheService.class),
-                context.getBean(MessageTemplate.class)
+                context.getBean(CacheService.class)
         );
 
         httpSecurity.logout(logout -> logout

@@ -6,9 +6,9 @@ import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.account.AccountLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.mobile.MobileLoginAuthenticationProvider;
-import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.component.cache.CacheService;
+import com.ark.component.security.core.token.issuer.TokenIssuer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +17,7 @@ import org.springframework.security.authentication.DefaultAuthenticationEventPub
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -33,7 +34,7 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
     public void init(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 http.getSharedObject(AuthenticationManagerBuilder.class);
-
+        
         context = http.getSharedObject(ApplicationContext.class);
         AuthenticationManager authenticationManager = authenticationManagerBuilder
                 .authenticationEventPublisher(new DefaultAuthenticationEventPublisher())
@@ -42,7 +43,6 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
                 .build();
         http.authenticationManager(authenticationManager);
         http.setSharedObject(AuthenticationManager.class, authenticationManager);
-
     }
 
     @Override
@@ -67,14 +67,14 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
         filter.setAuthenticationFailureHandler(authenticationHandler);
         filter.setSecurityContextRepository(contextRepository);
         filter.setAuthenticationManager(authenticationManager);
-        
+
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @NotNull
     private MobileLoginAuthenticationProvider buildMobileLoginAuthenticationProvider(ApplicationContext context) {
         return new MobileLoginAuthenticationProvider(
-            context.getBean(UserTokenGenerator.class),
+            context.getBean(TokenIssuer.class),
             context.getBean(UserGateway.class),
             context.getBean(CacheService.class),
             context.getBean(UserConverter.class)
@@ -83,12 +83,12 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
 
     @NotNull
     private AccountLoginAuthenticationProvider buildAccountLoginAuthenticationProvider(ApplicationContext context) {
-        AccountLoginAuthenticationProvider accountProvider = new AccountLoginAuthenticationProvider(
-            context.getBean(UserTokenGenerator.class),
+        return new AccountLoginAuthenticationProvider(
+            context.getBean(TokenIssuer.class),
             context.getBean(UserGateway.class),
-            context.getBean(UserConverter.class)
+            context.getBean(UserConverter.class),
+            context.getBean(PasswordEncoder.class),
+            context.getBean(UserDetailsService.class)
         );
-        accountProvider.setPasswordEncoder(context.getBean(PasswordEncoder.class));
-        return accountProvider;
     }
 } 

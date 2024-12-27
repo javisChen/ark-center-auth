@@ -3,7 +3,6 @@ package com.ark.center.auth.infra.authentication.logout;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.cache.CacheService;
 import com.ark.component.dto.ServerResponse;
-import com.ark.component.mq.integration.MessageTemplate;
 import com.ark.component.security.base.user.LoginUser;
 import com.ark.component.security.core.context.repository.RedisKeyUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,11 +21,9 @@ public class AuthLogoutHandler implements LogoutSuccessHandler, LogoutHandler {
 
     private final CacheService cacheService;
     private final BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
-    private final MessageTemplate messageTemplate;
 
-    public AuthLogoutHandler(CacheService cacheService, MessageTemplate messageTemplate) {
+    public AuthLogoutHandler(CacheService cacheService) {
         this.cacheService = cacheService;
-        this.messageTemplate = messageTemplate;
     }
 
     @Override

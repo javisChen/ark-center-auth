@@ -1,26 +1,27 @@
 package com.ark.center.auth.infra.authentication.login.account;
 
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
-import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.core.token.issuer.TokenIssuer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 /**
  * 账号密码登录认证提供者
  * 负责处理账号密码方式的登录认证
  */
 @Slf4j
+@Component
 public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticationProvider<AccountAuthenticationToken> {
 
     private static final String INVALID_CREDENTIALS_MSG = "用户名或密码错误";
@@ -31,15 +32,19 @@ public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticat
 
     private final UserGateway userGateway;
     private final UserConverter userConverter;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
 
-    public AccountLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator,
-                                           UserGateway userGateway, 
-                                           UserConverter userConverter) {
-        super(userTokenGenerator);
+    public AccountLoginAuthenticationProvider(TokenIssuer tokenIssuer,
+                                              UserGateway userGateway,
+                                              UserConverter userConverter,
+                                              PasswordEncoder passwordEncoder,
+                                              UserDetailsService userDetailsService) {
+        super(tokenIssuer);
         this.userGateway = userGateway;
         this.userConverter = userConverter;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -100,14 +105,6 @@ public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticat
             log.error("Failed to authenticate user: {}", authentication.getUsername(), ex);
             throw new AuthenticationServiceException(SERVICE_ERROR_MSG);
         }
-    }
-
-    /**
-     * 设置密码编码器
-     */
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
-        Assert.notNull(passwordEncoder, "passwordEncoder cannot be null");
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override

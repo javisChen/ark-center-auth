@@ -5,11 +5,11 @@ import com.ark.center.auth.domain.user.AuthUser;
 import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
-import com.ark.center.auth.infra.authentication.token.generator.UserTokenGenerator;
 import com.ark.center.auth.infra.cache.AuthCacheKey;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.component.cache.CacheService;
 import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.core.token.issuer.TokenIssuer;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,16 +22,15 @@ public class MobileLoginAuthenticationProvider extends AbstractLoginAuthenticati
 
     private final UserConverter userConverter;
 
-    public MobileLoginAuthenticationProvider(UserTokenGenerator userTokenGenerator,
+    public MobileLoginAuthenticationProvider(TokenIssuer tokenIssuer,
                                              UserGateway userGateway,
                                              CacheService cacheService,
                                              UserConverter userConverter) {
-        super(userTokenGenerator);
+        super(tokenIssuer);
         this.userGateway = userGateway;
         this.cacheService = cacheService;
         this.userConverter = userConverter;
     }
-
 
     @Override
     protected void preCheckAuthentication(MobileAuthenticationToken authentication) throws AuthenticationException {

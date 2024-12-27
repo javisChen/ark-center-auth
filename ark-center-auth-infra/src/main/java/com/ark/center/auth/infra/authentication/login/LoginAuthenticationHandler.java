@@ -1,6 +1,6 @@
 package com.ark.center.auth.infra.authentication.login;
 
-import com.ark.center.auth.infra.authentication.DefaultAuthenticationHandler;
+import com.ark.center.auth.infra.authentication.AuthenticationHandler;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.dto.SingleResponse;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
@@ -17,7 +17,7 @@ import java.io.IOException;
  * 登录认证处理器
  */
 @Slf4j
-public class LoginAuthenticationHandler extends DefaultAuthenticationHandler {
+public class LoginAuthenticationHandler extends AuthenticationHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
