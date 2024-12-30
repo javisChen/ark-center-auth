@@ -30,7 +30,7 @@ public abstract class LoginAuthenticationConverter<T extends BaseLoginAuthentica
     @Override
     @SuppressWarnings("unchecked")
     public void afterPropertiesSet() {
-        this.clazz = (Class<T>) ClassUtil.getTypeArgument(getClass());;
+        this.clazz = (Class<T>) ClassUtil.getTypeArgument(getClass());
     }
 
 

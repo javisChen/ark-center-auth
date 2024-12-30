@@ -87,8 +87,7 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
             context.getBean(TokenIssuer.class),
             context.getBean(UserGateway.class),
             context.getBean(UserConverter.class),
-            context.getBean(PasswordEncoder.class),
-            context.getBean(UserDetailsService.class)
+            context.getBean(PasswordEncoder.class)
         );
     }
 } 

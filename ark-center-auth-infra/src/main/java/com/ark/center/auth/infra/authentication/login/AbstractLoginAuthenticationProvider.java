@@ -4,6 +4,7 @@ import cn.hutool.core.util.ClassUtil;
 import com.ark.component.security.base.user.LoginUser;
 import com.ark.component.security.core.token.issuer.TokenIssuer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -50,11 +51,9 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
         UserDetails user;
         try {
             user = retrieveUser(authenticationToken);
-        } catch (UserNotFoundException ex) {
-			throw new BadCredentialsException(ex.getMessage());
 		} catch (Exception ex) {
 			log.error("Failed to find user", ex);
-			throw new BadCredentialsException("服务器网络波动，请稍候重试");
+			throw new BadCredentialsException(ex.getMessage());
 		}
 		additionalAuthenticationChecks(((LoginUser) user), authenticationToken);
 

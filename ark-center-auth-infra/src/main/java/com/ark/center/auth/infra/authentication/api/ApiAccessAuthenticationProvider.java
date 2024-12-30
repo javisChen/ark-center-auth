@@ -6,7 +6,7 @@ import com.ark.center.auth.infra.api.support.ApiCommonUtils;
 import com.ark.center.auth.infra.authentication.cache.ApiCache;
 import com.ark.component.security.base.user.LoginUser;
 import com.ark.component.security.core.authentication.LoginAuthenticationToken;
-import com.ark.component.security.core.authentication.exception.AuthException;
+import com.ark.component.security.core.exception.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.http.HttpStatus;

@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -33,18 +32,15 @@ public class AccountLoginAuthenticationProvider extends AbstractLoginAuthenticat
     private final UserGateway userGateway;
     private final UserConverter userConverter;
     private final PasswordEncoder passwordEncoder;
-    private final UserDetailsService userDetailsService;
 
     public AccountLoginAuthenticationProvider(TokenIssuer tokenIssuer,
                                               UserGateway userGateway,
                                               UserConverter userConverter,
-                                              PasswordEncoder passwordEncoder,
-                                              UserDetailsService userDetailsService) {
+                                              PasswordEncoder passwordEncoder) {
         super(tokenIssuer);
         this.userGateway = userGateway;
         this.userConverter = userConverter;
         this.passwordEncoder = passwordEncoder;
-        this.userDetailsService = userDetailsService;
     }
 
     @Override

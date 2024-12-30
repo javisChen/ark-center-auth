@@ -4,7 +4,7 @@ import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.common.util.spring.SpringUtils;
 import com.ark.component.dto.ServerResponse;
 import com.ark.component.dto.SingleResponse;
-import com.ark.component.security.core.authentication.exception.AuthException;
+import com.ark.component.security.core.exception.AuthException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
