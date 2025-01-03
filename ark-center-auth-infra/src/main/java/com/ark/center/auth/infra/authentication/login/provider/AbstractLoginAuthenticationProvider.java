@@ -1,10 +1,9 @@
-package com.ark.center.auth.infra.authentication.login;
+package com.ark.center.auth.infra.authentication.login.provider;
 
 import cn.hutool.core.util.ClassUtil;
-import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.base.user.AuthUser;
 import com.ark.component.security.core.token.issuer.TokenIssuer;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -55,7 +54,7 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
 			log.error("Failed to find user", ex);
 			throw new BadCredentialsException(ex.getMessage());
 		}
-		additionalAuthenticationChecks(((LoginUser) user), authenticationToken);
+		additionalAuthenticationChecks(((AuthUser) user), authenticationToken);
 
 		postHandle(user, authenticationToken);
 
@@ -66,10 +65,10 @@ public abstract class AbstractLoginAuthenticationProvider<T extends Authenticati
 
 	}
 
-	protected abstract void additionalAuthenticationChecks(LoginUser user, T authenticationToken);
+	protected abstract void additionalAuthenticationChecks(AuthUser user, T authenticationToken);
 
 	protected Authentication issueToken(UserDetails user) {
-		LoginUser loginUser = (LoginUser) user;
+		AuthUser loginUser = (AuthUser) user;
 		return tokenIssuer.issueToken(loginUser);
 	}
 

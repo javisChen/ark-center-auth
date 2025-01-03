@@ -1,7 +1,7 @@
-package com.ark.center.auth.domain.user.gateway;
+package com.ark.center.auth.infra.user.gateway;
 
-import com.ark.center.auth.domain.user.AuthUser;
-import com.ark.center.auth.domain.user.AuthUserApiPermission;
+import com.ark.center.auth.infra.user.AuthUserApiPermission;
+import com.ark.component.security.base.user.AuthUser;
 
 import java.util.List;
 

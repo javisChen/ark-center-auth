@@ -1,11 +1,13 @@
 package com.ark.center.auth.infra.authentication.login.mobile;
 
+import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
 
+@Getter
 public class MobileAuthenticationToken extends AbstractAuthenticationToken {
 
 	private final String mobile;
@@ -59,11 +61,4 @@ public class MobileAuthenticationToken extends AbstractAuthenticationToken {
 		this.code = null;
 	}
 
-	public String getMobile() {
-		return mobile;
-	}
-
-	public String getCode() {
-		return code;
-	}
 }

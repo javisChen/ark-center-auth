@@ -49,34 +49,34 @@
 
             <!-- 内部模块依赖 -->
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.ark.center</groupId>
                 <artifactId>ark-center-auth-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.ark.center</groupId>
                 <artifactId>ark-center-auth-adapter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.ark.center</groupId>
                 <artifactId>ark-center-auth-app</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.ark.center</groupId>
                 <artifactId>ark-center-auth-infra</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.ark.center</groupId>
                 <artifactId>ark-center-auth-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- 外部服务依赖 -->
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.ark.center</groupId>
                 <artifactId>ark-center-iam-client</artifactId>
                 <version>${project.version}</version>
             </dependency>

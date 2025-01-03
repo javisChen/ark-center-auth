@@ -3,7 +3,7 @@ package com.ark.center.auth.infra.authentication.logout;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.cache.CacheService;
 import com.ark.component.dto.ServerResponse;
-import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.base.user.AuthUser;
 import com.ark.component.security.core.common.RedisKeyUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +33,7 @@ public class AuthLogoutHandler implements LogoutSuccessHandler, LogoutHandler {
             return;
         }
 
-        LoginUser user = (LoginUser) authentication.getPrincipal();
+        AuthUser user = (AuthUser) authentication.getPrincipal();
 
         String accessToken = bearerTokenResolver.resolve(request);
 

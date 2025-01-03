@@ -1,66 +1,75 @@
 package com.ark.center.auth.infra.authentication.login.mobile;
 
-import cn.hutool.core.lang.Assert;
-import com.ark.center.auth.domain.user.AuthUser;
-import com.ark.center.auth.domain.user.gateway.UserGateway;
-import com.ark.center.auth.infra.authentication.login.AbstractLoginAuthenticationProvider;
+import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
+import com.ark.center.auth.client.captcha.constant.CaptchaScene;
+import com.ark.center.auth.client.captcha.constant.CaptchaType;
+import com.ark.center.auth.infra.authentication.login.provider.UserDetailsAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
-import com.ark.center.auth.infra.cache.AuthCacheKey;
-import com.ark.center.auth.infra.user.converter.UserConverter;
-import com.ark.component.cache.CacheService;
-import com.ark.component.security.base.user.LoginUser;
+import com.ark.center.auth.infra.authentication.login.userdetails.IamUserDetailsService;
+import com.ark.center.auth.infra.captcha.SmsCaptchaProvider;
+import com.ark.component.security.base.user.AuthUser;
 import com.ark.component.security.core.token.issuer.TokenIssuer;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class MobileLoginAuthenticationProvider extends AbstractLoginAuthenticationProvider<MobileAuthenticationToken> {
+public class MobileLoginAuthenticationProvider extends UserDetailsAuthenticationProvider {
 
-    private final UserGateway userGateway;
+    private final IamUserDetailsService iamUserDetailsService;
 
-    private final CacheService cacheService;
+    private final SmsCaptchaProvider smsCaptchaProvider;
 
-    private final UserConverter userConverter;
 
-    public MobileLoginAuthenticationProvider(TokenIssuer tokenIssuer,
-                                             UserGateway userGateway,
-                                             CacheService cacheService,
-                                             UserConverter userConverter) {
+    public MobileLoginAuthenticationProvider(IamUserDetailsService iamUserDetailsService,
+                                             TokenIssuer tokenIssuer,
+                                             SmsCaptchaProvider smsCaptchaProvider) {
         super(tokenIssuer);
-        this.userGateway = userGateway;
-        this.cacheService = cacheService;
-        this.userConverter = userConverter;
+        this.iamUserDetailsService = iamUserDetailsService;
+        this.smsCaptchaProvider = smsCaptchaProvider;
     }
 
     @Override
-    protected void preCheckAuthentication(MobileAuthenticationToken authentication) throws AuthenticationException {
-        Assert.notBlank(authentication.getMobile(), () -> new BadCredentialsException("手机号不能为空"));
-        Assert.notBlank(authentication.getCode(), () -> new BadCredentialsException("无效的验证码"));
+    protected void additionalAuthenticationChecks(UserDetails userDetails, Authentication authentication) throws AuthenticationException {
+        if (authentication.getCredentials() == null || StringUtils.isBlank(authentication.getCredentials().toString())) {
+            this.logger.debug("Failed to authenticate since no credentials provided");
+            throw new BadCredentialsException(this.messages
+                    .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
+        }
+
+        VerifyCaptchaCommand command = new VerifyCaptchaCommand();
+        command.setType(CaptchaType.SMS);
+        command.setTarget(authentication.getPrincipal().toString());
+        command.setCode(authentication.getCredentials().toString());
+        command.setScene(CaptchaScene.LOGIN);
+        if (!smsCaptchaProvider.verify(command)) {
+            throw new BadCredentialsException(this.messages
+                    .getMessage("UserDetailsAuthenticationProvider.captchaInvalid", "Bad credentials"));
+        }
+
+
     }
 
     @Override
-    protected void additionalAuthenticationChecks(LoginUser user, MobileAuthenticationToken authenticationToken) {
-        String requestCode = authenticationToken.getCode();
-        String mobile = authenticationToken.getMobile();
-        String codeCacheKey = String.format(AuthCacheKey.CACHE_KEY_USER_MOBILE_LOGIN_CODE, mobile);
-
-        // 缓存的登录验证码
-        String cacheCode = cacheService.get(codeCacheKey, String.class);
-        Assert.equals(requestCode, cacheCode, () -> new BadCredentialsException("无效的验证码"));
+    protected AuthUser retrieveUser(String username, Authentication authentication) throws AuthenticationException {
+        try {
+            AuthUser loadedUser = iamUserDetailsService.loadUserByMobile(((String) authentication.getPrincipal()));
+            if (loadedUser == null) {
+                throw new InternalAuthenticationServiceException(
+                        "UserDetailsService returned null, which is an interface contract violation");
+            }
+            return loadedUser;
+        } catch (UserNotFoundException | InternalAuthenticationServiceException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
+        }
     }
 
     @Override
-    protected UserDetails retrieveUser(MobileAuthenticationToken authentication) throws AuthenticationException {
-        AuthUser authUser = userGateway.retrieveUserByMobile(authentication.getMobile());
-        // todo 这里可以调整成没有注册就自动注册一个
-        Assert.notNull(authUser, () -> new UserNotFoundException("该手机没有注册用户"));
-        return userConverter.toLoginUser(authUser);
-    }
-
-    @Override
-    protected void postHandle(UserDetails user, MobileAuthenticationToken authenticationToken) {
-        String mobile = authenticationToken.getMobile();
-        String codeCacheKey = String.format(AuthCacheKey.CACHE_KEY_USER_MOBILE_LOGIN_CODE, mobile);
-        cacheService.del(codeCacheKey);
+    public boolean supports(Class<?> authentication) {
+        return MobileAuthenticationToken.class.isAssignableFrom(authentication);
     }
 }

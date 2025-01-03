@@ -14,7 +14,7 @@
     <dependencies>
         <!-- 内部模块依赖 -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.ark.center</groupId>
             <artifactId>ark-center-auth-app</artifactId>
         </dependency>
 

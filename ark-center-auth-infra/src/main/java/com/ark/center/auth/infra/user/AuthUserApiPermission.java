@@ -1,4 +1,4 @@
-package com.ark.center.auth.domain.user;
+package com.ark.center.auth.infra.user;
 
 import lombok.Data;
 

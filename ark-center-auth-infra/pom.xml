@@ -12,14 +12,16 @@
     <packaging>jar</packaging>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.ark.center</groupId>
+            <artifactId>ark-center-iam-client</artifactId>
+        </dependency>
+
         <!-- 内部模块依赖 -->
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.ark.center</groupId>
             <artifactId>ark-center-auth-domain</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ark-center-iam-client</artifactId>
         </dependency>
 
         <!-- Spring 依赖 -->

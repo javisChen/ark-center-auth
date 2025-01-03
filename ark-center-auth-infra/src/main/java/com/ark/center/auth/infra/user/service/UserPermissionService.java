@@ -1,7 +1,7 @@
-package com.ark.center.auth.domain.user.service;
+package com.ark.center.auth.infra.user.service;
 
-import com.ark.center.auth.domain.user.AuthUserApiPermission;
-import com.ark.center.auth.domain.user.gateway.UserGateway;
+import com.ark.center.auth.infra.user.AuthUserApiPermission;
+import com.ark.center.auth.infra.user.gateway.UserGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,13 +1,14 @@
 package com.ark.center.auth.infra.config.configurers;
 
-import com.ark.center.auth.domain.user.gateway.UserGateway;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationConverter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.account.AccountLoginAuthenticationProvider;
+import com.ark.center.auth.infra.authentication.login.check.DefaultPostAuthenticationChecks;
+import com.ark.center.auth.infra.authentication.login.check.DefaultPreAuthenticationChecks;
 import com.ark.center.auth.infra.authentication.login.mobile.MobileLoginAuthenticationProvider;
-import com.ark.center.auth.infra.user.converter.UserConverter;
-import com.ark.component.cache.CacheService;
+import com.ark.center.auth.infra.authentication.login.userdetails.IamUserDetailsService;
+import com.ark.center.auth.infra.captcha.SmsCaptchaProvider;
 import com.ark.component.security.core.token.issuer.TokenIssuer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,6 @@ import org.springframework.security.authentication.DefaultAuthenticationEventPub
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -29,6 +29,9 @@ import java.util.List;
 public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurityConfigurer, HttpSecurity> {
 
     private ApplicationContext context;
+    private final DefaultPreAuthenticationChecks preAuthenticationChecks = new DefaultPreAuthenticationChecks();
+    private final DefaultPostAuthenticationChecks postAuthenticationChecks = new DefaultPostAuthenticationChecks();
+
 
     @Override
     public void init(HttpSecurity http) throws Exception {
@@ -74,20 +77,18 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
     @NotNull
     private MobileLoginAuthenticationProvider buildMobileLoginAuthenticationProvider(ApplicationContext context) {
         return new MobileLoginAuthenticationProvider(
-            context.getBean(TokenIssuer.class),
-            context.getBean(UserGateway.class),
-            context.getBean(CacheService.class),
-            context.getBean(UserConverter.class)
+                context.getBean(IamUserDetailsService.class),
+                context.getBean(TokenIssuer.class),
+                context.getBean(SmsCaptchaProvider.class)
         );
     }
 
     @NotNull
     private AccountLoginAuthenticationProvider buildAccountLoginAuthenticationProvider(ApplicationContext context) {
         return new AccountLoginAuthenticationProvider(
-            context.getBean(TokenIssuer.class),
-            context.getBean(UserGateway.class),
-            context.getBean(UserConverter.class),
-            context.getBean(PasswordEncoder.class)
+                context.getBean(IamUserDetailsService.class),
+                context.getBean(TokenIssuer.class),
+                context.getBean(PasswordEncoder.class)
         );
     }
 } 

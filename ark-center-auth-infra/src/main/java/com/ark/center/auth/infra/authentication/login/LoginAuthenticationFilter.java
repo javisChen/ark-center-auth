@@ -36,7 +36,6 @@ public class LoginAuthenticationFilter extends AbstractAuthenticationProcessingF
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         validateRequest(request);
-        
         // 读取请求体并保存
         String requestBody = readAndSaveRequestBody(request);
         // 获取登录模式并转换认证信息

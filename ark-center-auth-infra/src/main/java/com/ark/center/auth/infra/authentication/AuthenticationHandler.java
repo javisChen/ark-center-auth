@@ -23,26 +23,45 @@ public class AuthenticationHandler implements AuthenticationSuccessHandler, Auth
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        log.error("Authentication Failure", exception);
+        String requestUri = request.getRequestURI();
+        String remoteIp = request.getRemoteAddr();
+        
+        log.error("Authentication failed - URI: {}, IP: {}, Error: {}", 
+                requestUri, remoteIp, exception.getMessage(), exception);
+        
         String applicationName = SpringUtils.getApplicationName();
         int httpStatusCode = HttpStatus.BAD_REQUEST.value();
-        ServerResponse responseBody = SingleResponse.error(applicationName, String.valueOf(httpStatusCode), exception.getMessage());
-
+        
+        // 处理自定义认证异常
         if (exception instanceof AuthException authException) {
             httpStatusCode = authException.getHttpStatusCode();
         }
-
-        responseBody.setMsg(exception.getMessage());
+        
+        ServerResponse responseBody = SingleResponse.error(
+                applicationName, 
+                String.valueOf(httpStatusCode), 
+                exception.getMessage()
+        );
+        
         ResponseUtils.write(responseBody, response, httpStatusCode);
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        String username = authentication.getName();
+        String requestUri = request.getRequestURI();
+        String remoteIp = request.getRemoteAddr();
+        
+        log.info("Authentication success - User: {}, URI: {}, IP: {}", 
+                username, requestUri, remoteIp);
+                
+        ServerResponse responseBody = SingleResponse.ok();
+        ResponseUtils.write(responseBody, response, HttpStatus.OK.value());
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
-        AuthenticationSuccessHandler.super.onAuthenticationSuccess(request, response, chain, authentication);
+        // 调用标准的成功处理方法
+        onAuthenticationSuccess(request, response, authentication);
     }
 }

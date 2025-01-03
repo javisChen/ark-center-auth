@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "认证服务")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/v1")
 public class LoginController {
 
     @Operation(summary = "账号密码登录")

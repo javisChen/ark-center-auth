@@ -3,7 +3,7 @@ package com.ark.center.auth.infra.authentication.login;
 import com.ark.center.auth.infra.authentication.AuthenticationHandler;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.dto.SingleResponse;
-import com.ark.component.security.core.authentication.LoginAuthenticationToken;
+import com.ark.component.security.core.authentication.AuthenticatedToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +30,7 @@ public class LoginAuthenticationHandler extends AuthenticationHandler {
     }
 
     private void writeSuccess(HttpServletResponse response, Authentication authentication) throws IOException {
-        LoginAuthenticationToken authenticationToken = (LoginAuthenticationToken) authentication;
+        AuthenticatedToken authenticationToken = (AuthenticatedToken) authentication;
         SingleResponse<LoginAuthenticateResponse> serverResponse = SingleResponse.ok(new LoginAuthenticateResponse(authenticationToken.getAccessToken()));
         ResponseUtils.write(serverResponse, response, HttpStatus.SC_OK);
     }

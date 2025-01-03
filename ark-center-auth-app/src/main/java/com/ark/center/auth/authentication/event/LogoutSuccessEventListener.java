@@ -7,7 +7,7 @@ import com.ark.component.mq.MsgBody;
 import com.ark.component.mq.SendConfirm;
 import com.ark.component.mq.SendResult;
 import com.ark.component.mq.integration.MessageTemplate;
-import com.ark.component.security.base.user.LoginUser;
+import com.ark.component.security.base.user.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
@@ -28,12 +28,12 @@ public class LogoutSuccessEventListener implements ApplicationListener<LogoutSuc
 
         log.info("User logout successfully：{}, time = {}", event.getAuthentication(), LocalDateTime.now());
 
-        LoginUser user = (LoginUser) event.getAuthentication().getPrincipal();
+        AuthUser user = (AuthUser) event.getAuthentication().getPrincipal();
 
         publishMessage(user);
     }
 
-    private void publishMessage(LoginUser user) {
+    private void publishMessage(AuthUser user) {
         UserLogoutMessage message = new UserLogoutMessage(user.getUserId(), LocalDateTime.now());
         messageTemplate.asyncSend(AuthConst.TOPIC_AUTH, UserLogoutMQConst.USER_LOGOUT_EVENT_TAG, MsgBody.of(message), new SendConfirm() {
             @Override

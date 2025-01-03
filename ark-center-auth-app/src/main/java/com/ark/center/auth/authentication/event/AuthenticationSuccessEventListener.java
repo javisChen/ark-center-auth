@@ -1,7 +1,7 @@
 package com.ark.center.auth.authentication.event;
 
 import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
-import com.ark.component.security.core.authentication.LoginAuthenticationToken;
+import com.ark.component.security.core.authentication.AuthenticatedToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
@@ -21,14 +21,14 @@ public class AuthenticationSuccessEventListener implements ApplicationListener<A
     @Override
     public void onApplicationEvent(AuthenticationSuccessEvent event) {
         Authentication authentication = event.getAuthentication();
-        if (authentication instanceof LoginAuthenticationToken loginAuthenticationToken) {
+        if (authentication instanceof AuthenticatedToken loginAuthenticationToken) {
             handlerForLoginSuccess(event, loginAuthenticationToken);
         }
     }
 
-    private void handlerForLoginSuccess(AuthenticationSuccessEvent event, LoginAuthenticationToken loginAuthenticationToken) {
+    private void handlerForLoginSuccess(AuthenticationSuccessEvent event, AuthenticatedToken loginAuthenticationToken) {
         log.info("User successfully authenticated: {}, time = {}", loginAuthenticationToken, LocalDateTime.now());
-        Long userId = loginAuthenticationToken.getLoginUser().getUserId();
+        Long userId = loginAuthenticationToken.getAuthUser().getUserId();
         // 刷新权限缓存
         userApiPermissionCache.refresh(userId);
 

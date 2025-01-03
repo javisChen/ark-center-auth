@@ -12,13 +12,12 @@ import java.util.Collection;
 public class AccountAuthenticationToken extends AbstractAuthenticationToken {
 
 	private final String username;
-
 	private String password;
 
-	public AccountAuthenticationToken(String username, String password) {
+	public AccountAuthenticationToken(String principal, String credentials) {
 		super(null);
-		this.username = username;
-		this.password = password;
+		this.username = principal;
+		this.password = credentials;
 		setAuthenticated(false);
 	}
 

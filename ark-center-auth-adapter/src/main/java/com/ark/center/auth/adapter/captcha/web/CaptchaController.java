@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CaptchaController {
     
-    private final CaptchaAppService captchaService;
+    private final CaptchaAppService captchaAppService;
     
     @Operation(summary = "生成验证码")
     @PostMapping("/generate")
     public SingleResponse<CaptchaContentDTO> generateCaptcha(
             @Parameter(description = "生成验证码请求") 
             @Validated @RequestBody GenerateCaptchaCommand command) {
-        CaptchaContentDTO result = captchaService.create(command);
+        CaptchaContentDTO result = captchaAppService.create(command);
         result.setCode(null);
         return SingleResponse.ok(result);
     }
@@ -35,7 +35,7 @@ public class CaptchaController {
     public SingleResponse<Boolean> verifyCaptcha(
             @Parameter(description = "验证验证码请求")
             @Validated @RequestBody VerifyCaptchaCommand command) {
-        boolean verified = captchaService.verify(command);
+        boolean verified = captchaAppService.verify(command);
         return SingleResponse.ok(verified);
     }
 }

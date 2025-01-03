@@ -1,35 +1,25 @@
 package com.ark.center.auth.infra.user.converter;
 
-import com.ark.center.auth.domain.user.AuthUser;
-import com.ark.center.auth.domain.user.AuthUserApiPermission;
+import com.ark.component.security.base.user.AuthUser;
+import com.ark.center.auth.infra.user.AuthUserApiPermission;
 import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
-import com.ark.center.iam.client.user.dto.UserInnerDTO;
-import com.ark.component.security.base.user.LoginUser;
+import com.ark.center.iam.client.user.dto.UserAuthDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-import java.util.Collections;
 import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserConverter {
 
-    AuthUser toAuthUser(UserInnerDTO userInnerDTO);
-
-    default LoginUser toLoginUser(AuthUser user) {
-        LoginUser loginUser = new LoginUser();
-        loginUser.setUsername(user.getUsername());
-        loginUser.setPassword(user.getPassword());
-        loginUser.setAccountNonExpired(true);
-        loginUser.setAccountNonLocked(true);
-        loginUser.setEnabled(true);
-        loginUser.setCredentialsNonExpired(true);
-        loginUser.setAuthorities(Collections.emptySet());
-        loginUser.setUserId(user.getId());
-        loginUser.setUserCode(user.getUserCode());
-        loginUser.setIsSuperAdmin(user.getIsSuperAdmin());
-        return loginUser;
-    };
+    @Mapping(target = "userId", source = "id")
+    @Mapping(target = "enabled", ignore = true)
+    @Mapping(target = "credentialsNonExpired", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "accountNonLocked", ignore = true)
+    @Mapping(target = "accountNonExpired", ignore = true)
+    AuthUser toAuthUser(UserAuthDTO userAuthDTO);
 
     AuthUserApiPermission toAuthUserApiPermission(UserApiPermissionDTO dto);
 
