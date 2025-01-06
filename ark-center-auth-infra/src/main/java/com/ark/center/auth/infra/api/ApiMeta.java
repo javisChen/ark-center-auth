@@ -60,9 +60,9 @@ public class ApiMeta {
     }
 
     /**
-     * 检查是否无需认证和授权
+     * 检查是否允许匿名访问
      */
-    public boolean noAuthRequired() {
+    public boolean allowsAnonymousAccess() {
         return authType.equals(ApiAuthType.ANONYMOUS);
     }
 }

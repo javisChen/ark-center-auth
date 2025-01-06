@@ -1,9 +1,9 @@
-package com.ark.center.auth.infra.authentication.api;
+package com.ark.center.auth.client.access.query;
 
 import lombok.Data;
 
 @Data
-public class ApiAccessAuthenticateRequest {
+public class ApiAccessAuthenticateQuery {
 
     /**
      * token

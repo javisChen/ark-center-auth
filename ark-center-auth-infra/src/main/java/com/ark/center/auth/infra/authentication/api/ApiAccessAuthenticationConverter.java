@@ -2,6 +2,7 @@ package com.ark.center.auth.infra.authentication.api;
 
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson2.JSON;
+import com.ark.center.auth.client.access.query.ApiAccessAuthenticateQuery;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -19,17 +20,17 @@ public final class ApiAccessAuthenticationConverter implements AuthenticationCon
 
 	@Override
 	public Authentication convert(HttpServletRequest request) {
-		ApiAccessAuthenticateRequest authenticateRequest = readFromRequest(request);
+		ApiAccessAuthenticateQuery authenticateRequest = readFromRequest(request);
 		return ApiAccessAuthenticationToken
 				.unauthenticated(authenticateRequest, authenticateRequest.getAccessToken());
 	}
 
-	private ApiAccessAuthenticateRequest readFromRequest(HttpServletRequest request) {
+	private ApiAccessAuthenticateQuery readFromRequest(HttpServletRequest request) {
 		String token = bearerTokenResolver.resolve(request);
-		ApiAccessAuthenticateRequest authenticateRequest;
+		ApiAccessAuthenticateQuery authenticateRequest;
 		try {
 			String reqBody = IoUtil.read(request.getInputStream()).toString(StandardCharsets.UTF_8);
-			authenticateRequest = JSON.to(ApiAccessAuthenticateRequest.class, reqBody);
+			authenticateRequest = JSON.to(ApiAccessAuthenticateQuery.class, reqBody);
 		} catch (Exception e) {
 			log.error("读取API认证参数失败", e);
 			throw new AuthenticationServiceException("API认证参数不合法");

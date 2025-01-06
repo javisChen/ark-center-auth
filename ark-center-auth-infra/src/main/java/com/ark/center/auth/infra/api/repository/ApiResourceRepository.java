@@ -1,7 +1,8 @@
 package com.ark.center.auth.infra.api.repository;
 
 import com.ark.center.auth.infra.api.ApiMeta;
-import com.ark.center.auth.infra.api.domain.ApiKey;
+import com.ark.center.auth.infra.api.ApiCacheKey;
+import com.ark.center.auth.infra.api.cache.ApiRedisCache;
 import com.ark.center.auth.infra.user.gateway.ApiGateway;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -23,30 +24,15 @@ import java.util.stream.Collectors;
 public class ApiResourceRepository implements InitializingBean {
 
     private final ApiGateway apiGateway;
+    private final ApiRedisCache apiRedisCache;
 
     /**
-     * 允许匿名访问的API缓存
+     * API缓存
      * key: ApiKey(uri, method)
-     * value: uri
+     * value: ApiMeta
      */
     @Getter
-    private Map<ApiKey, String> anonymousAccessApiCache;
-
-    /**
-     * 需要授权的API缓存
-     * key: ApiKey(uri, method)
-     * value: uri
-     */
-    @Getter
-    private Map<ApiKey, String> authorizationRequiredApiCache;
-
-    /**
-     * 仅需认证的API缓存
-     * key: ApiKey(uri, method)
-     * value: uri
-     */
-    @Getter
-    private Map<ApiKey, String> authenticationRequiredApiCache;
+    private Map<ApiCacheKey, ApiMeta> apiCache;
 
     /**
      * 动态路径API缓存
@@ -56,8 +42,9 @@ public class ApiResourceRepository implements InitializingBean {
     @Getter
     private List<String> dynamicPathApiCache;
 
-    public ApiResourceRepository(ApiGateway apiGateway) {
+    public ApiResourceRepository(ApiGateway apiGateway, ApiRedisCache apiRedisCache) {
         this.apiGateway = apiGateway;
+        this.apiRedisCache = apiRedisCache;
     }
 
     @Override
@@ -67,11 +54,18 @@ public class ApiResourceRepository implements InitializingBean {
 
     public synchronized void refresh(boolean throwEx) {
         try {
-            List<ApiMeta> apis = apiGateway.retrieveApis();
-            anonymousAccessApiCache = collectAnonymousAccessApis(apis);
-            authorizationRequiredApiCache = collectAuthorizationRequiredApis(apis);
-            authenticationRequiredApiCache = collectAuthenticationRequiredApis(apis);
-            dynamicPathApiCache = collectHasPathVariableApis(apis);
+            // 尝试从Redis缓存加载
+            List<ApiMeta> apis = apiRedisCache.loadApiCache()
+                    .orElseGet(() -> {
+                        // 如果Redis缓存不存在，从IAM服务获取并保存到缓存
+                        List<ApiMeta> remoteApis = apiGateway.retrieveApis();
+                        apiRedisCache.saveApiCache(remoteApis);
+                        return remoteApis;
+                    });
+
+            // 更新内存缓存
+            updateLocalCache(apis);
+            log.info("Successfully refreshed API cache with {} APIs", apis.size());
         } catch (Exception e) {
             log.error("Failed to refresh API cache: {}", e.getMessage(), e);
             if (throwEx) {
@@ -81,44 +75,73 @@ public class ApiResourceRepository implements InitializingBean {
     }
 
     /**
-     * 收集允许匿名访问的API
+     * 强制从IAM服务刷新API数据
      */
-    private Map<ApiKey, String> collectAnonymousAccessApis(List<ApiMeta> apis) {
-        return apis.stream()
-                .filter(ApiMeta::noAuthRequired)
-                .collect(collectMatchApi());
+    public synchronized void forceRefresh() {
+        try {
+            // 从IAM服务获取最新数据
+            List<ApiMeta> apis = apiGateway.retrieveApis();
+            
+            // 更新Redis缓存
+            apiRedisCache.saveApiCache(apis);
+            
+            // 更新内存缓存
+            updateLocalCache(apis);
+            log.info("Successfully force refreshed API cache with {} APIs", apis.size());
+        } catch (Exception e) {
+            log.error("Failed to force refresh API cache: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
-     * 收集需要授权的API
+     * 更新本地内存缓存
      */
-    private Map<ApiKey, String> collectAuthorizationRequiredApis(List<ApiMeta> apis) {
-        return apis.stream()
-                .filter(ApiMeta::authorizationRequired)
-                .collect(collectMatchApi());
-    }
-
-    /**
-     * 收集仅需认证的API
-     */
-    private Map<ApiKey, String> collectAuthenticationRequiredApis(List<ApiMeta> apis) {
-        return apis.stream()
-                .filter(ApiMeta::authenticationRequired)
-                .collect(collectMatchApi());
-    }
-
-    @NotNull
-    private Collector<ApiMeta, ?, Map<ApiKey, String>> collectMatchApi() {
-        return Collectors.toMap(
-            api -> new ApiKey(api.getUri(), api.getMethod()),
-            ApiMeta::getUri
-        );
-    }
-
-    private List<String> collectHasPathVariableApis(List<ApiMeta> apis) {
-        return apis.stream()
+    private void updateLocalCache(List<ApiMeta> apis) {
+        apiCache = apis.stream().collect(Collectors.toMap(
+            api -> new ApiCacheKey(api.getUri(), api.getMethod()),
+            api -> api
+        ));
+        
+        dynamicPathApiCache = apis.stream()
                 .filter(item -> item.getHasPathVariable().equals(true))
                 .map(ApiMeta::getUri)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取API信息
+     */
+    public Optional<ApiMeta> getApi(String uri, String method) {
+        ApiMeta api = apiCache.get(new ApiCacheKey(uri, method));
+        return Optional.ofNullable(api);
+    }
+
+    /**
+     * 检查API是否允许匿名访问
+     */
+    public boolean isAnonymousAccess(String uri, String method) {
+        return getApi(uri, method)
+                .map(ApiMeta::allowsAnonymousAccess)
+                .orElse(false);
+    }
+
+    /**
+     * 检查API是否需要授权
+     */
+    public boolean isAuthorizationRequired(String uri, String method) {
+        return getApi(uri, method)
+                .map(ApiMeta::authorizationRequired)
+                .orElse(false);
+    }
+
+    /**
+     * 检查API是否只需要认证
+     * 只需登录验证，无需额外的权限校验
+     */
+    public boolean requiresAuthenticationOnly(String uri, String method) {
+        return getApi(uri, method)
+                .map(ApiMeta::authenticationRequired)
+                .orElse(false);
     }
 }

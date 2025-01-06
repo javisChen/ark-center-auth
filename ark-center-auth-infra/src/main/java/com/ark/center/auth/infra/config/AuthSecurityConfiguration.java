@@ -29,14 +29,15 @@ public class AuthSecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/captcha/**")
-//                                .permitAll()
-//                )
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/v1/access/api/auth")
+                                .permitAll()
+                )
                 .with(new CommonHttpConfigurer(), configurer -> {})
                 .with(new LogoutSecurityConfigurer(), configurer -> {})
                 .with(new LoginSecurityConfigurer(), configurer -> {})
-                .with(new ApiSecurityConfigurer(), configurer -> {});
+//                .with(new ApiSecurityConfigurer(), configurer -> {})
+        ;
 
         return httpSecurity.build();
     }

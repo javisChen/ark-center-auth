@@ -1,22 +1,31 @@
 package com.ark.center.auth.infra.api.service;
 
+import com.ark.center.auth.infra.api.ApiMeta;
 import com.ark.center.auth.infra.api.repository.ApiResourceRepository;
-import com.ark.center.auth.infra.api.domain.ApiKey;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.MapUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ApiAccessControlService {
     
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
     private final ApiResourceRepository apiResourceRepository;
+
+    /**
+     * 获取API信息
+     */
+    public Optional<ApiMeta> getApi(String requestUri, String method) {
+        // 先尝试替换动态路径
+        String normalizedUri = matchDynamicPath(requestUri);
+        return apiResourceRepository.getApi(normalizedUri, method);
+    }
 
     /**
      * 将包含路径变量的请求URL匹配到对应的API模板
@@ -35,8 +44,7 @@ public class ApiAccessControlService {
      * 需要同时满足认证和授权要求
      */
     public boolean requiresAuthorization(String requestUri, String method) {
-        Map<ApiKey, String> cache = apiResourceRepository.getAuthorizationRequiredApiCache();
-        return matchUri(cache, requestUri, method);
+        return apiResourceRepository.isAuthorizationRequired(requestUri, method);
     }
 
     /**
@@ -44,23 +52,14 @@ public class ApiAccessControlService {
      * 无需认证也无需授权
      */
     public boolean allowsAnonymousAccess(String requestUri, String method) {
-        Map<ApiKey, String> cache = apiResourceRepository.getAnonymousAccessApiCache();
-        return matchUri(cache, requestUri, method);
+        return apiResourceRepository.isAnonymousAccess(requestUri, method);
     }
 
     /**
-     * 检查API是否仅需要认证
-     * 只需要登录，无需额外的权限校验
+     * 检查API是否只需要认证
+     * 只需登录验证，无需额外的权限校验
      */
     public boolean requiresAuthenticationOnly(String requestUri, String method) {
-        Map<ApiKey, String> cache = apiResourceRepository.getAuthenticationRequiredApiCache();
-        return matchUri(cache, requestUri, method);
-    }
-
-    private boolean matchUri(Map<ApiKey, String> cache, String requestUri, String method) {
-        if (MapUtils.isEmpty(cache)) {
-            return false;
-        }
-        return cache.get(new ApiKey(requestUri, method)) != null;
+        return apiResourceRepository.requiresAuthenticationOnly(requestUri, method);
     }
 } 

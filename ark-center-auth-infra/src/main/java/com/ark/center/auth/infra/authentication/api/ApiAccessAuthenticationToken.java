@@ -1,5 +1,6 @@
 package com.ark.center.auth.infra.authentication.api;
 
+import com.ark.center.auth.client.access.query.ApiAccessAuthenticateQuery;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,20 +9,20 @@ import java.util.Collection;
 
 public class ApiAccessAuthenticationToken implements Authentication, CredentialsContainer {
 
-    private final ApiAccessAuthenticateRequest authenticateRequest;
+    private final ApiAccessAuthenticateQuery authenticateRequest;
     private String accessToken;
 
-    public ApiAccessAuthenticationToken(ApiAccessAuthenticateRequest authenticateRequest, String accessToken) {
+    public ApiAccessAuthenticationToken(ApiAccessAuthenticateQuery authenticateRequest, String accessToken) {
         this.authenticateRequest = authenticateRequest;
         this.accessToken = accessToken;
     }
 
 
-    public static ApiAccessAuthenticationToken unauthenticated(ApiAccessAuthenticateRequest principal, String accessToken) {
+    public static ApiAccessAuthenticationToken unauthenticated(ApiAccessAuthenticateQuery principal, String accessToken) {
         return new ApiAccessAuthenticationToken(principal, accessToken);
     }
 
-    public static ApiAccessAuthenticationToken authenticated(ApiAccessAuthenticateRequest principal, String accessToken) {
+    public static ApiAccessAuthenticationToken authenticated(ApiAccessAuthenticateQuery principal, String accessToken) {
         return new ApiAccessAuthenticationToken(principal, accessToken);
     }
 

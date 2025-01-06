@@ -1,6 +1,5 @@
 package com.ark.center.auth.infra.config.configurers;
 
-import com.ark.center.auth.infra.api.repository.ApiResourceRepository;
 import com.ark.center.auth.infra.api.service.ApiAccessControlService;
 import com.ark.center.auth.infra.user.service.UserPermissionService;
 import com.ark.center.auth.infra.authentication.api.ApiAccessAuthenticationFilter;
