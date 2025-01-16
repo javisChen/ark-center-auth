@@ -43,20 +43,20 @@ public class ApiMeta {
      * true-包含（如/users/{id}）
      * false-不包含（如/users/list）
      */
-    private Boolean hasPathVariable;
+    private Boolean isDynamicPath;
 
     /**
      * 检查是否只需要认证
      */
     public boolean authenticationRequired() {
-        return authType.equals(ApiAuthType.AUTHENTICATION_REQUIRED);
+        return authType.equals(ApiAuthType.AUTHENTICATION);
     }
 
     /**
      * 检查是否需要授权
      */
     public boolean authorizationRequired() {
-        return authType.equals(ApiAuthType.AUTHORIZATION_REQUIRED);
+        return authType.equals(ApiAuthType.AUTHORIZATION);
     }
 
     /**

@@ -4,20 +4,18 @@ import com.ark.center.auth.infra.api.ApiMeta;
 import com.ark.center.auth.infra.api.ApiCacheKey;
 import com.ark.center.auth.infra.api.cache.ApiRedisCache;
 import com.ark.center.auth.infra.user.gateway.ApiGateway;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * API资源缓存
- * 用于存储和管理API的访问控制信息
+ * 使用线程安全的集合类来存储API数据
  */
 @Component
 @Slf4j
@@ -27,20 +25,15 @@ public class ApiResourceRepository implements InitializingBean {
     private final ApiRedisCache apiRedisCache;
 
     /**
-     * API缓存
-     * key: ApiKey(uri, method)
-     * value: ApiMeta
+     * 精确路径API缓存
+     * key: ApiCacheKey(uri, method)
      */
-    @Getter
-    private Map<ApiCacheKey, ApiMeta> apiCache;
+    private Map<ApiCacheKey, ApiMeta> exactPathCache = new ConcurrentHashMap<>();
 
     /**
      * 动态路径API缓存
-     * 包含路径参数的API列表
-     * 例如：["/api/v1/users/{id}", "/api/v1/orders/{orderId}/items/{itemId}"]
      */
-    @Getter
-    private List<String> dynamicPathApiCache;
+    private List<ApiMeta> dynamicPathCache = new CopyOnWriteArrayList<>();
 
     public ApiResourceRepository(ApiGateway apiGateway, ApiRedisCache apiRedisCache) {
         this.apiGateway = apiGateway;
@@ -52,13 +45,13 @@ public class ApiResourceRepository implements InitializingBean {
         refresh(true);
     }
 
-    public synchronized void refresh(boolean throwEx) {
+    public void refresh(boolean throwEx) {
         try {
             // 尝试从Redis缓存加载
             List<ApiMeta> apis = apiRedisCache.loadApiCache()
                     .orElseGet(() -> {
                         // 如果Redis缓存不存在，从IAM服务获取并保存到缓存
-                        List<ApiMeta> remoteApis = apiGateway.retrieveApis();
+                        List<ApiMeta> remoteApis = apiGateway.queryApis();
                         apiRedisCache.saveApiCache(remoteApis);
                         return remoteApis;
                     });
@@ -75,73 +68,99 @@ public class ApiResourceRepository implements InitializingBean {
     }
 
     /**
-     * 强制从IAM服务刷新API数据
+     * 添加API到指定的缓存集合中
      */
-    public synchronized void forceRefresh() {
-        try {
-            // 从IAM服务获取最新数据
-            List<ApiMeta> apis = apiGateway.retrieveApis();
-            
-            // 更新Redis缓存
-            apiRedisCache.saveApiCache(apis);
-            
-            // 更新内存缓存
-            updateLocalCache(apis);
-            log.info("Successfully force refreshed API cache with {} APIs", apis.size());
-        } catch (Exception e) {
-            log.error("Failed to force refresh API cache: {}", e.getMessage(), e);
-            throw e;
+    private void addToCache(ApiMeta api, Map<ApiCacheKey, ApiMeta> exactCache, List<ApiMeta> dynamicCache) {
+        if (api.getIsDynamicPath()) {
+            dynamicCache.add(api);
+        } else {
+            exactCache.put(new ApiCacheKey(api.getUri(), api.getMethod()), api);
         }
+    }
+
+    /**
+     * 添加API到本地缓存中
+     */
+    private void addToLocalCache(ApiMeta api) {
+        addToCache(api, exactPathCache, dynamicPathCache);
     }
 
     /**
      * 更新本地内存缓存
      */
     private void updateLocalCache(List<ApiMeta> apis) {
-        apiCache = apis.stream().collect(Collectors.toMap(
-            api -> new ApiCacheKey(api.getUri(), api.getMethod()),
-            api -> api
-        ));
+        // 创建新的缓存实例
+        Map<ApiCacheKey, ApiMeta> newExactPathCache = new ConcurrentHashMap<>();
+        List<ApiMeta> newDynamicPathCache = new CopyOnWriteArrayList<>();
+
+        // 分类存储API
+        for (ApiMeta api : apis) {
+            addToCache(api, newExactPathCache, newDynamicPathCache);
+        }
+
+        // 原子性地替换缓存引用
+        this.exactPathCache = newExactPathCache;
+        this.dynamicPathCache = newDynamicPathCache;
+    }
+
+    /**
+     * 从本地缓存中移除指定的API
+     */
+    private void removeFromLocalCache(String uri, String method) {
+        ApiCacheKey key = new ApiCacheKey(uri, method);
+        exactPathCache.remove(key);
+        dynamicPathCache.removeIf(item -> 
+            item.getUri().equals(uri) && item.getMethod().equals(method)
+        );
+    }
+
+    /**
+     * 更新单个API缓存
+     * @throws RuntimeException 如果Redis缓存更新失败
+     */
+    public void updateApi(ApiMeta api) {
+        // 1. 先更新Redis缓存，如果失败则抛出异常，本地缓存保持不变
+        try {
+            apiRedisCache.updateApiCache(api);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update Redis cache, local cache remains unchanged", e);
+        }
         
-        dynamicPathApiCache = apis.stream()
-                .filter(item -> item.getHasPathVariable().equals(true))
-                .map(ApiMeta::getUri)
-                .collect(Collectors.toList());
+        // 2. Redis更新成功后，再更新本地缓存
+        removeFromLocalCache(api.getUri(), api.getMethod());
+        addToLocalCache(api);
+
+        log.info("Successfully updated API cache for {}", api.getUri() + ":" + api.getMethod());
     }
 
     /**
-     * 获取API信息
+     * 删除API缓存
+     * @throws RuntimeException 如果Redis缓存删除失败
      */
-    public Optional<ApiMeta> getApi(String uri, String method) {
-        ApiMeta api = apiCache.get(new ApiCacheKey(uri, method));
-        return Optional.ofNullable(api);
+    public void removeApi(ApiMeta api) {
+        // 1. 先从Redis缓存中移除，如果失败则抛出异常，本地缓存保持不变
+        try {
+            apiRedisCache.removeApiCache(api);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to remove from Redis cache, local cache remains unchanged", e);
+        }
+
+        // 2. Redis删除成功后，再从本地缓存中移除
+        removeFromLocalCache(api.getUri(), api.getMethod());
+        log.info("Successfully removed API cache for {}", api.getUri() + ":" + api.getMethod());
     }
 
     /**
-     * 检查API是否允许匿名访问
+     * 获取精确匹配的API
      */
-    public boolean isAnonymousAccess(String uri, String method) {
-        return getApi(uri, method)
-                .map(ApiMeta::allowsAnonymousAccess)
-                .orElse(false);
+    public ApiMeta getExactApi(String uri, String method) {
+        return exactPathCache.get(new ApiCacheKey(uri, method));
     }
 
     /**
-     * 检查API是否需要授权
+     * 获取指定HTTP方法的所有动态路径API
      */
-    public boolean isAuthorizationRequired(String uri, String method) {
-        return getApi(uri, method)
-                .map(ApiMeta::authorizationRequired)
-                .orElse(false);
-    }
-
-    /**
-     * 检查API是否只需要认证
-     * 只需登录验证，无需额外的权限校验
-     */
-    public boolean requiresAuthenticationOnly(String uri, String method) {
-        return getApi(uri, method)
-                .map(ApiMeta::authenticationRequired)
-                .orElse(false);
+    public List<ApiMeta> getDynamicApis() {
+        return dynamicPathCache;
     }
 }

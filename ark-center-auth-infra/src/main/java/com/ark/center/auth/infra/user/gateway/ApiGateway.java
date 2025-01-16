@@ -6,5 +6,8 @@ import java.util.List;
 
 public interface ApiGateway {
 
-    List<ApiMeta> retrieveApis();
+    List<ApiMeta> queryApis();
+
+    ApiMeta getApi(Long apiId);
+
 }
