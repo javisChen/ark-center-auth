@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,7 +112,7 @@ public class ApiRedisCache {
     public void removeApiCache(ApiMeta api) {
         try {
             String key = ApiCacheKey.generateRedisKey(api);
-            cacheService.hDel(CACHE_KEY, key);
+            cacheService.hDel(CACHE_KEY, Collections.singleton(key));
             log.info("Successfully removed API cache for {}", key);
         } catch (Exception e) {
             log.error("Failed to remove API cache: {}", e.getMessage(), e);
