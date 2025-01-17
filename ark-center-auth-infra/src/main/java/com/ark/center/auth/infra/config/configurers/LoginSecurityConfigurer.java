@@ -4,8 +4,6 @@ import com.ark.center.auth.infra.authentication.login.LoginAuthenticationConvert
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.account.AccountLoginAuthenticationProvider;
-import com.ark.center.auth.infra.authentication.login.check.DefaultPostAuthenticationChecks;
-import com.ark.center.auth.infra.authentication.login.check.DefaultPreAuthenticationChecks;
 import com.ark.center.auth.infra.authentication.login.mobile.MobileLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.userdetails.IamUserDetailsService;
 import com.ark.center.auth.infra.captcha.SmsCaptchaProvider;
@@ -29,8 +27,6 @@ import java.util.List;
 public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurityConfigurer, HttpSecurity> {
 
     private ApplicationContext context;
-    private final DefaultPreAuthenticationChecks preAuthenticationChecks = new DefaultPreAuthenticationChecks();
-    private final DefaultPostAuthenticationChecks postAuthenticationChecks = new DefaultPostAuthenticationChecks();
 
 
     @Override

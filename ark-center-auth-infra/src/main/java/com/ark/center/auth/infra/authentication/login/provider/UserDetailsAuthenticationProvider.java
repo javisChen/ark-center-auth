@@ -26,14 +26,11 @@ public abstract class UserDetailsAuthenticationProvider implements Authenticatio
     protected final Log logger = LogFactory.getLog(getClass());
 
     protected MessageSourceAccessor messages = AuthMessageSource.getAccessor();
-    // protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
     private final TokenIssuer tokenIssuer;
 
     @Setter
     private UserCache userCache = new NullUserCache();
-
-    private final GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
     protected UserDetailsAuthenticationProvider(TokenIssuer tokenIssuer) {
         this.tokenIssuer = tokenIssuer;
@@ -76,11 +73,10 @@ public abstract class UserDetailsAuthenticationProvider implements Authenticatio
         if (!cacheWasUsed) {
             userCache.putUserInCache(user);
         }
-        Object principalToReturn = user.getUsername();
-        return createSuccessAuthentication(principalToReturn, authentication, user);
+        return createSuccessAuthentication(user);
     }
 
-    private Authentication createSuccessAuthentication(Object principalToReturn, Authentication authentication, AuthUser user) {
+    private Authentication createSuccessAuthentication(AuthUser user) {
         return tokenIssuer.issueToken(user);
     }
 

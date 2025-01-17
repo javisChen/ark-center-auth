@@ -1,10 +1,10 @@
 package com.ark.center.auth.infra.authentication.logout;
 
+import com.ark.center.auth.infra.authentication.common.CacheKeyManager;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.cache.CacheService;
 import com.ark.component.dto.ServerResponse;
 import com.ark.component.security.base.user.AuthUser;
-import com.ark.component.security.core.common.RedisKeyUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +38,9 @@ public class AuthLogoutHandler implements LogoutSuccessHandler, LogoutHandler {
         String accessToken = bearerTokenResolver.resolve(request);
 
         // 删除用户认证信息缓存
-        cacheService.del(RedisKeyUtils.createAccessTokenKey(accessToken));
+        cacheService.del(CacheKeyManager.createAccessTokenKey(accessToken));
 
-        cacheService.del(RedisKeyUtils.createUserIdKey(user.getUserId()));
+        cacheService.del(CacheKeyManager.createUserIdKey(user.getUserId()));
 
     }
 

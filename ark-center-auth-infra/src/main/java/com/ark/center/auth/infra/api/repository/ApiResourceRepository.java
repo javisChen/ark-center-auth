@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -119,18 +120,19 @@ public class ApiResourceRepository implements InitializingBean {
      * @throws RuntimeException 如果Redis缓存更新失败
      */
     public void updateApi(ApiMeta api) {
+        String cacheKey = api.getUri() + ":" + api.getMethod();
         // 1. 先更新Redis缓存，如果失败则抛出异常，本地缓存保持不变
         try {
             apiRedisCache.updateApiCache(api);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to update Redis cache, local cache remains unchanged", e);
+            throw new RuntimeException("Failed to update Redis cache for API " + cacheKey + ", local cache remains unchanged", e);
         }
         
         // 2. Redis更新成功后，再更新本地缓存
         removeFromLocalCache(api.getUri(), api.getMethod());
         addToLocalCache(api);
 
-        log.info("Successfully updated API cache for {}", api.getUri() + ":" + api.getMethod());
+        log.info("Successfully updated API cache for {}", cacheKey);
     }
 
     /**
@@ -138,16 +140,17 @@ public class ApiResourceRepository implements InitializingBean {
      * @throws RuntimeException 如果Redis缓存删除失败
      */
     public void removeApi(ApiMeta api) {
+        String cacheKey = api.getUri() + ":" + api.getMethod();
         // 1. 先从Redis缓存中移除，如果失败则抛出异常，本地缓存保持不变
         try {
             apiRedisCache.removeApiCache(api);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to remove from Redis cache, local cache remains unchanged", e);
+            throw new RuntimeException("Failed to remove API " + cacheKey + " from Redis cache, local cache remains unchanged", e);
         }
 
         // 2. Redis删除成功后，再从本地缓存中移除
         removeFromLocalCache(api.getUri(), api.getMethod());
-        log.info("Successfully removed API cache for {}", api.getUri() + ":" + api.getMethod());
+        log.info("Successfully removed API cache for {}", cacheKey);
     }
 
     /**
@@ -158,9 +161,11 @@ public class ApiResourceRepository implements InitializingBean {
     }
 
     /**
-     * 获取指定HTTP方法的所有动态路径API
+     * 获取所有动态路径API
+     * @return 不可修改的动态路径API列表
      */
     public List<ApiMeta> getDynamicApis() {
-        return dynamicPathCache;
+        return Collections.unmodifiableList(dynamicPathCache);
     }
 }
+

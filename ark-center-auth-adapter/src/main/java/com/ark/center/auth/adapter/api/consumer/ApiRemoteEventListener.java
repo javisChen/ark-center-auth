@@ -4,6 +4,7 @@ import com.ark.center.auth.infra.api.ApiMeta;
 import com.ark.center.auth.infra.api.repository.ApiResourceRepository;
 import com.ark.center.auth.infra.user.gateway.ApiGateway;
 import com.ark.center.iam.client.api.event.ApiChangeEventDTO;
+import com.ark.center.iam.client.api.enums.ApiChangeType;
 import com.ark.center.iam.client.contants.IamMQConst;
 import com.ark.component.mq.MQType;
 import com.ark.component.mq.core.annotations.MQMessageListener;
@@ -11,6 +12,11 @@ import com.ark.component.mq.core.processor.SimpleMessageHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import static com.ark.center.iam.client.api.enums.ApiChangeType.CREATED;
+import static com.ark.center.iam.client.api.enums.ApiChangeType.DELETED;
+import static com.ark.center.iam.client.api.enums.ApiChangeType.STATUS_CHANGED;
+import static com.ark.center.iam.client.api.enums.ApiChangeType.UPDATED;
 
 @MQMessageListener(
         mq = MQType.ROCKET,
@@ -39,16 +45,21 @@ public class ApiRemoteEventListener extends SimpleMessageHandler<ApiChangeEventD
                         log.info("API deleted, cache cleared: apiId={}", event.getApiId());
                     }
                 }
-                case CREATED, UPDATED -> {
+                case CREATED, UPDATED, STATUS_CHANGED -> {
                     ApiMeta api = apiGateway.getApi(event.getApiId());
                     if (api != null) {
-                        apiResourceRepository.updateApi(api);
-                        log.info("API updated, cache refreshed: apiId={}", event.getApiId());
+                        if (api.getStatus() == 2) { // 2表示已禁用
+                            apiResourceRepository.removeApi(api);
+                            log.info("API disabled, cache removed: apiId={}", event.getApiId());
+                        } else {
+                            apiResourceRepository.updateApi(api);
+                            log.info("API updated, cache refreshed: apiId={}", event.getApiId());
+                        }
                     } else {
                         log.warn("API not found, cannot update cache: apiId={}", event.getApiId());
                     }
                 }
-                default -> log.warn("Unknown API change type: {}", event.getChangeType());
+                default -> log.warn("Unhandled API change type: {}", event.getChangeType());
             }
         } catch (Exception e) {
             log.error("Failed to process API change event: {}", e.getMessage(), e);
