@@ -1,9 +1,8 @@
 package com.ark.center.auth.infra.config.configurers;
 
-import com.ark.center.auth.infra.authentication.common.Uris;
+import com.ark.center.auth.infra.authentication.common.CommonConst;
 import com.ark.center.auth.infra.authentication.logout.AuthLogoutHandler;
 import com.ark.component.cache.CacheService;
-import com.ark.component.mq.integration.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,7 +21,7 @@ public class LogoutSecurityConfigurer extends AbstractHttpConfigurer<LogoutSecur
         );
 
         httpSecurity.logout(logout -> logout
-                .logoutRequestMatcher(new AntPathRequestMatcher(Uris.LOGOUT))
+                .logoutRequestMatcher(new AntPathRequestMatcher(CommonConst.URI_LOGOUT))
                 .clearAuthentication(false)
                 .logoutSuccessHandler(handler)
                 .addLogoutHandler(handler)

@@ -1,34 +1,49 @@
-package com.ark.center.auth.infra.authentication.login;
+package com.ark.center.auth.client.authentication.command;
 
-import com.ark.center.auth.client.login.constant.LoginMode;
+import com.ark.center.auth.client.application.constant.AppCode;
+import com.ark.center.auth.client.authentication.constant.AuthStrategy;
+import com.ark.center.auth.client.authentication.constant.ClientType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * 基础登录认证请求
+ */
 @Data
 @Schema(description = "基础登录请求参数")
 public class BaseLoginAuthenticateRequest {
 
     @Schema(
-        description = "登录渠道",
+        description = "应用编码",
         requiredMode = Schema.RequiredMode.REQUIRED,
-        example = "APP",
-        allowableValues = {"APP", "WEB", "H5", "MINI_PROGRAM"},
-        title = "登录来源渠道"
+        example = "MALL_APP",
+        implementation = AppCode.class,
+        title = "应用编码"
     )
-    @NotBlank(message = "登录渠道不能为空")
-    private String channel;
+    @NotNull(message = "应用编码不能为空")
+    private AppCode appCode;
 
     @Schema(
-        description = "登录模式",
+        description = "客户端类型",
         requiredMode = Schema.RequiredMode.REQUIRED,
-        example = "ACCOUNT",
-        implementation = LoginMode.class,
-        title = "登录认证方式"
+        example = "IOS",
+        implementation = ClientType.class,
+        title = "登录客户端类型"
     )
-    @NotNull(message = "登录模式不能为空")
-    private LoginMode loginMode;
+    @NotNull(message = "客户端类型不能为空")
+    private ClientType clientType;
+
+    @Schema(
+        description = "认证策略",
+        requiredMode = Schema.RequiredMode.REQUIRED,
+        example = "PWD",
+        implementation = AuthStrategy.class,
+        title = "登录认证策略"
+    )
+    @NotNull(message = "认证策略不能为空")
+    private AuthStrategy authStrategy;
 
     @Schema(
         description = "设备ID",

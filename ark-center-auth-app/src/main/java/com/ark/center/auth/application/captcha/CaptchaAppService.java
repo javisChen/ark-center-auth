@@ -1,4 +1,4 @@
-package com.ark.center.auth.captcha;
+package com.ark.center.auth.application.captcha;
 
 import com.ark.center.auth.client.captcha.constant.CaptchaType;
 import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;

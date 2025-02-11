@@ -1,7 +1,7 @@
 package com.ark.center.auth.adapter.login;
 
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticateResponse;
-import com.ark.center.auth.infra.authentication.login.account.AccountLoginAuthenticateRequest;
+import com.ark.center.auth.client.authentication.command.AccountLoginAuthenticateRequest;
 import com.ark.component.dto.ServerResponse;
 import com.ark.component.dto.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;

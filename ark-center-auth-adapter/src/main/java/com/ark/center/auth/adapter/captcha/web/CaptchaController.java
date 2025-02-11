@@ -3,7 +3,7 @@ package com.ark.center.auth.adapter.captcha.web;
 import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
 import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
 import com.ark.center.auth.client.captcha.dto.CaptchaContentDTO;
-import com.ark.center.auth.captcha.CaptchaAppService;
+import com.ark.center.auth.application.captcha.CaptchaAppService;
 import com.ark.component.dto.SingleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

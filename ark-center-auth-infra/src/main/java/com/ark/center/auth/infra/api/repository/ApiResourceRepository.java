@@ -3,7 +3,8 @@ package com.ark.center.auth.infra.api.repository;
 import com.ark.center.auth.infra.api.ApiMeta;
 import com.ark.center.auth.infra.api.ApiCacheKey;
 import com.ark.center.auth.infra.api.cache.ApiRedisCache;
-import com.ark.center.auth.infra.user.gateway.ApiGateway;
+import com.ark.center.auth.infra.api.gateway.ApiGateway;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * API资源缓存
  * 使用线程安全的集合类来存储API数据
+ * ApiMeta的内存占用分析：
+ * name: 32 字节
+ * uri: 32 字节
+ * method: 16 字节
+ * authType: 16 字节
+ * status: 16 字节
+ * isDynamicPath: 16 字节
+ * 总计: 132 字节
+ * 36 字节（ApiMeta 实例） + 132 字节（内部对象） = 168 字节
+ * 10,000 × 168 字节 = 1,680,000 字节 ≈ 1.6 MB
+ * 粗略计算10000个API占用也不到2MB
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class ApiResourceRepository implements InitializingBean {
 
     private final ApiGateway apiGateway;
@@ -35,11 +48,6 @@ public class ApiResourceRepository implements InitializingBean {
      * 动态路径API缓存
      */
     private List<ApiMeta> dynamicPathCache = new CopyOnWriteArrayList<>();
-
-    public ApiResourceRepository(ApiGateway apiGateway, ApiRedisCache apiRedisCache) {
-        this.apiGateway = apiGateway;
-        this.apiRedisCache = apiRedisCache;
-    }
 
     @Override
     public void afterPropertiesSet() throws Exception {

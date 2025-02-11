@@ -31,7 +31,8 @@ public class LoginAuthenticationHandler extends AuthenticationHandler {
 
     private void writeSuccess(HttpServletResponse response, Authentication authentication) throws IOException {
         AuthenticatedToken authenticationToken = (AuthenticatedToken) authentication;
-        SingleResponse<LoginAuthenticateResponse> serverResponse = SingleResponse.ok(new LoginAuthenticateResponse(authenticationToken.getAccessToken()));
+        LoginAuthenticateResponse authenticateResponse = new LoginAuthenticateResponse(authenticationToken.getToken().getAccessToken());
+        SingleResponse<LoginAuthenticateResponse> serverResponse = SingleResponse.ok(authenticateResponse);
         ResponseUtils.write(serverResponse, response, HttpStatus.SC_OK);
     }
 

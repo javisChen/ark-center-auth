@@ -1,6 +1,6 @@
 package com.ark.center.auth.infra.user.converter;
 
-import com.ark.component.security.base.user.AuthUser;
+import com.ark.component.security.base.authentication.AuthUser;
 import com.ark.center.auth.infra.user.AuthUserApiPermission;
 import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
 import com.ark.center.iam.client.user.dto.UserAuthDTO;

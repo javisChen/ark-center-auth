@@ -6,6 +6,11 @@ import lombok.Data;
 @Data
 public class ApiMeta {
     /**
+     * API ID
+     */
+    private Long id;
+
+    /**
      * API名称
      */
     private String name;

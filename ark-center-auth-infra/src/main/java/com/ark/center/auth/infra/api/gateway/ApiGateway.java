@@ -1,4 +1,4 @@
-package com.ark.center.auth.infra.user.gateway;
+package com.ark.center.auth.infra.api.gateway;
 
 import com.ark.center.auth.infra.api.ApiMeta;
 

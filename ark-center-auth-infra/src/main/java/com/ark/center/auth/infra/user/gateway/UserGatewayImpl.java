@@ -1,14 +1,12 @@
-package com.ark.center.auth.infra.user.gateway.impl;
+package com.ark.center.auth.infra.user.gateway;
 
-import com.ark.component.security.base.user.AuthUser;
 import com.ark.center.auth.infra.user.AuthUserApiPermission;
-import com.ark.center.auth.infra.user.gateway.UserGateway;
-import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
+import com.ark.center.iam.client.user.dto.UserApiPermissionDTO;
+import com.ark.component.security.base.authentication.AuthUser;
 import com.ark.center.auth.infra.user.converter.UserConverter;
 import com.ark.center.auth.infra.user.facade.UserFacade;
 import com.ark.center.auth.infra.user.facade.UserPermissionFacade;
 import com.ark.center.iam.client.user.dto.UserAuthDTO;
-import com.ark.center.iam.client.user.query.UserPermissionQuery;
 import com.ark.center.iam.client.user.query.UserQuery;
 import com.ark.component.microservice.rpc.util.RpcUtils;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 用户远程服务调用实现
+ */
 @Component
 @RequiredArgsConstructor
 public class UserGatewayImpl implements UserGateway {
@@ -23,7 +24,6 @@ public class UserGatewayImpl implements UserGateway {
     private final UserFacade userFacade;
     private final UserPermissionFacade userPermissionFacade;
     private final UserConverter userConverter;
-    private final UserApiPermissionCache userApiPermissionCache;
 
     @Override
     public AuthUser retrieveUserByMobile(String mobile) {
@@ -42,17 +42,8 @@ public class UserGatewayImpl implements UserGateway {
     }
 
     @Override
-    public Boolean checkHasPermission(String requestUri, String applicationCode, String method, Long userId) {
-        UserPermissionQuery userPermissionQuery = new UserPermissionQuery();
-        userPermissionQuery.setRequestUri(requestUri);
-        userPermissionQuery.setApplicationCode(applicationCode);
-        userPermissionQuery.setMethod(method);
-        userPermissionQuery.setUserId(userId);
-        return RpcUtils.checkAndGetData(userPermissionFacade.hasApiPermission(userPermissionQuery));
-    }
-
-    @Override
     public List<AuthUserApiPermission> queryUserApiPermissions(Long userId) {
-        return userApiPermissionCache.get(userId);
+        List<UserApiPermissionDTO> apiList = RpcUtils.checkAndGetData(userPermissionFacade.queryUserApiPermissions(userId));
+        return userConverter.toAuthUserApiPermission(apiList);
     }
 }

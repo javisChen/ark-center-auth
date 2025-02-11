@@ -1,9 +1,10 @@
 package com.ark.center.auth.infra.authentication.login.provider;
 
-import com.ark.center.auth.infra.AuthMessageSource;
+import com.ark.center.auth.infra.authentication.LoginAuthenticationDetails;
+import com.ark.center.auth.infra.authentication.token.issuer.TokenIssuer;
+import com.ark.center.auth.infra.support.AuthMessageSource;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
-import com.ark.component.security.base.user.AuthUser;
-import com.ark.component.security.core.token.issuer.TokenIssuer;
+import com.ark.component.security.base.authentication.AuthUser;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
@@ -13,8 +14,6 @@ import org.springframework.core.log.LogMessage;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
-import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserCache;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.cache.NullUserCache;
@@ -39,6 +38,8 @@ public abstract class UserDetailsAuthenticationProvider implements Authenticatio
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         preCheckAuthentication(authentication);
+
+        LoginAuthenticationDetails details = (LoginAuthenticationDetails) authentication.getDetails();
 
         String username = authentication.getPrincipal().toString();
         boolean cacheWasUsed = true;
@@ -73,11 +74,11 @@ public abstract class UserDetailsAuthenticationProvider implements Authenticatio
         if (!cacheWasUsed) {
             userCache.putUserInCache(user);
         }
-        return createSuccessAuthentication(user);
+        return createSuccessAuthentication(user, details);
     }
 
-    private Authentication createSuccessAuthentication(AuthUser user) {
-        return tokenIssuer.issueToken(user);
+    private Authentication createSuccessAuthentication(AuthUser user, LoginAuthenticationDetails details) {
+        return tokenIssuer.issueToken(user, details);
     }
 
     protected void additionalAuthenticationChecks(UserDetails user, Authentication authentication) {

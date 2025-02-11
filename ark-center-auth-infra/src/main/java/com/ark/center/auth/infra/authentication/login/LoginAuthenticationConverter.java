@@ -1,17 +1,14 @@
 package com.ark.center.auth.infra.authentication.login;
 
-import cn.hutool.core.util.ClassUtil;
 import com.alibaba.fastjson2.JSON;
-import com.ark.center.auth.client.login.constant.LoginMode;
+import com.ark.center.auth.client.authentication.command.BaseLoginAuthenticateRequest;
+import com.ark.center.auth.client.authentication.constant.AuthStrategy;
+import com.ark.center.auth.infra.authentication.common.CommonConst;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 
-import static com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter.LOGIN_REQUEST_BODY_ATTR;
 
 /**
  * 登录认证请求转换器抽象类
@@ -21,43 +18,15 @@ import static com.ark.center.auth.infra.authentication.login.LoginAuthentication
  * @author JC
  */
 @Slf4j
-public abstract class LoginAuthenticationConverter<T extends BaseLoginAuthenticateRequest>
-        extends RequestConverter<T>
-        implements AuthenticationConverter, InitializingBean {
-
-    private Class<T> clazz;
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void afterPropertiesSet() {
-        this.clazz = (Class<T>) ClassUtil.getTypeArgument(getClass());
-    }
-
+public abstract class LoginAuthenticationConverter<T extends BaseLoginAuthenticateRequest> extends RequestConverter<T>
+        implements AuthenticationConverter {
 
 
     @Override
     public Authentication convert(HttpServletRequest request) {
-        String cachedRequest = (String) request.getAttribute(LOGIN_REQUEST_BODY_ATTR);
-        return doConvert(JSON.to(clazz, cachedRequest));
-    }
-
-    /**
-     * 读取并校验认证请求参数
-     */
-    @NotNull
-    private T readRequest(HttpServletRequest request) {
-        T authenticateRequest;
-        try {
-            authenticateRequest = readFromRequest(request);
-        } catch (Exception e) {
-            log.error("Failed to read authentication parameters:", e);
-            throw new AuthenticationServiceException("Invalid authentication parameters");
-        }
-        if (authenticateRequest == null) {
-            log.error("Authentication request parameters cannot be null");
-            throw new AuthenticationServiceException("Invalid authentication parameters");
-        }
-        return authenticateRequest;
+        String cachedRequest = (String) request.getAttribute(CommonConst.LOGIN_REQUEST_BODY_ATTR);
+        T authenticateRequest = JSON.to(clazz, cachedRequest);
+        return doConvert(authenticateRequest);
     }
 
     /**
@@ -66,7 +35,7 @@ public abstract class LoginAuthenticationConverter<T extends BaseLoginAuthentica
     protected abstract Authentication doConvert(T authenticateRequest);
 
     /**
-     * 判断是否支持指定的登录模式
+     * 判断是否支持指定的认证策略
      */
-    protected abstract boolean supports(LoginMode loginMode);
+    protected abstract boolean supports(AuthStrategy authStrategy);
 }

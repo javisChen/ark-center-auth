@@ -1,12 +1,9 @@
-package com.ark.center.auth.infra.api.gateway.impl;
+package com.ark.center.auth.infra.api.gateway;
 
 import com.ark.center.auth.infra.api.ApiMeta;
-import com.ark.center.auth.infra.user.gateway.ApiGateway;
 import com.ark.center.auth.infra.api.converter.ApiConverter;
 import com.ark.center.auth.infra.api.facade.ApiFacade;
 import com.ark.center.iam.client.api.dto.ApiDTO;
-import com.ark.center.iam.client.api.dto.ApiDetailDTO;
-import com.ark.center.iam.client.api.dto.ApiDetailsDTO;
 import com.ark.center.iam.client.api.query.ApiQuery;
 import com.ark.component.microservice.rpc.util.RpcUtils;
 import lombok.RequiredArgsConstructor;

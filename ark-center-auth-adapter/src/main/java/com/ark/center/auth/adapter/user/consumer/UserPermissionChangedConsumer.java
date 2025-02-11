@@ -1,6 +1,6 @@
 package com.ark.center.auth.adapter.user.consumer;
 
-import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
+import com.ark.center.auth.infra.user.service.UserPermissionService;
 import com.ark.center.iam.client.contants.IamMQConst;
 import com.ark.center.iam.client.user.dto.UserApiPermissionChangedDTO;
 import com.ark.component.mq.MQType;
@@ -21,12 +21,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserPermissionChangedConsumer extends SimpleMessageHandler<UserApiPermissionChangedDTO> {
 
-    private final UserApiPermissionCache userApiPermissionCache;
+    private final UserPermissionService userPermissionService;
 
     @Override
     protected void handleMessage(String msgId, String sendId, UserApiPermissionChangedDTO body, Object o) {
         log.info("用户Api权限发生变更 -> msgId = {}, sendId = {}, body = {}", msgId, sendId, body);
-        userApiPermissionCache.refresh(body.getUserId());
+        userPermissionService.refresh(body.getUserId());
     }
 
 }

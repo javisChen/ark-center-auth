@@ -1,10 +1,12 @@
 package com.ark.center.auth.infra.authentication.context;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.ark.center.auth.infra.authentication.common.CacheKeyManager;
+import com.ark.center.auth.infra.authentication.LoginAuthenticationDetails;
+import com.ark.center.auth.infra.application.model.ApplicationAuthConfig;
 import com.ark.component.cache.CacheService;
-import com.ark.component.security.base.user.AuthUser;
+import com.ark.component.security.base.authentication.AuthUser;
+import com.ark.component.security.base.authentication.Token;
 import com.ark.component.security.core.authentication.AuthenticatedToken;
 import com.ark.component.security.core.common.SecurityConstants;
 import com.ark.component.security.core.context.repository.AbstractSecurityContextRepository;
@@ -30,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 /**
  * 认证服务的安全上下文存储库
@@ -41,25 +44,41 @@ public class AuthServerSecurityContextRepository extends AbstractSecurityContext
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
     private final CacheService cacheService;
-
-    /**
-     * LoginUser对象的属性列表，用于Redis hash结构存储
-     */
-    private final List<Object> hashKeys = List.of(
-            AuthUser.USER_ID,
-            AuthUser.USER_CODE,
-            AuthUser.IS_SUPER_ADMIN,
-            "password",
-            AuthUser.USERNAME,
-            "authorities",
-            "accountNonExpired",
-            "accountNonLocked",
-            "credentialsNonExpired",
-            "enabled");
+    private final List<Object> hashKeys = AuthenticatedCacheKeys.getKeys();
 
     public AuthServerSecurityContextRepository(CacheService cacheService) {
         Assert.notNull(cacheService, "CacheService must not be null");
         this.cacheService = cacheService;
+    }
+
+    private Map<String, Object> buildCacheMap(AuthenticatedToken authenticatedToken) {
+        AuthUser authUser = authenticatedToken.getAuthUser();
+        Map<String, Object> map = new HashMap<>();
+        
+        // 基本用户信息
+        map.put(AuthenticatedCacheKeys.USER_ID.getValue().toString(), authUser.getUserId());
+        map.put(AuthenticatedCacheKeys.USER_CODE.getValue().toString(), authUser.getUserCode());
+        map.put(AuthenticatedCacheKeys.IS_SUPER_ADMIN.getValue().toString(), authUser.getIsSuperAdmin());
+        map.put(AuthenticatedCacheKeys.USERNAME.getValue().toString(), authUser.getUsername());
+        
+        // 权限信息
+        map.put(AuthenticatedCacheKeys.AUTHORITIES.getValue().toString(), authenticatedToken.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+        
+        // 账户状态
+        map.put(AuthenticatedCacheKeys.ACCOUNT_NON_EXPIRED.getValue().toString(), authUser.isAccountNonExpired());
+        map.put(AuthenticatedCacheKeys.ACCOUNT_NON_LOCKED.getValue().toString(), authUser.isAccountNonLocked());
+        map.put(AuthenticatedCacheKeys.CREDENTIALS_NON_EXPIRED.getValue().toString(), authUser.isCredentialsNonExpired());
+        map.put(AuthenticatedCacheKeys.ENABLED.getValue().toString(), authUser.isEnabled());
+        
+        // 应用信息
+        LoginAuthenticationDetails details = (LoginAuthenticationDetails) authenticatedToken.getDetails();
+        ApplicationAuthConfig config = details.getApplicationAuthConfig();
+        map.put(AuthenticatedCacheKeys.APP_CODE.getValue().toString(), config.getCode());
+        map.put(AuthenticatedCacheKeys.APP_TYPE.getValue().toString(), config.getAppType());
+
+        return map;
     }
 
     @Override
@@ -76,18 +95,13 @@ public class AuthServerSecurityContextRepository extends AbstractSecurityContext
         try {
             AuthenticatedToken authenticatedToken = (AuthenticatedToken) authentication;
             AuthUser authUser = authenticatedToken.getAuthUser();
-            String accessToken = authenticatedToken.getAccessToken();
+            String accessToken = authenticatedToken.getToken().getAccessToken();
 
             if (log.isDebugEnabled()) {
                 log.debug("Saving security context for user: {}", authUser.getUsername());
             }
 
-            // 将LoginUser对象转换为Map并存储到Redis
-            Map<String, Object> map = BeanUtil.beanToMap(authUser, false, true);
-            map.put("authorities", authenticatedToken.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList()));
-
+            Map<String, Object> map = buildCacheMap(authenticatedToken);
             cacheService.hMSet(CacheKeyManager.createAccessTokenKey(accessToken),
                     map, SecurityConstants.TOKEN_EXPIRES_SECONDS);
 
@@ -133,15 +147,15 @@ public class AuthServerSecurityContextRepository extends AbstractSecurityContext
         }
 
         try {
-            AuthUser authUser = loadAuthUserFromRedis(accessToken);
-            if (authUser == null) {
+            AuthenticatedToken authenticatedToken = loadAuthenticatedTokenFromRedis(accessToken);
+            if (authenticatedToken == null) {
                 return context;
             }
 
-            context.setAuthentication(AuthenticatedToken.authenticated(authUser, accessToken, "", 0L));
+            context.setAuthentication(authenticatedToken);
 
             if (log.isDebugEnabled()) {
-                log.debug("Successfully loaded security context for user: {}", authUser.getUsername());
+                log.debug("Successfully loaded security context for user: {}", authenticatedToken.getAuthUser().getUsername());
             }
 
             return context;
@@ -149,17 +163,6 @@ public class AuthServerSecurityContextRepository extends AbstractSecurityContext
             log.error("Failed to load security context", e);
             return context;
         }
-    }
-
-    private AuthUser loadAuthUserFromRedis(String accessToken) {
-        List<Object> values = cacheService.hMGet(CacheKeyManager.createAccessTokenKey(accessToken), hashKeys);
-        
-        if (!isValidValues(values)) {
-            log.warn("No security context found in Redis for token: {}", accessToken);
-            return null;
-        }
-
-        return assemble(values);
     }
 
     private boolean isValidValues(List<Object> values) {
@@ -178,22 +181,48 @@ public class AuthServerSecurityContextRepository extends AbstractSecurityContext
 
     private AuthUser assemble(List<Object> objects) {
         AuthUser authUser = new AuthUser();
-        authUser.setUserId(Long.parseLong(objects.get(0).toString()));
-        authUser.setUserCode(String.valueOf(objects.get(1)));
-        authUser.setIsSuperAdmin((Boolean) objects.get(2));
-        authUser.setUsername(String.valueOf(objects.get(4)));
+        authUser.setUserId(Long.parseLong(objects.get(AuthenticatedCacheKeys.USER_ID.getIndex()).toString()));
+        authUser.setUserCode(String.valueOf(objects.get(AuthenticatedCacheKeys.USER_CODE.getIndex())));
+        authUser.setIsSuperAdmin((Boolean) objects.get(AuthenticatedCacheKeys.IS_SUPER_ADMIN.getIndex()));
+        authUser.setUsername(String.valueOf(objects.get(AuthenticatedCacheKeys.USERNAME.getIndex())));
         
-        JSONArray authorities = (JSONArray) objects.get(5);
+        JSONArray authorities = (JSONArray) objects.get(AuthenticatedCacheKeys.AUTHORITIES.getIndex());
         authUser.setAuthorities(authorities.stream()
                 .map(item -> new SimpleGrantedAuthority((String) item))
                 .collect(Collectors.toUnmodifiableSet()));
                 
-        authUser.setAccountNonExpired((Boolean) objects.get(6));
-        authUser.setAccountNonLocked((Boolean) objects.get(7));
-        authUser.setCredentialsNonExpired((Boolean) objects.get(8));
-        authUser.setEnabled((Boolean) objects.get(9));
+        authUser.setAccountNonExpired((Boolean) objects.get(AuthenticatedCacheKeys.ACCOUNT_NON_EXPIRED.getIndex()));
+        authUser.setAccountNonLocked((Boolean) objects.get(AuthenticatedCacheKeys.ACCOUNT_NON_LOCKED.getIndex()));
+        authUser.setCredentialsNonExpired((Boolean) objects.get(AuthenticatedCacheKeys.CREDENTIALS_NON_EXPIRED.getIndex()));
+        authUser.setEnabled((Boolean) objects.get(AuthenticatedCacheKeys.ENABLED.getIndex()));
         return authUser;
     }
 
+    private Token assembleToken(String accessToken, List<Object> values) {
+        return Token.of(
+            accessToken,
+            "",  // 从Redis中恢复时不需要刷新令牌
+            SecurityConstants.TOKEN_EXPIRES_SECONDS,
+            String.valueOf(values.get(AuthenticatedCacheKeys.APP_CODE.getIndex())),
+            String.valueOf(values.get(AuthenticatedCacheKeys.APP_TYPE.getIndex()))
+        );
+    }
+
+    private AuthenticatedToken loadAuthenticatedTokenFromRedis(String accessToken) {
+        List<Object> values = cacheService.hMGet(CacheKeyManager.createAccessTokenKey(accessToken), hashKeys);
+        
+        if (!isValidValues(values)) {
+            log.warn("No security context found in Redis for token: {}", accessToken);
+            return null;
+        }
+
+        // 组装用户信息
+        AuthUser authUser = assemble(values);
+        
+        // 组装令牌信息
+        Token token = assembleToken(accessToken, values);
+        
+        return AuthenticatedToken.authenticated(authUser, token);
+    }
 
 } 

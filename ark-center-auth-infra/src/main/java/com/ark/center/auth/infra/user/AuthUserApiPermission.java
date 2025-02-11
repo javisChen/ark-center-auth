@@ -4,6 +4,10 @@ import lombok.Data;
 
 @Data
 public class AuthUserApiPermission {
+    /**
+     * API ID
+     */
+    private Long apiId;
 
     private String uri;
 

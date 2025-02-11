@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.FeignClient;
         path = "/v1/users",
         url = "${ark.center.iam.service.uri:}",
         dismiss404 = true,
-        configuration = {FeignCommonErrorDecoder.class}
+        configuration = FeignCommonErrorDecoder.class
 )
 public interface UserFacade extends UserQueryApi {
 

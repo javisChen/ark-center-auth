@@ -1,4 +1,4 @@
-package com.ark.center.auth.authentication.event;
+package com.ark.center.auth.application.authentication.event;
 
 import com.ark.center.auth.client.mq.AuthConst;
 import com.ark.center.auth.client.mq.logout.UserLogoutMQConst;
@@ -7,7 +7,7 @@ import com.ark.component.mq.MsgBody;
 import com.ark.component.mq.SendConfirm;
 import com.ark.component.mq.SendResult;
 import com.ark.component.mq.integration.MessageTemplate;
-import com.ark.component.security.base.user.AuthUser;
+import com.ark.component.security.base.authentication.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.ark.center.auth.infra;
+package com.ark.center.auth.infra.support;
 
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ResourceBundleMessageSource;

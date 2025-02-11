@@ -1,13 +1,15 @@
 package com.ark.center.auth.infra.config.configurers;
 
+import com.ark.center.auth.infra.application.service.ApplicationAuthConfigService;
+import com.ark.center.auth.infra.authentication.LoginAuthenticationDetailsSource;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationConverter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.account.AccountLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.mobile.MobileLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.userdetails.IamUserDetailsService;
+import com.ark.center.auth.infra.authentication.token.issuer.TokenIssuer;
 import com.ark.center.auth.infra.captcha.SmsCaptchaProvider;
-import com.ark.component.security.core.token.issuer.TokenIssuer;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -56,18 +58,34 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
                                     ApplicationContext context, 
                                     AuthenticationManager authenticationManager) {
         SecurityContextRepository contextRepository = context.getBean(SecurityContextRepository.class);
+        ApplicationAuthConfigService applicationAuthConfigService = context.getBean(ApplicationAuthConfigService.class);
         List<LoginAuthenticationConverter> converters = new ArrayList<>(
             context.getBeansOfType(LoginAuthenticationConverter.class).values()
         );
-        
+
+        LoginAuthenticationFilter filter = buildLoginAuthenticationFilter(
+            authenticationManager, 
+            converters, 
+            contextRepository,
+            applicationAuthConfigService
+        );
+
+        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @NotNull
+    private LoginAuthenticationFilter buildLoginAuthenticationFilter(AuthenticationManager authenticationManager,
+                                                                   List<LoginAuthenticationConverter> converters,
+                                                                   SecurityContextRepository contextRepository,
+                                                                   ApplicationAuthConfigService applicationAuthConfigService) {
         LoginAuthenticationHandler authenticationHandler = new LoginAuthenticationHandler();
-        LoginAuthenticationFilter filter = new LoginAuthenticationFilter(converters);
+        LoginAuthenticationFilter filter = new LoginAuthenticationFilter(converters, applicationAuthConfigService);
         filter.setAuthenticationSuccessHandler(authenticationHandler);
         filter.setAuthenticationFailureHandler(authenticationHandler);
         filter.setSecurityContextRepository(contextRepository);
         filter.setAuthenticationManager(authenticationManager);
-
-        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        filter.setAuthenticationDetailsSource(new LoginAuthenticationDetailsSource());
+        return filter;
     }
 
     @NotNull

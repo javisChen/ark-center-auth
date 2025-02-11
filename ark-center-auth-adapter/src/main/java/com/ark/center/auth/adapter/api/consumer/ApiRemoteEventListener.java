@@ -2,9 +2,8 @@ package com.ark.center.auth.adapter.api.consumer;
 
 import com.ark.center.auth.infra.api.ApiMeta;
 import com.ark.center.auth.infra.api.repository.ApiResourceRepository;
-import com.ark.center.auth.infra.user.gateway.ApiGateway;
+import com.ark.center.auth.infra.api.gateway.ApiGateway;
 import com.ark.center.iam.client.api.event.ApiChangeEventDTO;
-import com.ark.center.iam.client.api.enums.ApiChangeType;
 import com.ark.center.iam.client.contants.IamMQConst;
 import com.ark.component.mq.MQType;
 import com.ark.component.mq.core.annotations.MQMessageListener;
@@ -12,11 +11,6 @@ import com.ark.component.mq.core.processor.SimpleMessageHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import static com.ark.center.iam.client.api.enums.ApiChangeType.CREATED;
-import static com.ark.center.iam.client.api.enums.ApiChangeType.DELETED;
-import static com.ark.center.iam.client.api.enums.ApiChangeType.STATUS_CHANGED;
-import static com.ark.center.iam.client.api.enums.ApiChangeType.UPDATED;
 
 @MQMessageListener(
         mq = MQType.ROCKET,

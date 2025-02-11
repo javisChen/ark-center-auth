@@ -1,6 +1,6 @@
 package com.ark.center.auth.adapter.access;
 
-import com.ark.center.auth.application.access.ApiAccessService;
+import com.ark.center.auth.application.access.ApiAccessAppService;
 import com.ark.center.auth.client.access.dto.ApiAccessAuthenticateDTO;
 import com.ark.center.auth.client.access.query.ApiAccessAuthenticateQuery;
 import com.ark.component.dto.SingleResponse;
@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AccessController {
 
-    private final ApiAccessService apiAccessService;
+    private final ApiAccessAppService apiAccessAppService;
 
     @Operation(summary = "API访问认证")
     @PostMapping("/api/auth")
     public SingleResponse<ApiAccessAuthenticateDTO> auth(@RequestBody ApiAccessAuthenticateQuery query) {
-        return SingleResponse.ok(apiAccessService.authenticate(query));
+        return SingleResponse.ok(apiAccessAppService.authenticate(query));
     }
 
 }

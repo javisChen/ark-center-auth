@@ -1,6 +1,6 @@
-package com.ark.center.auth.authentication.event;
+package com.ark.center.auth.application.authentication.event;
 
-import com.ark.center.auth.infra.authentication.cache.UserApiPermissionCache;
+import com.ark.center.auth.infra.user.service.UserPermissionService;
 import com.ark.component.security.core.authentication.AuthenticatedToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class AuthenticationSuccessEventListener implements ApplicationListener<AuthenticationSuccessEvent> {
 
-    private final UserApiPermissionCache userApiPermissionCache;
+    private final UserPermissionService userPermissionService;
 
     @Override
     public void onApplicationEvent(AuthenticationSuccessEvent event) {
@@ -30,7 +30,7 @@ public class AuthenticationSuccessEventListener implements ApplicationListener<A
         log.info("User successfully authenticated: {}, time = {}", loginAuthenticationToken, LocalDateTime.now());
         Long userId = loginAuthenticationToken.getAuthUser().getUserId();
         // 刷新权限缓存
-        userApiPermissionCache.refresh(userId);
+        userPermissionService.refresh(userId);
 
     }
 }

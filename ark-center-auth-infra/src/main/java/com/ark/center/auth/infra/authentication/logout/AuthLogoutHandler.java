@@ -4,7 +4,7 @@ import com.ark.center.auth.infra.authentication.common.CacheKeyManager;
 import com.ark.center.auth.infra.authentication.common.ResponseUtils;
 import com.ark.component.cache.CacheService;
 import com.ark.component.dto.ServerResponse;
-import com.ark.component.security.base.user.AuthUser;
+import com.ark.component.security.base.authentication.AuthUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

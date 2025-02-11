@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ApiRedisCache {
 
-    private static final String APP_PREFIX = "auth";
     private static final String CACHE_KEY = "apis";
     private static final Long CACHE_TTL_DAYS = 7L;
 

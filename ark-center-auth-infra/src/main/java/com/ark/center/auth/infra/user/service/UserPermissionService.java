@@ -1,23 +1,26 @@
 package com.ark.center.auth.infra.user.service;
 
-import com.ark.center.auth.infra.user.AuthUserApiPermission;
-import com.ark.center.auth.infra.user.gateway.UserGateway;
+import com.ark.center.auth.infra.user.repository.UserPermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+/**
+ * 用户权限服务
+ */
 @Service
 @RequiredArgsConstructor
 public class UserPermissionService {
 
-    private final UserGateway userGateway;
+    private final UserPermissionRepository userPermissionRepository;
 
-    public boolean checkHasApiPermission(String applicationCode, Long userId, String requestUri, String method) {
-        return userGateway.checkHasPermission(requestUri, applicationCode, method, userId);
+    public void refresh(Long userId) {
+        userPermissionRepository.refreshUserPermissions(userId);
     }
 
-    public List<AuthUserApiPermission> queryUserApiPermission(Long userId) {
-        return userGateway.queryUserApiPermissions(userId);
+    /**
+     * 根据API ID获取用户的API权限
+     */
+    public boolean checkUserApiPermission(Long userId, Long apiId) {
+        return userPermissionRepository.getUserApiPermission(userId, apiId) != null;
     }
 }
