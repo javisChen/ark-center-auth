@@ -1,4 +1,4 @@
-package com.ark.center.auth.client.captcha.constant;
+package com.ark.center.auth.client.captcha.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

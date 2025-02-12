@@ -1,8 +1,8 @@
 package com.ark.center.auth.infra.authentication.login.mobile;
 
 import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
-import com.ark.center.auth.client.captcha.constant.CaptchaScene;
-import com.ark.center.auth.client.captcha.constant.CaptchaType;
+import com.ark.center.auth.client.captcha.common.CaptchaScene;
+import com.ark.center.auth.client.captcha.common.CaptchaType;
 import com.ark.center.auth.infra.authentication.login.provider.UserDetailsAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
 import com.ark.center.auth.infra.authentication.login.userdetails.IamUserDetailsService;

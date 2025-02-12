@@ -1,7 +1,7 @@
 package com.ark.center.auth.infra.application.service;
 
-import com.ark.center.auth.client.application.constant.AppCode;
-import com.ark.center.auth.client.authentication.constant.AuthStrategy;
+import com.ark.center.auth.client.application.common.AppCode;
+import com.ark.center.auth.client.authentication.common.AuthStrategy;
 import com.ark.center.auth.infra.application.model.ApplicationAuthConfig;
 import com.ark.center.auth.infra.application.repository.ApplicationAuthConfigRepository;
 import lombok.RequiredArgsConstructor;

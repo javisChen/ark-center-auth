@@ -3,7 +3,7 @@ package com.ark.center.auth.infra.authentication.login;
 import cn.hutool.core.io.IoUtil;
 import com.alibaba.fastjson2.JSON;
 import com.ark.center.auth.client.authentication.command.BaseLoginAuthenticateRequest;
-import com.ark.center.auth.client.authentication.constant.AuthStrategy;
+import com.ark.center.auth.client.authentication.common.AuthStrategy;
 import com.ark.center.auth.infra.application.model.ApplicationAuthConfig;
 import com.ark.center.auth.infra.application.service.ApplicationAuthConfigService;
 import com.ark.center.auth.infra.authentication.common.CommonConst;

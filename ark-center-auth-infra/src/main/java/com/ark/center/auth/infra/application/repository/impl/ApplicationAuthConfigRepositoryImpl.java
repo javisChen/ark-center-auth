@@ -1,8 +1,8 @@
 package com.ark.center.auth.infra.application.repository.impl;
 
-import com.ark.center.auth.client.application.constant.AppCode;
-import com.ark.center.auth.client.authentication.constant.AuthStrategy;
-import com.ark.center.auth.client.authentication.constant.AppType;
+import com.ark.center.auth.client.application.common.AppCode;
+import com.ark.center.auth.client.authentication.common.AuthStrategy;
+import com.ark.center.auth.client.authentication.common.AppType;
 import com.ark.center.auth.infra.application.model.ApplicationAuthConfig;
 import com.ark.center.auth.infra.application.repository.ApplicationAuthConfigRepository;
 import org.springframework.stereotype.Repository;

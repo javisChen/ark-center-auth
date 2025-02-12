@@ -1,7 +1,7 @@
 package com.ark.center.auth.infra.authentication.login.mobile;
 
 import com.ark.center.auth.client.authentication.command.MobileLoginAuthenticateRequest;
-import com.ark.center.auth.client.authentication.constant.AuthStrategy;
+import com.ark.center.auth.client.authentication.common.AuthStrategy;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

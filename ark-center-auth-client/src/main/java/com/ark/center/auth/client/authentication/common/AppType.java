@@ -1,4 +1,4 @@
-package com.ark.center.auth.client.authentication.constant;
+package com.ark.center.auth.client.authentication.common;
 
 /**
  * 终端类型

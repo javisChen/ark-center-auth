@@ -1,6 +1,6 @@
-package com.ark.center.auth.client.application.constant;
+package com.ark.center.auth.client.application.common;
 
-import com.ark.center.auth.client.authentication.constant.AppType;
+import com.ark.center.auth.client.authentication.common.AppType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 

@@ -1,7 +1,7 @@
 package com.ark.center.auth.client.captcha.command;
 
-import com.ark.center.auth.client.captcha.constant.CaptchaScene;
-import com.ark.center.auth.client.captcha.constant.CaptchaType;
+import com.ark.center.auth.client.captcha.common.CaptchaScene;
+import com.ark.center.auth.client.captcha.common.CaptchaType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

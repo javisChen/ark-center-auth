@@ -1,6 +1,6 @@
 package com.ark.center.auth.application.captcha;
 
-import com.ark.center.auth.client.captcha.constant.CaptchaType;
+import com.ark.center.auth.client.captcha.common.CaptchaType;
 import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
 import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
 import com.ark.center.auth.client.captcha.dto.CaptchaContentDTO;

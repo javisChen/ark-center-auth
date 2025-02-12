@@ -1,4 +1,4 @@
-package com.ark.center.auth.client.authentication.constant;
+package com.ark.center.auth.client.authentication.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

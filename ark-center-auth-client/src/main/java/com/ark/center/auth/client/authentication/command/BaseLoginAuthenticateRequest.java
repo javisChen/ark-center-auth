@@ -1,8 +1,8 @@
 package com.ark.center.auth.client.authentication.command;
 
-import com.ark.center.auth.client.application.constant.AppCode;
-import com.ark.center.auth.client.authentication.constant.AuthStrategy;
-import com.ark.center.auth.client.authentication.constant.ClientType;
+import com.ark.center.auth.client.application.common.AppCode;
+import com.ark.center.auth.client.authentication.common.AuthStrategy;
+import com.ark.center.auth.client.authentication.common.ClientType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

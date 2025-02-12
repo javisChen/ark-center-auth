@@ -1,6 +1,6 @@
 package com.ark.center.auth.infra.application.repository;
 
-import com.ark.center.auth.client.application.constant.AppCode;
+import com.ark.center.auth.client.application.common.AppCode;
 import com.ark.center.auth.infra.application.model.ApplicationAuthConfig;
 
 /**
