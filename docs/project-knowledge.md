@@ -81,7 +81,7 @@
       I -->|找不到转换器| J[抛出认证服务异常]
       I -->|找到转换器| K[转换为认证对象]
       K --> L[设置认证详情]
-      L --> M[AuthenticationManager认证]
+      L --> M[AuthenticationManager认证
       M -->|认证成功| N[生成令牌]
       M -->|认证失败| O[返回认证失败响应]
       N --> P[返回认证成功响应]

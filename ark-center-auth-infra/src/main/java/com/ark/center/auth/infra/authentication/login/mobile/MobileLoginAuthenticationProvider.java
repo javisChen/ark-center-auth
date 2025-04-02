@@ -43,6 +43,7 @@ public class MobileLoginAuthenticationProvider extends UserDetailsAuthentication
         command.setCode(authentication.getCredentials().toString());
         command.setScene(VerifyCodeScene.LOGIN);
         command.setVerifyCodeId(details.getBaseLoginAuthenticateRequest().getVerifyCodeId());
+
         if (!smsVerifyCodeProvider.verify(command)) {
             throw new BadCredentialsException(this.messages
                     .getMessage("UserDetailsAuthenticationProvider.captchaInvalid", "Bad credentials"));

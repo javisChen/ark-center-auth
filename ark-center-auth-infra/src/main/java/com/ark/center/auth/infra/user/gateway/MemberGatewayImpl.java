@@ -35,6 +35,7 @@ public class MemberGatewayImpl implements MemberGateway {
     @Override
     public AuthUser retrieveUserByUsername(String username) {
         MemberAuthDTO userAuthDTO = RpcUtils.checkAndGetData(memberFacade.getMemberAuthInfo(username));
+        if (userAuthDTO == null) {
             return null;
         }
         return memberConverter.toAuthUser(userAuthDTO);

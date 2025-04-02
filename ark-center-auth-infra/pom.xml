@@ -49,6 +49,10 @@
             <artifactId>ark-component-cache-redis-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.ark.lock</groupId>
+            <artifactId>ark-component-lock-redis-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.ark.context</groupId>
             <artifactId>ark-component-context-spring-boot-starter</artifactId>
         </dependency>
