@@ -1,4 +1,4 @@
-package com.ark.center.auth.client.captcha.common;
+package com.ark.center.auth.client.verifycode.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -9,18 +9,18 @@ import lombok.Getter;
     description = """
         验证码类型:
          * `SMS` - 短信验证码
-         * `EMAIL` - 邮件验证码
-         * `IMAGE` - 图片验证码
+         * `EMAIL` - 邮箱验证码
+         * `IMAGE` - 图形验证码
         """
 )
-public enum CaptchaType {
+public enum VerifyCodeType {
     SMS("短信验证码"),
-    EMAIL("邮件验证码"),
-    IMAGE("图片验证码");
+    EMAIL("邮箱验证码"),
+    IMAGE("图形验证码");
 
     private final String description;
 
-    CaptchaType(String description) {
+    VerifyCodeType(String description) {
         this.description = description;
     }
 } 

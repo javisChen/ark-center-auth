@@ -80,6 +80,11 @@
                 <artifactId>ark-center-iam-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.ark.center</groupId>
+                <artifactId>ark-center-product-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

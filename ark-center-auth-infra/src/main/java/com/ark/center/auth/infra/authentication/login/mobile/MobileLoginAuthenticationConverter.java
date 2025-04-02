@@ -14,7 +14,7 @@ public class MobileLoginAuthenticationConverter extends LoginAuthenticationConve
     @Override
     protected Authentication doConvert(MobileLoginAuthenticateRequest authenticateRequest) {
         return MobileAuthenticationToken
-                .unauthenticated(authenticateRequest.getMobile(), authenticateRequest.getCaptcha());
+                .unauthenticated(authenticateRequest.getMobile(), authenticateRequest.getCode());
     }
 
     @Override

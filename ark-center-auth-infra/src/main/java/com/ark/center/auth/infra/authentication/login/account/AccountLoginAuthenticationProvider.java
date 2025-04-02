@@ -1,10 +1,12 @@
 package com.ark.center.auth.infra.authentication.login.account;
 
+import com.ark.center.auth.infra.authentication.LoginAuthenticationDetails;
 import com.ark.center.auth.infra.authentication.login.provider.UserDetailsAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.UserNotFoundException;
-import com.ark.center.auth.infra.authentication.login.userdetails.IamUserDetailsService;
+import com.ark.center.auth.infra.authentication.login.userdetails.AuthenticationUserService;
 import com.ark.center.auth.infra.authentication.token.issuer.TokenIssuer;
 import com.ark.component.security.base.authentication.AuthUser;
+import com.ark.component.security.base.password.PasswordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -21,24 +23,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class AccountLoginAuthenticationProvider extends UserDetailsAuthenticationProvider {
 
-    private final IamUserDetailsService iamUserDetailsService;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationUserService authenticationUserService;
+    private final PasswordService passwordService;
 
     private static final String USER_NOT_FOUND_PASSWORD = "userNotFoundPassword";
     private volatile String userNotFoundEncodedPassword;
 
-    public AccountLoginAuthenticationProvider(IamUserDetailsService iamUserDetailsService,
+    public AccountLoginAuthenticationProvider(AuthenticationUserService authenticationUserService,
                                               TokenIssuer tokenIssuer,
-                                              PasswordEncoder passwordEncoder) {
+                                              PasswordService passwordService) {
         super(tokenIssuer);
-        this.iamUserDetailsService = iamUserDetailsService;
-        this.passwordEncoder = passwordEncoder;
+        this.authenticationUserService = authenticationUserService;
+        this.passwordService = passwordService;
     }
 
     @Override
-    protected void additionalAuthenticationChecks(UserDetails userDetails, Authentication authentication) throws AuthenticationException {
+    protected void additionalAuthenticationChecks(UserDetails userDetails, Authentication authentication, LoginAuthenticationDetails details) throws AuthenticationException {
         String presentedPassword = authentication.getCredentials().toString();
-        if (!this.passwordEncoder.matches(presentedPassword, userDetails.getPassword())) {
+        if (!this.passwordService.checkPassword(presentedPassword, userDetails.getPassword())) {
             if (log.isDebugEnabled()) {
                 this.logger.debug("Failed to authenticate since password does not match stored value");
             }
@@ -51,7 +53,7 @@ public class AccountLoginAuthenticationProvider extends UserDetailsAuthenticatio
     protected AuthUser retrieveUser(String username, Authentication authentication) throws AuthenticationException {
         prepareTimingAttackProtection();
         try {
-            AuthUser loadedUser = iamUserDetailsService.loadUserByUsername(username);
+            AuthUser loadedUser = authenticationUserService.loadUserByUsername(username, authentication);
             if (loadedUser == null) {
                 throw new InternalAuthenticationServiceException(
                         "UserDetailsService returned null, which is an interface contract violation");
@@ -74,14 +76,14 @@ public class AccountLoginAuthenticationProvider extends UserDetailsAuthenticatio
 
     private void prepareTimingAttackProtection() {
         if (this.userNotFoundEncodedPassword == null) {
-            this.userNotFoundEncodedPassword = this.passwordEncoder.encode(USER_NOT_FOUND_PASSWORD);
+            this.userNotFoundEncodedPassword = this.passwordService.enhancePassword(USER_NOT_FOUND_PASSWORD);
         }
     }
 
     private void mitigateAgainstTimingAttack(Authentication authentication) {
         if (authentication.getCredentials() != null) {
             String presentedPassword = authentication.getCredentials().toString();
-            this.passwordEncoder.matches(presentedPassword, this.userNotFoundEncodedPassword);
+            this.passwordService.checkPassword(presentedPassword, this.userNotFoundEncodedPassword);
         }
     }
 }

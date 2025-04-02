@@ -1,23 +1,23 @@
-package com.ark.center.auth.infra.captcha;
+package com.ark.center.auth.infra.verifycode;
 
 import cn.hutool.core.util.RandomUtil;
 
-import com.ark.center.auth.client.captcha.common.CaptchaType;
+import com.ark.center.auth.client.verifycode.common.VerifyCodeType;
 import com.ark.component.cache.CacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class SmsCaptchaProvider extends AbstractCaptchaProvider {
+public class SmsVerifyCodeProvider extends AbstractVerifyCodeProvider {
 
-    public SmsCaptchaProvider(CacheService cacheService) {
+    public SmsVerifyCodeProvider(CacheService cacheService) {
         super(cacheService);
     }
 
     @Override
-    public CaptchaType getProviderType() {
-        return CaptchaType.SMS;
+    public VerifyCodeType getProviderType() {
+        return VerifyCodeType.SMS;
     }
 
     @Override

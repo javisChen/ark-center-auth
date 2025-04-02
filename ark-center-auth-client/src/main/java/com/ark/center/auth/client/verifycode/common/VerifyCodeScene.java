@@ -1,4 +1,4 @@
-package com.ark.center.auth.client.captcha.common;
+package com.ark.center.auth.client.verifycode.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import lombok.Getter;
          * `DEFAULT` - 默认场景
         """
 )
-public enum CaptchaScene {
+public enum VerifyCodeScene {
     LOGIN("登录验证"),
     REGISTER("注册验证"),
     RESET_PASSWORD("重置密码"),
@@ -26,7 +26,7 @@ public enum CaptchaScene {
 
     private final String description;
 
-    CaptchaScene(String description) {
+    VerifyCodeScene(String description) {
         this.description = description;
     }
-}
+} 

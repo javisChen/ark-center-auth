@@ -28,12 +28,4 @@ public class IamUserDetailsService implements UserDetailsService {
         return authUser;
     }
 
-    public AuthUser loadUserByMobile(String mobile) throws UsernameNotFoundException {
-        AuthUser authUser = userGateway.retrieveUserByMobile(mobile);
-        if (authUser == null) {
-            throw new UserNotFoundException(this.messages
-                    .getMessage("UserDetailsAuthenticationProvider.mobileNotFound"));
-        }
-        return authUser;
-    }
 }

@@ -1,7 +1,7 @@
-package com.ark.center.auth.client.captcha.command;
+package com.ark.center.auth.client.verifycode.command;
 
-import com.ark.center.auth.client.captcha.common.CaptchaScene;
-import com.ark.center.auth.client.captcha.common.CaptchaType;
+import com.ark.center.auth.client.verifycode.common.VerifyCodeScene;
+import com.ark.center.auth.client.verifycode.common.VerifyCodeType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +20,7 @@ import lombok.Data;
                 }
                 """
 )
-public class GenerateCaptchaCommand {
+public class GenerateVerifyCodeCommand {
 
     @Schema(
             description = "验证码类型",
@@ -29,12 +29,12 @@ public class GenerateCaptchaCommand {
             defaultValue = "SMS",
             allowableValues = {"SMS", "EMAIL", "IMAGE"},
             enumAsRef = true,
-            implementation = CaptchaType.class,
+            implementation = VerifyCodeType.class,
             title = "验证码类型",
             accessMode = Schema.AccessMode.READ_WRITE
     )
     @NotNull(message = "验证码类型不能为空")
-    private CaptchaType type;
+    private VerifyCodeType type;
 
     @Schema(
             description = "目标对象(手机号/邮箱)",
@@ -58,9 +58,9 @@ public class GenerateCaptchaCommand {
             example = "LOGIN",
             defaultValue = "LOGIN",
             enumAsRef = true,
-            implementation = CaptchaScene.class,
+            implementation = VerifyCodeScene.class,
             title = "验证码使用场景"
     )
     @NotNull(message = "验证码场景不能为空")
-    private CaptchaScene scene;
+    private VerifyCodeScene scene;
 } 

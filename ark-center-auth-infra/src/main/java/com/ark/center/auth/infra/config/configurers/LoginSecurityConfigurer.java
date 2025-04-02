@@ -7,9 +7,10 @@ import com.ark.center.auth.infra.authentication.login.LoginAuthenticationFilter;
 import com.ark.center.auth.infra.authentication.login.LoginAuthenticationHandler;
 import com.ark.center.auth.infra.authentication.login.account.AccountLoginAuthenticationProvider;
 import com.ark.center.auth.infra.authentication.login.mobile.MobileLoginAuthenticationProvider;
-import com.ark.center.auth.infra.authentication.login.userdetails.IamUserDetailsService;
+import com.ark.center.auth.infra.authentication.login.userdetails.AuthenticationUserService;
 import com.ark.center.auth.infra.authentication.token.issuer.TokenIssuer;
-import com.ark.center.auth.infra.captcha.SmsCaptchaProvider;
+import com.ark.center.auth.infra.verifycode.SmsVerifyCodeProvider;
+import com.ark.component.security.base.password.PasswordService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -91,18 +92,18 @@ public class LoginSecurityConfigurer extends AbstractHttpConfigurer<LoginSecurit
     @NotNull
     private MobileLoginAuthenticationProvider buildMobileLoginAuthenticationProvider(ApplicationContext context) {
         return new MobileLoginAuthenticationProvider(
-                context.getBean(IamUserDetailsService.class),
+                context.getBean(AuthenticationUserService.class),
                 context.getBean(TokenIssuer.class),
-                context.getBean(SmsCaptchaProvider.class)
+                context.getBean(SmsVerifyCodeProvider.class)
         );
     }
 
     @NotNull
     private AccountLoginAuthenticationProvider buildAccountLoginAuthenticationProvider(ApplicationContext context) {
         return new AccountLoginAuthenticationProvider(
-                context.getBean(IamUserDetailsService.class),
+                context.getBean(AuthenticationUserService.class),
                 context.getBean(TokenIssuer.class),
-                context.getBean(PasswordEncoder.class)
+                context.getBean(PasswordService.class)
         );
     }
 } 

@@ -53,7 +53,7 @@ public class AuthServerSecurityContextRepository extends AbstractSecurityContext
 
     private Map<String, Object> buildCacheMap(AuthenticatedToken authenticatedToken) {
         AuthUser authUser = authenticatedToken.getAuthUser();
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(16);
         
         // 基本用户信息
         map.put(AuthenticatedCacheKeys.USER_ID.getValue().toString(), authUser.getUserId());

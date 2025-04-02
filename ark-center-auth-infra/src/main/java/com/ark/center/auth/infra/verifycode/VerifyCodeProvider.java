@@ -1,20 +1,20 @@
-package com.ark.center.auth.infra.captcha;
+package com.ark.center.auth.infra.verifycode;
 
-import com.ark.center.auth.client.captcha.common.CaptchaType;
-import com.ark.center.auth.client.captcha.command.GenerateCaptchaCommand;
-import com.ark.center.auth.client.captcha.command.VerifyCaptchaCommand;
-import com.ark.center.auth.client.captcha.dto.CaptchaContentDTO;
+import com.ark.center.auth.client.verifycode.common.VerifyCodeType;
+import com.ark.center.auth.client.verifycode.command.GenerateVerifyCodeCommand;
+import com.ark.center.auth.client.verifycode.command.VerifyCodeCommand;
+import com.ark.center.auth.client.verifycode.dto.VerifyCodeDTO;
 
 /**
  * 验证码提供者接口
  */
-public interface CaptchaProvider {
+public interface VerifyCodeProvider {
     /**
      * 获取验证码提供者类型
      *
      * @return 验证码类型
      */
-    CaptchaType getProviderType();
+    VerifyCodeType getProviderType();
     
     /**
      * 创建验证码
@@ -22,7 +22,7 @@ public interface CaptchaProvider {
      * @param command 创建验证码命令
      * @return 验证码结果
      */
-    CaptchaContentDTO generate(GenerateCaptchaCommand command);
+    VerifyCodeDTO generate(GenerateVerifyCodeCommand command);
     
     /**
      * 验证验证码
@@ -30,7 +30,7 @@ public interface CaptchaProvider {
      * @param command 验证验证码命令
      * @return 验证结果
      */
-    boolean verify(VerifyCaptchaCommand command);
+    boolean verify(VerifyCodeCommand command);
     
     /**
      * 发送验证码

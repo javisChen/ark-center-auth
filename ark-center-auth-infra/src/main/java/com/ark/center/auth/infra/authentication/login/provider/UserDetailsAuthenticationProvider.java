@@ -57,7 +57,7 @@ public abstract class UserDetailsAuthenticationProvider implements Authenticatio
         }
         try {
             this.preCheckUser(user);
-            additionalAuthenticationChecks(user, authentication);
+            additionalAuthenticationChecks(user, authentication, details);
         }
         catch (AuthenticationException ex) {
             if (!cacheWasUsed) {
@@ -68,7 +68,7 @@ public abstract class UserDetailsAuthenticationProvider implements Authenticatio
             cacheWasUsed = false;
             user = retrieveUser(username, authentication);
             this.preCheckUser(user);
-            additionalAuthenticationChecks(user, authentication);
+            additionalAuthenticationChecks(user, authentication, details);
         }
 
         if (!cacheWasUsed) {
@@ -81,7 +81,7 @@ public abstract class UserDetailsAuthenticationProvider implements Authenticatio
         return tokenIssuer.issueToken(user, details);
     }
 
-    protected void additionalAuthenticationChecks(UserDetails user, Authentication authentication) {
+    protected void additionalAuthenticationChecks(UserDetails user, Authentication authentication, LoginAuthenticationDetails details) {
 
     }
 

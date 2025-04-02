@@ -81,4 +81,14 @@ public class BaseLoginAuthenticateRequest {
         title = "用户登录IP地址"
     )
     private String loginIp;
+
+    @Schema(
+            description = "验证码ID（用于后续验证）",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+            example = "sms_1234567890",
+            title = "验证码唯一标识"
+    )
+    @NotBlank(message = "验证码ID不能为空")
+    private String verifyCodeId;
+
 } 

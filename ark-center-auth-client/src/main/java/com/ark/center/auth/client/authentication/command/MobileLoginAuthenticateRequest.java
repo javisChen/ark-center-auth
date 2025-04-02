@@ -2,7 +2,6 @@ package com.ark.center.auth.client.authentication.command;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -39,11 +38,11 @@ public class MobileLoginAuthenticateRequest extends BaseLoginAuthenticateRequest
     private String mobile;
 
     @Schema(
-        description = "验证码",
-        requiredMode = Schema.RequiredMode.REQUIRED,
-        example = "123456",
-        title = "短信验证码"
+            description = "验证码",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            example = "123456",
+            title = "短信验证码"
     )
     @NotBlank(message = "验证码不能为空")
-    private String captcha;
+    private String code;
 }

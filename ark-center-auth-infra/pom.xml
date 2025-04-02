@@ -18,6 +18,11 @@
             <artifactId>ark-center-iam-client</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.ark.center</groupId>
+            <artifactId>ark-center-product-client</artifactId>
+        </dependency>
+
         <!-- 内部模块依赖 -->
         <dependency>
             <groupId>com.ark.center</groupId>
